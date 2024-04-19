@@ -1,0 +1,34 @@
+{
+	"name": "obsidian-sample-plugin",
+	"version": "1.0.0",
+	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"main": "main.js",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"rebuild": "electron-rebuild -f -w better-sqlite3"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/better-sqlite3": "^7.6.9",
+		"@types/node": "^16.11.6",
+		"@typescript-eslint/eslint-plugin": "5.29.0",
+		"@typescript-eslint/parser": "5.29.0",
+		"builtin-modules": "3.3.0",
+		"electron": "^25.0.0",
+		"electron-rebuild": "^3.2.9",
+		"esbuild": "0.17.3",
+		"esbuild-plugin-replace": "^1.4.0",
+		"esbuild-plugin-replace-regex": "^0.0.2",
+		"obsidian": "latest",
+		"tslib": "2.4.0",
+		"typescript": "4.7.4"
+	},
+	"dependencies": {
+		"better-sqlite3": "^9.5.0",
+		"sqlite3": "^5.1.7"
+	}
+}
