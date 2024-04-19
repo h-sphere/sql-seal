@@ -3,6 +3,8 @@ import Database from 'better-sqlite3'
 import type { Database as DBtype } from 'better-sqlite3'
 import { SqliteError } from 'better-sqlite3'
 import path from 'path'
+import Papa from 'papaparse';
+
 
 // Remember to rename these classes and interfaces!
 
@@ -12,6 +14,58 @@ interface MyPluginSettings {
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default'
+}
+
+function isNumeric(str: string) {
+	if (typeof str != "string") return false // we only process strings!  
+	return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+		   !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+  }
+
+
+const toTypeStatements = (header: Array<string>, data: Array<Record<string, string>>) => {
+	let d: Array<Record<string, string|number>> = data
+	let types: Record<string, ReturnType<typeof predictType>> = {}
+	header.forEach(key => {
+		const type = predictType(key, data)
+		console.log('TYPE:', key, type)
+		if (type === 'REAL' || type === 'INTEGER') {
+			// converting all data here to text
+			d = d.map(record => ({
+				...record,
+				[key]: type === 'REAL'
+					? parseFloat(record[key] as string)
+					: parseInt(record[key] as string)
+			}))
+		}
+
+		types[key] = type
+	})
+
+	return {
+		data: d,
+		types
+	}
+}
+
+const predictType = (field: string, data: Array<Record<string, string>>) => {
+
+	if (field === 'id') {
+		return 'TEXT'
+	}
+
+	const canBeNumber = data.reduce((acc, d) => acc && isNumeric(d[field]), true)
+	if (canBeNumber) {
+
+		// Check if Integer or Float
+		const canBeInteger = data.reduce((acc, d) => acc && parseFloat(d[field]) === parseInt(d[field]), true)
+		if (canBeInteger) {
+			return 'INTEGER'
+		}
+
+		return 'REAL'
+	}
+	return 'TEXT'
 }
 
 export default class MyPlugin extends Plugin {
@@ -92,9 +146,7 @@ export default class MyPlugin extends Plugin {
 
 		//@ts-ignore
 		const defaultDbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "obsidian.db")
-    	const db = new Database(defaultDbPath, { verbose: console.log })
-		console.log(db)
-
+    	const db = new Database(defaultDbPath, { /* verbose: console.log */ })
 		const savedDatabases: any = {}
 
 		const defineDatabaseFromUrl = async (name: string, url: string) => {
@@ -102,19 +154,26 @@ export default class MyPlugin extends Plugin {
 				console.log('Database Exists', name)
 				return
 			}
-			console.log('Creating schema for the database')
 			const file = this.app.vault.getFileByPath(url)
 				if (!file) {
 					console.log('File not found')
 					return
 				}
 				const data = await this.app.vault.cachedRead(file)
-				console.log(data)
-				
+
+				const parsed = Papa.parse(data, {
+					header: true,
+					dynamicTyping: false,
+					skipEmptyLines: true
+				})
+				const fields = parsed.meta.fields
+				const { data: parsedData, types } = toTypeStatements(fields, parsed.data)
+
+				const sqlFields = Object.entries(types).map(([key, type]) => `${key} ${type}`).join(',\n')
 				// FIXME: probably use schema generator, for now create with hardcoded fields
+				await db.prepare(`DROP TABLE IF EXISTS ${name}`).run()
 				const createSQL = `CREATE TABLE IF NOT EXISTS ${name} (
-					id TEXT,
-					name TEXT
+					${sqlFields}
 				);`
 
 				await db.prepare(createSQL).run()
@@ -123,15 +182,18 @@ export default class MyPlugin extends Plugin {
 				// Purge the database
 				await db.prepare(`DELETE FROM ${name}`).run()
 
-				const insert = db.prepare(`INSERT INTO ${name} (id, name) VALUES (@id, @name)`);
-				const insertMany = db.transaction(data => {
-					data.split("\n").slice(1).forEach(row => {
-						const [id, name] = row.split(',')
-						insert.run({ id, name })
+				const insert = db.prepare(`INSERT INTO ${name} (${fields.join(', ')}) VALUES (${fields.map(key => '@' + key).join(', ')})`);
+				const insertMany = db.transaction(pData => {
+					pData.forEach(data => {
+						try {
+						insert.run(data)
+						} catch (e) {
+							console.log(e)
+						}
 					})
 				})
 
-				await insertMany(data)
+				await insertMany(parsedData)
 
 		}
 
@@ -154,29 +216,32 @@ export default class MyPlugin extends Plugin {
 			})
 		}
 
+		const displayError = (el: HTMLElement, e: Error) => {
+			const callout = el.createEl("div", { text: e.toString(), cls: 'callout' })
+			callout.dataset.callout = 'error'
+		}
+
 		// FIXME: registering here
 		this.registerMarkdownCodeBlockProcessor("sql",  async (source, el, ctx) => {
-			console.log('SOURCE', source, ctx)
-			
 			const regex = /TABLE\s+(.+)\s+=\s+file\(([^)]+)\)/g;
 			let match
 			while ((match = regex.exec(source)) !== null) {
 				const name = match[1];
 				const url = match[2];
 				defineDatabaseFromUrl(name, url)
-				console.log("Name:", name);
-				console.log("URL:", url);
 			}
 
 			const selectRegexp = /SELECT\s+(.*)/g;
 			const selectMatch = selectRegexp.exec(source)
-			console.log('SELECT', selectMatch)
 			if (selectMatch) {
-				const stmt = await db.prepare(selectMatch[0])
-				const columns = await stmt.columns().map(column => column.name);
-				const data = await stmt.all()
-				console.log('GOT DATA', columns, data)
-				displayData(el, columns, data)
+				try {
+					const stmt = await db.prepare(selectMatch[0])
+					const columns = await stmt.columns().map(column => column.name);
+					const data = await stmt.all()
+					displayData(el, columns, data)
+				} catch (e) {
+					displayError(el, e)
+				}
 			}
 
 		})
