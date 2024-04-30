@@ -13,7 +13,7 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/better-sqlite3": "^7.6.9",
+		"@types/better-sqlite3": "^7.6.10",
 		"@types/node": "^16.11.6",
 		"@types/papaparse": "^5.3.14",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
@@ -25,11 +25,14 @@
 		"esbuild-plugin-replace": "^1.4.0",
 		"esbuild-plugin-replace-regex": "^0.0.2",
 		"obsidian": "latest",
+		"prettier": "3.2.5",
 		"tslib": "2.4.0",
 		"typescript": "4.7.4"
 	},
 	"dependencies": {
 		"better-sqlite3": "^9.5.0",
+		"gray-matter": "^4.0.3",
+		"node-sql-parser": "^5.0.0",
 		"papaparse": "^5.4.1",
 		"sqlite3": "^5.1.7"
 	}
