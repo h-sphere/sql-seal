@@ -13,10 +13,9 @@ function isNumeric(str: string) {
 
 const toTypeStatements = (header: Array<string>, data: Array<Record<string, string>>) => {
 	let d: Array<Record<string, string|number>> = data
-	let types: Record<string, ReturnType<typeof predictType>> = {}
+	const types: Record<string, ReturnType<typeof predictType>> = {}
 	header.forEach(key => {
 		const type = predictType(key, data)
-		console.log('TYPE:', key, type)
 		if (type === 'REAL' || type === 'INTEGER') {
 			// converting all data here to text
 			d = d.map(record => ({
@@ -65,9 +64,74 @@ export class SqlSealDatabase {
     	this.db = new Database(defaultDbPath, {  verbose: verbose ? console.log : undefined })
     }
 
+    async createTableWithData(name: string, data: Array<Record<string, unknown>>) {
+        const schema = await this.getSchema(data)
+        await this.createTable(name, schema)
+        await this.insertData(name, data)
+
+        return schema
+    }
+
+    updateData(name: string, data: Array<Record<string, unknown>>) {
+        const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
+        const update = this.db.prepare(`UPDATE ${name} SET ${fields.map((key: string) => `${key} = @${key}`).join(', ')} WHERE id = @id`);
+        const updateMany = this.db.transaction((pData: Array<Record<string, any>>) => {
+            pData.forEach(data => {
+                try {
+                    update.run(data)
+                } catch (e) {
+                    console.log(e)
+                }
+            })
+        })
+
+        return updateMany(data)
+    }
+
+    insertData(name: string, data: Array<Record<string, unknown>>) {
+        const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
+        const insert = this.db.prepare(`INSERT INTO ${name} (${fields.join(', ')}) VALUES (${fields.map((key: string) => '@' + key).join(', ')})`);
+        const insertMany = this.db.transaction((pData: Array<Record<string, any>>) => {
+            pData.forEach(data => {
+                try {
+                    // update data so all missing fields are set to null
+                    fields.forEach(field => {
+                        if (!data[field]) {
+                            data[field] = null
+                        }
+                    })
+                insert.run(data)
+                } catch (e) {
+                    console.log(e)
+                }
+            })
+        })
+
+        return insertMany(data)
+    }
+
+    async createTable(name: string, fields: Record<string, 'TEXT'|'INTEGER'|'REAL'>) {
+        const sqlFields = Object.entries(fields).map(([key, type]) => `${key} ${type}`)
+        // FIXME: probably use schema generator, for now create with hardcoded fields
+        await this.db.prepare(`DROP TABLE IF EXISTS ${name}`).run()
+        const createSQL = `CREATE TABLE IF NOT EXISTS ${name} (
+            ${sqlFields.join(', ')}
+        );`
+
+        await this.db.prepare(createSQL).run()
+        this.savedDatabases[name] = true
+
+        // Dropping data.
+        await this.db.prepare(`DELETE FROM ${name}`).run()
+    }
+    async getSchema(data: Array<Record<string, unknown>>) {
+        const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
+        const { types } = toTypeStatements(fields, data as Array<Record<string, string>>); // Call the toTypeStatements function with the correct arguments
+        return types;
+    }
+
     async defineDatabaseFromUrl(unprefixedName: string, url: string, prefix: string) {
         const name = prefixedIfNotGlobal(unprefixedName, [], prefix)
-        console.log('define db from url', name, url)
         if (this.savedDatabases[name]) {
             console.log('Database Exists', name)
             return
@@ -86,17 +150,9 @@ export class SqlSealDatabase {
             })
             const fields = parsed.meta.fields
             const { data: parsedData, types } = toTypeStatements(fields, parsed.data)
-            console.log('TABLE CREATE', parsedData)
 
-            const sqlFields = Object.entries(types).map(([key, type]) => `${key} ${type}`).join(',\n')
-            // FIXME: probably use schema generator, for now create with hardcoded fields
-            await this.db.prepare(`DROP TABLE IF EXISTS ${name}`).run()
-            const createSQL = `CREATE TABLE IF NOT EXISTS ${name} (
-                ${sqlFields}
-            );`
-    
-            await this.db.prepare(createSQL).run()
-            this.savedDatabases[name] = url
+            await this.createTable(name, types)
+            // this.savedDatabases[name] = url
     
             // Purge the database
             await this.db.prepare(`DELETE FROM ${name}`).run()

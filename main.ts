@@ -1,4 +1,5 @@
 import { MarkdownRenderer, MarkdownView, Plugin } from 'obsidian';
+import { SealFileSync } from 'src/SealFileSync';
 import { SqlSealSettings, SqlSealSettingsTab } from 'src/settings';
 import { SqlSeal } from 'src/sqlSeal';
 
@@ -9,25 +10,18 @@ export default class SqlSealPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		const sqlSeal = new SqlSeal(this.app, true)
+		const sqlSeal = new SqlSeal(this.app, false)
 		this.registerMarkdownCodeBlockProcessor("sqlseal",  sqlSeal.getHandler())
 
-// or onload
-	this.app.workspace.iterateAllLeaves((leaf) => {
-		if (leaf.view && leaf.view instanceof MarkdownView) {
-			const editorView = (leaf.view.editor as any).cm;
-			console.log('EDITOR VIEW', editorView)
-			// ...
-		}
-	})
-// })
-// 		MarkdownRenderer.registerLanguage({
-// 			id: "sqlseal",
-// 			codeMirrorMode: "sql",
-// 			name: "sqlseal",
-// 		  });
+		// const fileSync = new SealFileSync(this.app, sqlSeal)
+		// setTimeout(() => {
+		// 	fileSync.init()
+		// }, 5000)
 
-		this.addSettingTab(new SqlSealSettingsTab(this.app, this));
+	// this.addSettingTab(new SqlSealSettingsTab(this.app, this));
+
+
+
 
 	}
 

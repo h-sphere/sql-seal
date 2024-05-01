@@ -28,7 +28,6 @@ const updateSelect = (selectAst: Select, globalTables: string[], prefix: string)
         from: selectAst.from.map(from => {
             // FIXME: better typing here.
             if(isBaseFrom(from)) {
-                console.log('Found table', from.table, isGlobal(from.table, globalTables))
                 return {
                     ...from,
                     table: prefixedIfNotGlobal(from.table, globalTables, prefix)
