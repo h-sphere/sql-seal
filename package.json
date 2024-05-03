@@ -6,7 +6,8 @@
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
-    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "typecheck": "tsc -noEmit -skipLibCheck",
+    "build": " node esbuild.config.mjs production",
     "version": "node version-bump.mjs && git add manifest.json versions.json",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "docs:dev": "vitepress dev docs",
@@ -38,9 +39,7 @@
   "dependencies": {
     "better-sqlite3": "^9.5.0",
     "gray-matter": "^4.0.3",
-    "node-fetch": "^3.3.2",
     "node-sql-parser": "^5.0.0",
-    "papaparse": "^5.4.1",
-    "sqlite3": "^5.1.7"
+    "papaparse": "^5.4.1"
   }
 }

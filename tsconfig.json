@@ -10,6 +10,8 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "isolatedModules": true,
+    "skipLibCheck": true,
+    "types": [],
 	"strictNullChecks": true,
     "lib": [
       "DOM",
