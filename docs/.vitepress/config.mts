@@ -4,6 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Obsidian SQLSeal",
   description: "Plugin enabling full SQL capabilities in Obsidian",
+  base: '/sql-seal/',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
