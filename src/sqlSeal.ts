@@ -1,8 +1,7 @@
-import * as Database from "better-sqlite3";
 import GrayMatter from "gray-matter";
-import { SqlSealDatabase, defineDatabaseFromUrl, instantiateDatabase } from "./database";
-import { displayData, displayError, displayInfo } from "./ui";
-import { App, MarkdownPostProcessorContext, MarkdownSectionInformation, WorkspaceLeaf } from "obsidian";
+import { SqlSealDatabase } from "./database";
+import { displayData, displayError, displayInfo, displayLoader } from "./ui";
+import { App, MarkdownPostProcessorContext } from "obsidian";
 import { updateTables } from "./sqlReparseTables";
 import { hashString } from "./hash";
 
@@ -10,6 +9,10 @@ export class SqlSeal {
     public db: SqlSealDatabase
     constructor(private readonly app: App, verbose = false) {
         this.db = new SqlSealDatabase(app, verbose)
+    }
+
+    async connect() {
+        await this.db.connect()
     }
 
     async resolveFrontmatter(ctx: MarkdownPostProcessorContext) {
@@ -29,6 +32,10 @@ export class SqlSeal {
 
     getHandler() {
         return async (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+
+            displayLoader(el)
+            await this.connect()
+            
             const frontmatter = await this.resolveFrontmatter(ctx)
             const prefix = hashString(ctx.sourcePath)
     const regex = /TABLE\s+(.+)\s+=\s+file\(([^)]+)\)/g;

@@ -1,6 +1,5 @@
-import { MarkdownRenderer, MarkdownView, Plugin } from 'obsidian';
-import { SealFileSync } from 'src/SealFileSync';
-import { SqlSealSettings, SqlSealSettingsTab } from 'src/settings';
+import { Plugin } from 'obsidian';
+import { SqlSealSettings } from 'src/settings';
 import { SqlSeal } from 'src/sqlSeal';
 
 const DEFAULT_SETTINGS = { rows: [] }
@@ -12,6 +11,8 @@ export default class SqlSealPlugin extends Plugin {
 		await this.loadSettings();
 		const sqlSeal = new SqlSeal(this.app, false)
 		this.registerMarkdownCodeBlockProcessor("sqlseal",  sqlSeal.getHandler())
+		await sqlSeal.connect()
+
 
 		// const fileSync = new SealFileSync(this.app, sqlSeal)
 		// setTimeout(() => {

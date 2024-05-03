@@ -5,7 +5,7 @@ import replacePlugin from "esbuild-plugin-replace-regex";
 
 const patchStr = `
   const libPath = app.vault.adapter.getFullPath(app.vault.configDir)
-  addon = DEFAULT_ADDON || (DEFAULT_ADDON = require(path.resolve(libPath, "plugins/sqlseal/node_modules/better-sqlite3/build/Release/better_sqlite3.node")));
+  addon = DEFAULT_ADDON || (DEFAULT_ADDON = require(path.resolve(libPath, "plugins/sqlseal/better_sqlite3.node")));
 `
 
 const banner =

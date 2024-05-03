@@ -1,7 +1,8 @@
+
 {
-  "name": "obsidian-sample-plugin",
-  "version": "1.0.0",
-  "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+  "name": "obsidian-sqlseal",
+  "version": "0.1.0",
+  "description": "A plugin for Obsidian that allows you to run SQL queries on your notes.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
@@ -37,6 +38,7 @@
   "dependencies": {
     "better-sqlite3": "^9.5.0",
     "gray-matter": "^4.0.3",
+    "node-fetch": "^3.3.2",
     "node-sql-parser": "^5.0.0",
     "papaparse": "^5.4.1",
     "sqlite3": "^5.1.7"
