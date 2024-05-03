@@ -26,6 +26,10 @@ export default defineConfig({
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/vuejs/vitepress' }
-    ]
+    ],
+    footer: {
+      message: '',
+      copyright: 'By <a href="https://hypersphere.blog">hypersphere</a>'
+    }
   }
 })

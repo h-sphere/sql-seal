@@ -6,16 +6,10 @@ hero:
   name: "Obsidian SQLSeal"
   # text: "Plugin enabling full SQL capabilities in Obsidian"
   tagline: "Plugin enabling full SQL capabilities in Obsidian"
-  image:
-    src: ./seal.png
-    alt: SQL Seal Logo (In Progress)
   actions:
     - theme: brand
-      text: Markdown Examples
+      text: Get Started
       link: /getting-started
-    - theme: alt
-      text: API Examples
-      link: /api-examples
 
 features:
   - title: Query data in your vault
