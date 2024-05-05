@@ -24,3 +24,4 @@ The code above will create table called `transactions` based on the `transaction
 You can define multiple tables in a single snippet. You can also point to the tables defined in different snippets *within the same note* (for now tables stay local to the file).
 
 For more comprehensive documentation head to [hypersphere.blog/sql-seal](https://hypersphere.blog/sql-seal).
+

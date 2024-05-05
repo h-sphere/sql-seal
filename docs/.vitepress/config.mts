@@ -16,7 +16,6 @@ export default defineConfig({
       {
         text: 'Documentation',
         items: [
-          { text: 'Getting Started', link: '/getting-started' },
           { text: 'Quick Start', link: '/quick-start' },
           { text: 'Using properties', link: '/using-properties' },
           { text: 'Future Plans', link: '/future-plans' }

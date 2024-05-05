@@ -8,10 +8,9 @@ In this guide you will learn:
 The easiest way to install SQLSeal is to download it from Community Plugins. Go to Settings -> Community Plugins and click on Browse button. Search for SQLSeal, install it and enable.
 
 ### Manual instalation
-To install it manually clone the project:
-```bash
-git clone <URL>
-```
+To manually instal the package, open [Releases](https://github.com/h-sphere/sql-seal/releases) and download .zip of the last one. Unzip it in your vault under `.obsidian/Plugins/sqlseal`.
+
+Once the library is published in Obsidian Official Community Repository: just head to Community Tab in your Obisidian Settings page and search for "SQLSeal".
 
 ## Save CSV in Obsidian
 Obsidian does not natively support CSV and it hides them in the file explorer. To enable CSVs being shown on the sidebar, you need to enable "Detect all file extensions" in "Files and Links" setting panel. Then save the following CSV in your vault: [transactions.csv](./transactions.csv)
