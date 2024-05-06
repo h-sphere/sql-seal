@@ -1,9 +1,9 @@
 {
 	"id": "hypersphere-sqlseal",
-	"name": "SQL Seal",
+	"name": "SQLSeal",
 	"version": "0.2.0",
 	"minAppVersion": "0.15.0",
-	"description": "Use SQL in your notes to query your vault and CSV files.",
+	"description": "Use SQL in your notes to query your vault files and CSV content.",
 	"author": "hypersphere",
 	"authorUrl": "https://hypersphere.blog/",
 	"fundingUrl": "ko-fi.com/hypersphere",
