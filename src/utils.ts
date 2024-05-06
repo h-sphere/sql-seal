@@ -12,7 +12,6 @@ export const fetchBlobData = async (url: string, filePath: string) => {
         if (statusCode === 301 || statusCode === 302) {
             // Handle redirect
             const redirectUrl = response.headers.location;
-            console.log(`Redirected to: ${redirectUrl}`);
             if (!redirectUrl) { 
                 reject('Redirect URL not found')
                 return;
@@ -36,7 +35,6 @@ export const fetchBlobData = async (url: string, filePath: string) => {
         response.pipe(fileStream);
     
         fileStream.on('finish', () => {
-            console.log(`Blob data saved to ${filePath}`);
             resolve()
             fileStream.close()
         });

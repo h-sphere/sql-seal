@@ -29,7 +29,6 @@ export class SealFileSync {
             if (!(file instanceof TFile)) {
                 return
             }
-            console.log('Modified', file)
             const frontmatter = await extractFrontmatterFromFile(file)
 
             if (this.hasNewColumns(frontmatter)) {
@@ -55,7 +54,6 @@ export class SealFileSync {
             if (!(file instanceof TFile)) {
                 return
             }
-            console.log('File created', file.path)
             const frontmatter = await extractFrontmatterFromFile(file)
 
 
@@ -82,7 +80,6 @@ export class SealFileSync {
                 return
             }
 
-            console.log('File deleted', file.path)
             await this.sqlSeal.db.deleteData('files', [{ id: file.path }])
             this.sqlSeal.observer.fireObservers('table:files')
 
@@ -95,7 +92,6 @@ export class SealFileSync {
                 return
             }
 
-            console.log('File renamed', file.path)
             // deleting old one and adding new one
             await this.sqlSeal.db.deleteData('files', [{ id: oldPath }])
 
@@ -127,11 +123,6 @@ export class SealFileSync {
     }
 
     async getFileTags(file: TFile) {
-
-        // Get fresh tag
-        console.log('FILE', file)
-
-
         return (this.app.metadataCache.getFileCache(file)?.tags || [])
             .map(t => t.tag)
             .map(t => ({ tag: t, fileId: file.path }))
@@ -160,7 +151,6 @@ export class SealFileSync {
         const currentFields = Object.keys(this.currentSchema)
         const newFields = Object.keys(newFrontmatter).filter(f => !currentFields.includes(f))
 
-        console.log('current fields', currentFields, Object.keys(newFrontmatter))
         return newFields.length > 0
     }
 }

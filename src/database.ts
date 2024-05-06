@@ -84,23 +84,17 @@ export class SqlSealDatabase {
         const dbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "plugins/sqlseal/better_sqlite3.node")
         // check if file "better_sqlite3.node" exists in the plugin folder, if not, download it from github release
         if (!fs.existsSync(dbPath)) {
-            console.log('BETTER SQL DOES NOT EXIST, DOWNLOADING FROM GITHUB RELEASE')
-            const url = 'https://github.com/kulak-at/tag-test/releases/download/0.1/better_sqlite3.node' // my github release url
-
-            // use node native request to fetch data
-            console.log('PATH TO WRITE', dbPath)
+            const url = 'https://github.com/h-sphere/sql-seal/releases/download/0.2.0/better_sqlite3.node' // my github release url
 
             await fetchBlobData(url, dbPath)
         }
-        console.log('FETCHED')
 
-        await delay(1000) // Making sure everything is in order: ;
+        await delay(500)
 
         //@ts-ignore
-        const defaultDbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "obsidian.db")
+        const defaultDbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "sqlseal.db")
         this.db = new Database(defaultDbPath, { verbose: this.verbose ? console.log : undefined })
 
-        console.log('Connected to database', this.db)
         this.isConnected = true
         this.connectingPromiseResolve()
     }
@@ -143,7 +137,7 @@ export class SqlSealDatabase {
                 try {
                     update.run(data)
                 } catch (e) {
-                    console.log(e)
+                    console.error(e)
                 }
             })
         })
@@ -159,7 +153,7 @@ export class SqlSealDatabase {
                 try {
                     deleteStmt.run(data)
                 } catch (e) {
-                    console.log(e)
+                    console.error(e)
                 }
             })
         })
@@ -181,7 +175,7 @@ export class SqlSealDatabase {
                     })
                     insert.run(data)
                 } catch (e) {
-                    console.log(e)
+                    console.error(e)
                 }
             })
         })
@@ -230,7 +224,7 @@ export class SqlSealDatabase {
                 try {
                     insert.run(data)
                 } catch (e) {
-                    console.log(e)
+                    console.error(e)
                 }
             })
         })
@@ -241,7 +235,6 @@ export class SqlSealDatabase {
     async defineDatabaseFromUrl(unprefixedName: string, url: string, prefix: string, reloadData: boolean = false) {
         const name = prefixedIfNotGlobal(unprefixedName, [], prefix) // FIXME: should we pass global tables here too?
         if (this.savedDatabases[name]) {
-            console.log('Database Exists', name)
             if (reloadData) {
                 await this.loadDataForDatabaseFromUrl(name, url)
             }
@@ -249,7 +242,6 @@ export class SqlSealDatabase {
         }
         const file = this.app.vault.getFileByPath(url)
         if (!file) {
-            console.log('File not found')
             return name
         }
         const data = await this.app.vault.cachedRead(file)

@@ -47,7 +47,6 @@ export class SqlSeal {
     private observeAllFileChanges() {
         // Use fs to observe file changes
         this.app.vault.on('modify', async (file) => {
-            console.log('Firing observers for file:', file.path)
             this.observer.fireObservers('file:' + file.path)
         })
     }
@@ -67,7 +66,6 @@ export class SqlSeal {
         const url = match[2];
         const prefixedName = await this.db.defineDatabaseFromUrl(name, url, prefix)
         this.observer.registerObserver(`file:${url}`, async () => {
-            console.log('File was changes and we need to update related table: ', name)
             // Update table
             await this.db.defineDatabaseFromUrl(name, url, prefix, true)
 
@@ -94,11 +92,6 @@ export class SqlSeal {
             // Register observer for each table
             tables.forEach(table => {
                 const observer = async () => {
-                    console.log('Table was changes and we need to update related select: ', table)
-
-                    // FIXME: check if element is still in the DOM.
-                    console.log(el, el.isShown(), el.isConnected)
-
                     if (!el.isConnected) {
                         // Unregistering using the context id
                         this.observer.unregisterObserversByTag(ctx.docId)
@@ -120,7 +113,6 @@ export class SqlSeal {
                 displayInfo(el, 'Cannot access frontmatter properties in Live Preview Mode. Switch to Reading Mode to see the results.')
             } else {
                 displayError(el, e)
-                console.log(e)
             }
         }
     }

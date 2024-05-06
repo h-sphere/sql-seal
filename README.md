@@ -7,6 +7,10 @@ Once the library is published in Obsidian Official Community Repository: just he
 
 Note: Please note that this plugin is in early phase. Basic functionality should work just fine but I do not take any responsibility for potential data loss and damage to your Vault.
 
+On the first try plugin will download better_sqlite3.node binary to run database locally. This is due to the Obsidian restrictions to bundle everything in the `main.js`. The whole process of generating it is public and you can check it in the GitHub workflows.
+
+The plugin creates database file in configuration folder `.obsidian` named `sqlseal.db`.
+
 ### Manual Instalation
 To manually install the package, open [Releases](https://github.com/h-sphere/sql-seal/releases) and download .zip of the last one. Unzip it in your vault under `.obsidian/Plugins/sqlseal`.
 
