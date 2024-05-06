@@ -4,7 +4,7 @@ import path from 'path'
 import Papa from 'papaparse'
 import { prefixedIfNotGlobal } from "./sqlReparseTables"
 import fs from 'fs'
-import { fetchBlobData } from "./utils"
+import { delay, fetchBlobData } from "./utils"
 
 function isNumeric(str: string) {
     if (typeof str != "string") return false // we only process strings!  
@@ -57,8 +57,6 @@ const predictType = (field: string, data: Array<Record<string, string>>) => {
     return 'TEXT'
 }
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-
 export class SqlSealDatabase {
     private savedDatabases: Record<string, any> = {}
     db: typeof Database
@@ -96,7 +94,7 @@ export class SqlSealDatabase {
         }
         console.log('FETCHED')
 
-        await delay(1000) // Making sure everything is in order
+        await delay(1000) // Making sure everything is in order: ;
 
         //@ts-ignore
         const defaultDbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "obsidian.db")
@@ -173,17 +171,8 @@ export class SqlSealDatabase {
         return types;
     }
 
-    async defineDatabaseFromUrl(unprefixedName: string, url: string, prefix: string) {
-        const name = prefixedIfNotGlobal(unprefixedName, [], prefix)
-        if (this.savedDatabases[name]) {
-            console.log('Database Exists', name)
-            return
-        }
+    async loadDataForDatabaseFromUrl(name: string, url: string) {
         const file = this.app.vault.getFileByPath(url)
-        if (!file) {
-            console.log('File not found')
-            return
-        }
         const data = await this.app.vault.cachedRead(file)
 
         const parsed = Papa.parse(data, {
@@ -193,9 +182,6 @@ export class SqlSealDatabase {
         })
         const fields = parsed.meta.fields
         const { data: parsedData, types } = toTypeStatements(fields, parsed.data)
-
-        await this.createTable(name, types)
-        // this.savedDatabases[name] = url
 
         // Purge the database
         await this.db.prepare(`DELETE FROM ${name}`).run()
@@ -212,5 +198,37 @@ export class SqlSealDatabase {
         })
 
         await insertMany(parsedData)
+    }
+
+    async defineDatabaseFromUrl(unprefixedName: string, url: string, prefix: string, reloadData: boolean = false) {
+        const name = prefixedIfNotGlobal(unprefixedName, [], prefix)
+        if (this.savedDatabases[name]) {
+            console.log('Database Exists', name)
+            if (reloadData) {
+                await this.loadDataForDatabaseFromUrl(name, url)
+            }
+            return name
+        }
+        const file = this.app.vault.getFileByPath(url)
+        if (!file) {
+            console.log('File not found')
+            return name
+        }
+        const data = await this.app.vault.cachedRead(file)
+
+        const parsed = Papa.parse(data, {
+            header: true,
+            dynamicTyping: false,
+            skipEmptyLines: true
+        })
+        const fields = parsed.meta.fields
+        const { data: parsedData, types } = toTypeStatements(fields, parsed.data)
+
+        await this.createTable(name, types)
+        // this.savedDatabases[name] = url
+        await this.loadDataForDatabaseFromUrl(name, url)
+
+        
+        return name
     }
 }

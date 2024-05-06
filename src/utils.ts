@@ -51,3 +51,5 @@ export const fetchBlobData = async (url: string, filePath: string) => {
         });
     })
   };
+
+export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))

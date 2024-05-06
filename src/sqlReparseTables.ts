@@ -1,5 +1,6 @@
 import { BaseFrom, Parser, Select } from "node-sql-parser"
 import { generatePrefix } from "./hash"
+import { table } from "console"
 
 const isGlobal = (table: string, globalTables: string[]) => {
     return globalTables.map(t =>
@@ -21,20 +22,29 @@ export const prefixedIfNotGlobal = (tableName: string, globalTables: string[], p
 
 const updateSelect = (selectAst: Select, globalTables: string[], prefix: string) => {
     if (!selectAst.from) {
-        return selectAst
+        return { selectAst: selectAst, tables: [] }
     }
-    return {
-        ...selectAst,
-        from: selectAst.from.map(from => {
-            // FIXME: better typing here.
-            if(isBaseFrom(from)) {
-                return {
-                    ...from,
-                    table: prefixedIfNotGlobal(from.table, globalTables, prefix)
-                }
+
+    const tables: Array<string> = []
+
+    const updatedFrom = selectAst.from.map(from => {
+        if(isBaseFrom(from)) {
+            const t = prefixedIfNotGlobal(from.table, globalTables, prefix)
+            tables.push(t)
+            return {
+                ...from,
+                table: t
             }
-            return from
-        })
+        }
+        return from
+    })
+
+    return {
+        selectAst: {
+            ...selectAst,
+            from: updatedFrom
+        },
+        tables
     }
 }
 
@@ -42,8 +52,8 @@ export const updateTables = (selectStatement: string, globalTables: string[], pr
     const parser = new Parser()
     const { ast } = parser.parse(selectStatement)
     if (!Array.isArray(ast) && ast.type === 'select') {
-        const updated = updateSelect(ast!, globalTables, prefix)
-        return parser.sqlify(updated)
+        const { selectAst, tables } = updateSelect(ast!, globalTables, prefix)
+        return { statement: parser.sqlify(selectAst), tables }
     } else {
         throw new Error('Invalid Statement. Only single SELECTs are accepted at the moment.')
     }

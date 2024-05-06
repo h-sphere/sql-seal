@@ -33,6 +33,7 @@ export const displayInfo = (el: HTMLElement, message: string) => {
 }
 
 export const displayLoader = (el: HTMLElement) => {
+    el.empty()
     const loader = el.createEl("div", { cls: 'callout', text: 'Loading SQLSeal database...' })
     loader.dataset.callout = 'info'
 }
