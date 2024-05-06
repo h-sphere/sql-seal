@@ -18,8 +18,8 @@ export default defineConfig({
         items: [
           { text: 'Quick Start', link: '/quick-start' },
           { text: 'Using properties', link: '/using-properties' },
-          { text: 'Future Plans', link: '/future-plans' }
-
+          { text: 'Future Plans', link: '/future-plans' },
+          { text: 'Query Vault Content', link: '/query-vault-content' },
         ]
       }
     ],
@@ -29,7 +29,7 @@ export default defineConfig({
     ],
     footer: {
       message: '',
-      copyright: 'By <a href="https://hypersphere.blog">hypersphere</a>'
+      copyright: 'By <a href="https://hypersphere.blog">hypersphere</a>. Ko-Fi: <a href="https://ko-fi.com/hypersphere">hypersphere</a>'
     }
   }
 })

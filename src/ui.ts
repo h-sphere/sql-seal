@@ -1,6 +1,9 @@
 export const displayData = (el: HTMLElement, columns, data) => {
     el.empty()
-    const table = el.createEl("table")
+    const container = el.createDiv({
+        cls: 'sqlseal-table-container'
+    })
+    const table = container.createEl("table")
     table.style.setProperty('width', '100%');
 
     // HEADER

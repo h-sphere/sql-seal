@@ -9,15 +9,23 @@ import { delay } from "./utils";
 
 export class SqlSeal {
     public db: SqlSealDatabase
-    private observer: SealObserver
+    public observer: SealObserver
     constructor(private readonly app: App, verbose = false) {
         this.db = new SqlSealDatabase(app, verbose)
         this.observer = new SealObserver(verbose)
         this.observeAllFileChanges()
     }
 
+    public get globalTables() {
+        return ['files', 'tags']
+    }
+
     async connect() {
         await this.db.connect()
+    }
+
+    async disconnect() {
+        await this.db.disconect()
     }
 
     async resolveFrontmatter(ctx: MarkdownPostProcessorContext) {
@@ -73,7 +81,7 @@ export class SqlSeal {
     if (selectMatch) {
         try {
             const selectStatement = selectMatch[0]
-            const { statement, tables } = updateTables(selectStatement, ['files'], prefix)
+            const { statement, tables } = updateTables(selectStatement, this.globalTables, prefix)
 
 
             const renderSelect = async () => {

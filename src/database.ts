@@ -105,12 +105,34 @@ export class SqlSealDatabase {
         this.connectingPromiseResolve()
     }
 
+    async disconect() {
+        if (!this.isConnected) {
+            return
+        }
+        this.db.close()
+        this.isConnected = false
+    }
+
     async createTableWithData(name: string, data: Array<Record<string, unknown>>) {
         const schema = await this.getSchema(data)
         await this.createTable(name, schema)
         await this.insertData(name, data)
 
         return schema
+    }
+
+    async addNewColumns(name: string, data: Array<Record<string, unknown>>) {
+        const schema = await this.getSchema(data)
+        const currentSchema = this.db.prepare(`PRAGMA table_info(${name})`).all()
+        const currentFields = currentSchema.map((f: any) => f.name)
+        const newFields = Object.keys(schema).filter(f => !currentFields.includes(f))
+
+        if (newFields.length === 0) {
+            return
+        }
+
+        const alter = this.db.prepare(`ALTER TABLE ${name} ADD COLUMN ${newFields.map(f => `${f} ${schema[f]}`).join(', ')}`)
+        alter.run()
     }
 
     updateData(name: string, data: Array<Record<string, unknown>>) {
@@ -127,6 +149,22 @@ export class SqlSealDatabase {
         })
 
         return updateMany(data)
+    }
+
+    deleteData(name: string, data: Array<Record<string, unknown>>, key: string = 'id') {
+
+        const deleteStmt = this.db.prepare(`DELETE FROM ${name} WHERE ${key} = @${key}`);
+        const deleteMany = this.db.transaction((pData: Array<Record<string, any>>) => {
+            pData.forEach(data => {
+                try {
+                    deleteStmt.run(data)
+                } catch (e) {
+                    console.log(e)
+                }
+            })
+        })
+
+        return deleteMany(data)
     }
 
     insertData(name: string, data: Array<Record<string, unknown>>) {
@@ -201,7 +239,7 @@ export class SqlSealDatabase {
     }
 
     async defineDatabaseFromUrl(unprefixedName: string, url: string, prefix: string, reloadData: boolean = false) {
-        const name = prefixedIfNotGlobal(unprefixedName, [], prefix)
+        const name = prefixedIfNotGlobal(unprefixedName, [], prefix) // FIXME: should we pass global tables here too?
         if (this.savedDatabases[name]) {
             console.log('Database Exists', name)
             if (reloadData) {
