@@ -1,3 +1,8 @@
 .sqlseal-table-container {
     overflow-y: scroll;
 }
+
+.sqlseal-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
