@@ -1,16 +1,5 @@
 import { App, EventRef, Plugin, TAbstractFile, TFile } from "obsidian";
-import GrayMatter from "gray-matter";
 import { SqlSeal } from "./sqlSeal";
-import { delay } from "./utils";
-
-
-
-async function extractFrontmatterFromFile(file: TAbstractFile) {
-    const content = await this.app.vault.read(file);
-    const gm = GrayMatter(content)
-
-    return gm.data
-}
 
 function fileData(file: TAbstractFile, frontmatter: Record<string, any>) {
     return {
@@ -21,18 +10,21 @@ function fileData(file: TAbstractFile, frontmatter: Record<string, any>) {
     }
 }
 
+const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {
+    return plugin.app.metadataCache.getFileCache(file)?.frontmatter || {}
+}
+
 export class SealFileSync {
     private currentSchema: Record<string, 'TEXT' | 'INTEGER' | 'REAL'> = {}
-    private refs: Array<EventRef> = []
     constructor(public readonly app: App, private readonly sqlSeal: SqlSeal, private readonly plugin: Plugin) {
-        this.refs.push(this.app.vault.on('modify', async (file) => {
+        plugin.registerEvent(this.app.vault.on('modify', async (file) => {
             if (!(file instanceof TFile)) {
                 return
             }
-            const frontmatter = await extractFrontmatterFromFile(file)
+            const frontmatter = extractFrontmatterFromFile(file, plugin)
 
             if (this.hasNewColumns(frontmatter)) {
-                await delay(1000)
+                await sleep(1000)
                 await this.init()
 
                 return
@@ -45,20 +37,20 @@ export class SealFileSync {
 
 
             // Wait 1 second before updating tags table
-            await delay(1000)
+            await sleep(1000)
             await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
             this.sqlSeal.observer.fireObservers('table:tags')
         }))
 
-        this.refs.push(this.app.vault.on('create', async (file) => {
+        plugin.registerEvent(this.app.vault.on('create', async (file) => {
             if (!(file instanceof TFile)) {
                 return
             }
-            const frontmatter = await extractFrontmatterFromFile(file)
+            const frontmatter = await extractFrontmatterFromFile(file, plugin)
 
 
             if (this.hasNewColumns(frontmatter)) {
-                await delay(1000)
+                await sleep(1000)
                 await this.init()
 
                 return
@@ -70,12 +62,12 @@ export class SealFileSync {
             this.sqlSeal.observer.fireObservers('table:files')
 
             // Wait 1 second before updating tags table
-            await delay(1000)
+            await sleep(1000)
             await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
             this.sqlSeal.observer.fireObservers('table:tags')
         }))
         
-        this.refs.push(this.app.vault.on('delete', async (file) => {
+        plugin.registerEvent(this.app.vault.on('delete', async (file) => {
             if (!(file instanceof TFile)) {
                 return
             }
@@ -87,7 +79,7 @@ export class SealFileSync {
             this.sqlSeal.observer.fireObservers('table:tags')
         }))
 
-        this.refs.push(this.app.vault.on('rename', async (file, oldPath) => {
+        plugin.registerEvent(this.app.vault.on('rename', async (file, oldPath) => {
             if (!(file instanceof TFile)) {
                 return
             }
@@ -98,11 +90,11 @@ export class SealFileSync {
             // delete old tags
             await this.sqlSeal.db.deleteData('tags', [{ fileId: oldPath }], 'fileId')
 
-            await this.sqlSeal.db.insertData('files', [fileData(file, await extractFrontmatterFromFile(file))])
+            await this.sqlSeal.db.insertData('files', [fileData(file, await extractFrontmatterFromFile(file, this.plugin))])
             this.sqlSeal.observer.fireObservers('table:files')
 
             // Wait 1 second before updating tags table
-            await delay(1000)
+            await sleep(1000)
             await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
             this.sqlSeal.observer.fireObservers('table:tags')
 
@@ -111,15 +103,11 @@ export class SealFileSync {
         // add Obsidian command to reload SQLSeal file database
         this.plugin.addCommand({
             id: 'reload-sqlseal',
-            name: 'Reload Vault Database',
+            name: 'Reload vault database',
             callback: async () => {
                 await this.init()
             }
         })
-    }
-
-    destroy() {
-        this.refs.forEach(ref => this.app.vault.offref(ref))
     }
 
     async getFileTags(file: TFile) {
@@ -135,7 +123,7 @@ export class SealFileSync {
         const tags: Array<{fileId: string, tag: string }> = []
 
         for (const file of files) {
-            const frontmatter = await extractFrontmatterFromFile(file)
+            const frontmatter = await extractFrontmatterFromFile(file, this.plugin)
             tags.push(...await this.getFileTags(file))
             data.push(fileData(file, frontmatter))
         }

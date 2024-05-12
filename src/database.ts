@@ -1,10 +1,10 @@
 import Database from "better-sqlite3"
-import { App } from "obsidian"
+import { App, normalizePath } from "obsidian"
 import path from 'path'
 import Papa from 'papaparse'
 import { prefixedIfNotGlobal } from "./sqlReparseTables"
 import fs from 'fs'
-import { delay, fetchBlobData } from "./utils"
+import { fetchBlobData } from "./utils"
 
 function isNumeric(str: string) {
     if (typeof str != "string") return false // we only process strings!  
@@ -81,19 +81,21 @@ export class SqlSealDatabase {
             this.connectingPromiseResolve = resolve
         })
         //@ts-ignore
-        const dbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "plugins/sqlseal/better_sqlite3.node")
+        const dbPath = normalizePath(this.app.vault.adapter.basePath + '/' + this.app.vault.configDir + '/sqlseal.db')
+    
+        // const dbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "plugins/sqlseal/better_sqlite3.node")
         // check if file "better_sqlite3.node" exists in the plugin folder, if not, download it from github release
-        if (!fs.existsSync(dbPath)) {
-            const url = 'https://github.com/h-sphere/sql-seal/releases/download/0.2.0/better_sqlite3.node' // my github release url
+        // if (!fs.existsSync(dbPath)) {
+        //     const url = 'https://github.com/h-sphere/sql-seal/releases/download/0.2.0/better_sqlite3.node' // my github release url
 
-            await fetchBlobData(url, dbPath)
-        }
+        //     await fetchBlobData(url, dbPath)
+        // }
 
-        await delay(500)
+        // await sleep(500)
 
-        //@ts-ignore
-        const defaultDbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "sqlseal.db")
-        this.db = new Database(defaultDbPath, { verbose: this.verbose ? console.log : undefined })
+        // //@ts-ignore
+        // const defaultDbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "sqlseal.db")
+        this.db = new Database(dbPath, { verbose: this.verbose ? console.log : undefined })
 
         this.isConnected = true
         this.connectingPromiseResolve()

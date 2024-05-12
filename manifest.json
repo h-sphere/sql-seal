@@ -1,5 +1,5 @@
 {
-	"id": "hypersphere-sqlseal",
+	"id": "sqlseal",
 	"name": "SQLSeal",
 	"version": "0.2.0",
 	"minAppVersion": "0.15.0",

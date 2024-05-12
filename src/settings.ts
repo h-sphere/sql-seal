@@ -25,14 +25,12 @@ export class SqlSealSettingsTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: 'My Plugin Settings' });
-
         new Setting(containerEl)
             .setName('Rows')
             .setDesc('Configure your rows')
             .addButton((button: ButtonComponent) => {
                 button
-                    .setButtonText('Add Row')
+                    .setButtonText('Add row')
                     .onClick(async () => {
                         this.plugin.settings.rows.push({ name: '', type: 'File', dynamicField: '' });
                         await this.plugin.saveSettings();
@@ -74,10 +72,10 @@ export class SqlSealSettingsTab extends PluginSettingTab {
 
         if (row.type === 'File') {
             new Setting(rowContainer)
-                .setName('File Selector')
+                .setName('File selector')
                 .addText(text => {
                     text
-                    .setPlaceholder('Select File')
+                    .setPlaceholder('Select file')
                     .setValue(row.dynamicField)
                     .onChange(async (value) => {
                         this.plugin.settings.rows[index].dynamicField = value;

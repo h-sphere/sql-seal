@@ -1,4 +1,3 @@
-import GrayMatter from "gray-matter";
 import { SqlSealDatabase } from "./database";
 import { displayData, displayError, displayInfo, displayLoader } from "./ui";
 import { App, MarkdownPostProcessorContext } from "obsidian";
@@ -36,11 +35,7 @@ export class SqlSeal {
         if (!file) {
             return null
         }
-        const data = await this.app.vault.cachedRead(file)
-
-        const gm = GrayMatter(data)
-        const frontmatter = gm.data
-        return frontmatter
+        return this.app.metadataCache.getFileCache(file)?.frontmatter
     }
 
 
@@ -99,7 +94,6 @@ export class SqlSeal {
 
 
                     displayLoader(el)
-                    // await delay(1000)
 
                     await renderSelect()
                 }
