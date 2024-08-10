@@ -16,18 +16,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
-
-      - name: Build plugin
-        run: |
-          npm install
-          npm run build
+      - name: Install packages
+        run: npm install
       - name: Recompile Better SQLite3 for Electron
         run: |
           npm run rebuild
-      - name: Copy better SQLite3 to plugin
+      - name: Build plugin
         run: |
-          cp -r node_modules/better-sqlite3/build/Release/better_sqlite3.node .
-
+          npm run build
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -37,4 +33,4 @@ jobs:
           gh release create "$tag" \
             --title="$tag" \
             --draft \
-            main.js manifest.json styles.css better_sqlite3.node
+            main.js manifest.json styles.css
