@@ -16,12 +16,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
+      - name: Install packages
+        run: npm install
       - name: Recompile Better SQLite3 for Electron
         run: |
           npm run rebuild
       - name: Build plugin
         run: |
-          npm install
           npm run build
       - name: Create release
         env:
