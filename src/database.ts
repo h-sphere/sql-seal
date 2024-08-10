@@ -3,13 +3,20 @@ import { App, normalizePath } from "obsidian"
 import path from 'path'
 import Papa from 'papaparse'
 import { prefixedIfNotGlobal } from "./sqlReparseTables"
-import fs from 'fs'
+import { camelCase } from 'lodash'
 import { fetchBlobData } from "./utils"
 
 function isNumeric(str: string) {
     if (typeof str != "string") return false // we only process strings!  
     return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
         !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
+
+function dataToCamelCase(data: Array<Record<string, unknown>>) {
+    return data.map(d => Object.keys(d).reduce((acc, k) => ({
+        ...acc,
+        [camelCase(k)]: Array.isArray(d[k]) ? d[k].join(', ') : d[k]
+    }), {}))
 }
 
 
@@ -163,8 +170,13 @@ export class SqlSealDatabase {
         return deleteMany(data)
     }
 
-    insertData(name: string, data: Array<Record<string, unknown>>) {
+    insertData(name: string, inData: Array<Record<string, unknown>>) {
+        const data = dataToCamelCase(inData)
         const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
+        // FIXME: reworking all fields to be camel case
+        if (!fields || !fields.length) {
+            return
+        }
         const insert = this.db.prepare(`INSERT INTO ${name} (${fields.join(', ')}) VALUES (${fields.map((key: string) => '@' + key).join(', ')})`);
         const insertMany = this.db.transaction((pData: Array<Record<string, any>>) => {
             pData.forEach(data => {
@@ -177,7 +189,7 @@ export class SqlSealDatabase {
                     })
                     insert.run(data)
                 } catch (e) {
-                    console.error(e)
+                    console.error(e, insert, data)
                 }
             })
         })
@@ -186,7 +198,7 @@ export class SqlSealDatabase {
     }
 
     async createTable(name: string, fields: Record<string, 'TEXT' | 'INTEGER' | 'REAL'>) {
-        const sqlFields = Object.entries(fields).map(([key, type]) => `${key} ${type}`)
+        const sqlFields = Object.entries(fields).map(([key, type]) => `${camelCase(key)} ${type}`)
         // FIXME: probably use schema generator, for now create with hardcoded fields
         await this.db.prepare(`DROP TABLE IF EXISTS ${name}`).run()
         const createSQL = `CREATE TABLE IF NOT EXISTS ${name} (

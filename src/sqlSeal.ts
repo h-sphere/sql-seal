@@ -4,7 +4,6 @@ import { App, MarkdownPostProcessorContext } from "obsidian";
 import { updateTables } from "./sqlReparseTables";
 import { hashString } from "./hash";
 import { SealObserver } from "./SealObserver";
-import { delay } from "./utils";
 
 export class SqlSeal {
     public db: SqlSealDatabase
@@ -76,11 +75,10 @@ export class SqlSeal {
             const selectStatement = selectMatch[0]
             const { statement, tables } = updateTables(selectStatement, this.globalTables, prefix)
 
-
             const renderSelect = async () => {
                 const stmt = await this.db.db.prepare(statement)
                 const columns = await stmt.columns().map(column => column.name);
-                const data = await stmt.all(frontmatter)
+                const data = await stmt.all(frontmatter ?? {})
                 displayData(el, columns, data)
             }
 
@@ -103,7 +101,7 @@ export class SqlSeal {
             await renderSelect()
 
         } catch (e) {
-            if (e instanceof RangeError && Object.keys(ctx.frontmatter).length === 0) {
+            if (e instanceof RangeError && ctx && Object.keys(ctx.frontmatter).length === 0) {
                 displayInfo(el, 'Cannot access frontmatter properties in Live Preview Mode. Switch to Reading Mode to see the results.')
             } else {
                 displayError(el, e)
