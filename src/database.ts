@@ -5,6 +5,8 @@ import Papa from 'papaparse'
 import { prefixedIfNotGlobal } from "./sqlReparseTables"
 import { camelCase } from 'lodash'
 import { fetchBlobData } from "./utils"
+import os from 'os'
+import fs from 'fs'
 
 function isNumeric(str: string) {
     if (typeof str != "string") return false // we only process strings!  
@@ -71,7 +73,7 @@ export class SqlSealDatabase {
     private connectingPromise;
     private connectingPromiseResolve;
     constructor(private readonly app: App, private readonly verbose = false) {
-        
+
     }
 
 
@@ -88,24 +90,40 @@ export class SqlSealDatabase {
             this.connectingPromiseResolve = resolve
         })
         //@ts-ignore
-        const dbPath = normalizePath(this.app.vault.adapter.basePath + '/' + this.app.vault.configDir + '/sqlseal.db')
-    
-        // const dbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "plugins/sqlseal/better_sqlite3.node")
-        // check if file "better_sqlite3.node" exists in the plugin folder, if not, download it from github release
-        // if (!fs.existsSync(dbPath)) {
-        //     const url = 'https://github.com/h-sphere/sql-seal/releases/download/0.2.0/better_sqlite3.node' // my github release url
+        // const dbPath = normalizePath(this.app.vault.adapter.basePath + '/' + this.app.vault.configDir + '/sqlseal.db')
 
-        //     await fetchBlobData(url, dbPath)
-        // }
+        const arch = os.arch()
+        const platform = os.platform()
+        const better_sql_version = 'v11.2.1'
 
-        // await sleep(500)
+        const dbNodeFilePath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, `plugins/sqlseal/better_sqlite3-${platform}-${arch}.node`)
+        // check if file "better_sqlite3.node" exists in the plugin folder, if not, download it from better sqlite release.
+        try {
+            if (!fs.existsSync(dbNodeFilePath)) {
+                const url = `https://github.com/h-sphere/bettersql3-builds/releases/download/processed-${better_sql_version}/better-sqlite3-${better_sql_version}-electron-v${process.versions.modules}-${platform}-${arch}.node`
 
-        // //@ts-ignore
-        // const defaultDbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, "sqlseal.db")
-        this.db = new Database(dbPath, { verbose: this.verbose ? console.log : undefined })
+                await fetchBlobData(url, dbNodeFilePath)
+            }
 
-        this.isConnected = true
-        this.connectingPromiseResolve()
+            await sleep(500)
+
+
+            const dbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, `plugins/sqlseal/database.sqlite`)
+
+            this.db = new Database(dbPath, { verbose: this.verbose ? console.log : undefined })
+
+            this.isConnected = true
+            this.connectingPromiseResolve()
+
+        } catch (e) {
+            console.error(`Error while loading SQLSeal. Please reload Obsiidan. If it repeats, please create new issue on GitHub: https://github.com/h-sphere/sql-seal/issues . Please quote following parameters:
+                Architecture: ${arch}
+                Platform: ${platform}
+                Electron Version: ${process.versions.modules}
+                BetterSQLite Version: ${better_sql_version}
+                Error: ${e}
+                `, e)
+        }
     }
 
     async disconect() {
@@ -272,7 +290,7 @@ export class SqlSealDatabase {
         // this.savedDatabases[name] = url
         await this.loadDataForDatabaseFromUrl(name, url)
 
-        
+
         return name
     }
 }
