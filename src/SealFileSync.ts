@@ -130,7 +130,14 @@ export class SealFileSync {
 
         const schema = await this.sqlSeal.db.createTableWithData('files', data)
         this.currentSchema = schema
-        await this.sqlSeal.db.createTableWithData('tags', tags)
+        if (tags && tags.length) {
+            await this.sqlSeal.db.createTableWithData('tags', tags)
+        } else {
+            await this.sqlSeal.db.createTable('tags', {
+                'tag': 'TEXT',
+                'fileId': 'TEXT'
+            })
+        }
         this.sqlSeal.observer.fireObservers('table:files')
         this.sqlSeal.observer.fireObservers('table:tags')
     }

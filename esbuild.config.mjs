@@ -4,15 +4,12 @@ import builtins from "builtin-modules";
 import replacePlugin from "esbuild-plugin-replace-regex";
 import fs from "fs";
 
-const nodeFileBase64 = fs.readFileSync("node_modules/better-sqlite3/build/Release/better_sqlite3.node", { encoding: "base64" });
 const patchStr = `
+    const os = require("os")
+    const arch = os.arch()
+    const platform = os.platform()
   const libPath = app.vault.adapter.getFullPath(app.vault.configDir)
-  let addonBuffer;
-  if (!fs.existsSync(path.resolve(libPath, "plugins/sqlseal/better_sqlite3.node"))) {
-    addonBuffer = Buffer.from("${nodeFileBase64.replaceAll('"', '\\"')}", "base64");
-    fs.writeFileSync(path.resolve(libPath, "plugins/sqlseal/better_sqlite3.node"), addonBuffer);
-  }
-  addon = DEFAULT_ADDON || (DEFAULT_ADDON = require(path.resolve(libPath, "plugins/sqlseal/better_sqlite3.node")));
+  addon = DEFAULT_ADDON || (DEFAULT_ADDON = require(path.resolve(libPath, \`plugins/sqlseal/better_sqlite3-\${platform}-\${arch}.node\`)));
 `;
 
 const banner =
