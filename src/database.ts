@@ -4,11 +4,11 @@ import path from 'path'
 import Papa from 'papaparse'
 import { prefixedIfNotGlobal } from "./sqlReparseTables"
 import { camelCase } from 'lodash'
-import { fetchBlobData } from "./utils"
+import { fetchBlobData, predictType } from "./utils"
 import os from 'os'
 import fs from 'fs'
 
-function isNumeric(str: string) {
+export function isNumeric(str: string) {
     if (typeof str != "string") return false // we only process strings!  
     return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
         !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
@@ -44,26 +44,6 @@ const toTypeStatements = (header: Array<string>, data: Array<Record<string, stri
         data: d,
         types
     }
-}
-
-const predictType = (field: string, data: Array<Record<string, string>>) => {
-
-    if (field === 'id') {
-        return 'TEXT'
-    }
-
-    const canBeNumber = data.reduce((acc, d) => acc && isNumeric(d[field]), true)
-    if (canBeNumber) {
-
-        // Check if Integer or Float
-        const canBeInteger = data.reduce((acc, d) => acc && parseFloat(d[field]) === parseInt(d[field]), true)
-        if (canBeInteger) {
-            return 'INTEGER'
-        }
-
-        return 'REAL'
-    }
-    return 'TEXT'
 }
 
 export class SqlSealDatabase {
@@ -201,8 +181,12 @@ export class SqlSealDatabase {
                 try {
                     // update data so all missing fields are set to null
                     fields.forEach(field => {
-                        if (!data[field]) {
+                        if (typeof data[field] === 'boolean') {
+                            data[field] = data[field] ? 1 : 0
+                        } else if (!data[field]) {
                             data[field] = null
+                        } else  if (typeof data[field] === 'object') {
+                            data[field] = JSON.stringify(data[field])
                         }
                     })
                     insert.run(data)

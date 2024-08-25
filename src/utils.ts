@@ -1,6 +1,7 @@
 
 import { get } from "https"
 import * as fs from 'fs'
+import { isNumeric } from "./database";
 
 export const fetchBlobData = async (url: string, filePath: string) => {
     return new Promise<void>((resolve, reject) => {
@@ -49,3 +50,30 @@ export const fetchBlobData = async (url: string, filePath: string) => {
         });
     })
   };
+export const predictType = (field: string, data: Array<Record<string, string | Object>>) => {
+
+    if (field === 'id') {
+        return 'TEXT'
+    }
+
+    const d = data.map(d => d[field])
+
+    // CHECK JSONS.
+    const isObject = d.reduce((acc, d) => acc && (!d || typeof d === 'object'), true)
+    if (isObject) {
+        return 'JSON'
+    }
+
+    const canBeNumber = data.reduce((acc, d) => acc && isNumeric(d[field] as string), true)
+    if (canBeNumber) {
+
+        // Check if Integer or Float
+        const canBeInteger = data.reduce((acc, d) => acc && parseFloat(d[field] as string) === parseInt(d[field] as string), true)
+        if (canBeInteger) {
+            return 'INTEGER'
+        }
+
+        return 'REAL'
+    }
+    return 'TEXT'
+}
