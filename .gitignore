@@ -24,3 +24,6 @@ docs/.vitepress/dist
 docs/.vitepress/cache
 rebuild
 better_sqlite3.node
+
+better_sqlite3*.node
+database.sqlite
