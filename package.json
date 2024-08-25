@@ -1,6 +1,6 @@
 {
   "name": "sqlseal",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "A plugin for Obsidian that allows you to run SQL queries on your notes.",
   "main": "main.js",
   "scripts": {
@@ -11,15 +11,18 @@
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "@types/better-sqlite3": "^7.6.10",
+    "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.7",
-    "@types/node": "^16.11.6",
+    "@types/node": "^22.5.0",
     "@types/papaparse": "^5.3.14",
     "@typescript-eslint/eslint-plugin": "5.29.0",
     "@typescript-eslint/parser": "5.29.0",
@@ -29,8 +32,10 @@
     "esbuild": "0.17.3",
     "esbuild-plugin-replace": "^1.4.0",
     "esbuild-plugin-replace-regex": "^0.0.2",
+    "jest": "^29.7.0",
     "obsidian": "latest",
     "prettier": "3.2.5",
+    "ts-jest": "^29.2.5",
     "tslib": "2.4.0",
     "typescript": "4.7.4",
     "vitepress": "^1.1.4",

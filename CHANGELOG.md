@@ -1,3 +1,6 @@
+# 0.5.0
+- Adding support for JSON objects! Automatically detecting JSON in the frontmatter and converting it to JSON type in SQLite. You can query fields using built-in SQLite functions like `json_extract`, `json_array_length`, etc. More about SQlite functionality [can be found here.](https://www.sqlite.org/json1.html).
+
 # 0.4.1
 - Fixed issue with potential duplicate column sql error when two different fields resolve to the same uppercase structure
 
