@@ -1,3 +1,9 @@
+# 0.4.1
+- Fixed issue with potential duplicate column sql error when two different fields resolve to the same uppercase structure
+
+# 0.4.0
+- Fixed issue with better_sqlite3 not loading on different systems and architectures
+
 # 0.2.0
 - Added ability to query files in the fault directly.
 - Added observability - when CSV or file in the vault is changed, all SELECTS that uses it should update too
