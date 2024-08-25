@@ -216,7 +216,10 @@ export class SqlSealDatabase {
     }
 
     async createTable(name: string, fields: Record<string, 'TEXT' | 'INTEGER' | 'REAL'>) {
-        const sqlFields = Object.entries(fields).map(([key, type]) => `${camelCase(key)} ${type}`)
+        const transformedFiels = Object.entries(fields).map(([key, type]) => [camelCase(key), type])
+        const uniqueFields = [...new Map(transformedFiels.map(item =>
+            [item[0], item])).values()]
+        const sqlFields = uniqueFields.map(([key, type]) => `${key} ${type}`)
         // FIXME: probably use schema generator, for now create with hardcoded fields
         await this.db.prepare(`DROP TABLE IF EXISTS ${name}`).run()
         const createSQL = `CREATE TABLE IF NOT EXISTS ${name} (
