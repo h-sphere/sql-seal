@@ -29,3 +29,6 @@ You can define multiple tables in a single snippet. You can also point to the ta
 
 For more comprehensive documentation head to [hypersphere.blog/sql-seal](https://hypersphere.blog/sql-seal).
 
+
+# Stay in Touch!
+If you have any questions about the project, ideas or want to share your use-cases, [join our Discord Channel](https://discord.gg/ZMRnFeAWXb)!
