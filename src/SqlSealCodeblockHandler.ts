@@ -5,12 +5,13 @@ import { hashString } from "./hash"
 import { prefixedIfNotGlobal, updateTables } from "./sqlReparseTables"
 import { SealObserver } from "./SealObserver"
 import { SqlSealDatabase } from "./database"
+import { Logger } from "./logger"
 
 export class SqlSealCodeblockHandler {
     get globalTables() {
         return ['files', 'tags']
     }
-    constructor(private readonly app: App, private readonly db: SqlSealDatabase,private readonly observer: SealObserver) { }
+    constructor(private readonly app: App, private readonly db: SqlSealDatabase,private readonly observer: SealObserver, private logger: Logger) { }
 
     tablesConfig: Record<string, string> = {}
 
@@ -28,6 +29,7 @@ export class SqlSealCodeblockHandler {
     while ((match = regex.exec(source)) !== null) {
         const name = match[1];
         const url = match[2];
+        this.logger.log('CodedblockHandler. table', name, url)
         // UPDATING TABLES IF THEY CHANGED SINCE LAST REGISTER
         const prefixedName = prefixedIfNotGlobal(name, this.globalTables, prefix)
         if (this.tablesConfig[prefixedName] === url) {
@@ -42,12 +44,10 @@ export class SqlSealCodeblockHandler {
 
         // FIXME: do not register observer when it's already been registed for this ctx.
         this.observer.registerObserver(`file:${url}`, async () => {
-            console.log('UPDATE TABLE', name, url, prefix)
             // Update table
-            await this.db.loadDataForDatabaseFromUrl(name, url, true)
+            await this.db.loadDataForDatabaseFromUrl(prefixedName, url, true)
 
             // Fire observers for the table
-            console.log('prefixed name', prefixedName)
             this.observer.fireObservers(`table:${prefixedName}`)
         }, ctx.docId)
         if (this.tablesConfig[prefixedName] !== url) {
@@ -104,7 +104,6 @@ export class SqlSealCodeblockHandler {
             if (e instanceof RangeError && ctx && Object.keys(ctx.frontmatter).length === 0) {
                 displayInfo(el, 'Cannot access frontmatter properties in Live Preview Mode. Switch to Reading Mode to see the results.')
             } else {
-                console.error('e', e)
                 displayError(el, e)
             }
         }

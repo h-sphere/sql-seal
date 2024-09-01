@@ -2,6 +2,7 @@ import { SqlSealDatabase } from "./database";
 import { App } from "obsidian";
 import { SealObserver } from "./SealObserver";
 import { SqlSealCodeblockHandler } from "./SqlSealCodeblockHandler";
+import { Logger } from "./logger";
 
 export class SqlSeal {
     public db: SqlSealDatabase
@@ -11,7 +12,8 @@ export class SqlSeal {
         this.db = new SqlSealDatabase(app, verbose)
         this.observer = new SealObserver(verbose)
         this.observeAllFileChanges()
-        this.codeBlockHandler = new SqlSealCodeblockHandler(app, this.db, this.observer)
+        const logger = new Logger(verbose)
+        this.codeBlockHandler = new SqlSealCodeblockHandler(app, this.db, this.observer, logger)
         // FIXME: handle here changes to files and tags?
     }
 

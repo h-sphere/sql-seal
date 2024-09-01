@@ -163,7 +163,8 @@ export class SqlSealDatabase {
             return
         }
 
-        const alter = this.db.prepare(`ALTER TABLE ${name} ADD COLUMN ${newFields.map(f => `${f} ${schema[f]}`).join(', ')}`)
+        const alter = this.db.prepare(`ALTER TABLE ${name} ADD 
+            COLUMN ${newFields.map(f => `${f} ${schema[f]}`).join(', ')}`)
         alter.run()
     }
 
@@ -200,23 +201,18 @@ export class SqlSealDatabase {
     }
 
     async insertData(name: string, inData: Array<Record<string, unknown>>) {
-        console.log('IN DATA', inData)
         const data = dataToCamelCase(inData)
         const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
         // FIXME: reworking all fields to be camel case
         if (!fields || !fields.length) {
             return
         }
-        console.log('DATA', data)
         const insert = this.db.prepare(`INSERT INTO ${name} (${fields.join(', ')}) VALUES (${fields.map((key: string) => '@' + key).join(', ')})`);
         const insertMany = this.db.transaction((pData: Array<Record<string, any>>) => {
             pData.forEach(data => {
                 try {
                     // update data so all missing fields are set to null
                     fields.forEach(field => {
-                        if (field === 'events') {
-                            console.log('GOT FIELD events', data[field], typeof data[field])
-                        }
                         if (typeof data[field] === 'boolean') {
                             data[field] = data[field] ? 1 : 0
                         } else if (!data[field]) {
@@ -236,7 +232,6 @@ export class SqlSealDatabase {
     }
 
     async createTable(name: string, fields: Record<string, FieldTypes>) {
-        console.log(`CREATE TABLE ${name}`)
         const transformedFiels = Object.entries(fields).map(([key, type]) => [camelCase(key), type])
         const uniqueFields = [...new Map(transformedFiels.map(item =>
             [item[0], item])).values()]
@@ -260,7 +255,6 @@ export class SqlSealDatabase {
     }
 
     async loadDataForDatabaseFromUrl(name: string, url: string, reloadData: boolean = false) {
-        console.log('SHOULD WE RELOAD ALL THE DATA?', reloadData)
         const file = this.app.vault.getFileByPath(url)
 
         if (!file) {
@@ -284,25 +278,10 @@ export class SqlSealDatabase {
             // Purge the database
             await this.db.prepare(`DELETE FROM ${name}`).run()
         } catch (e) {
-            // IF ERROR IS THAT TABLE DOES NOT EXIST, LETS CREATE ONE.
             // FIXME: check if error is actually that the table does not exist
-            console.warn('Error', e)
             await this.createTable(name, types)
         }
         await this.insertData(name, parsedData)
-        // const insert = this.db.prepare(`INSERT INTO ${name} (${fields.join(', ')}) VALUES (${fields.map((key: string) => '@' + key).join(', ')})`);
-        // console.log(`INSERT STMT`, insert)
-        // const insertMany = this.db.transaction((pData: Array<Record<string, any>>) => {
-        //     pData.forEach(data => {
-        //         try {
-        //             insert.run(data)
-        //         } catch (e) {
-        //             console.error(e)
-        //         }
-        //     })
-        // })
-
-        // await insertMany(parsedData)
         return name
     }
 
@@ -316,7 +295,6 @@ export class SqlSealDatabase {
      */
     async defineDatabaseFromUrl(unprefixedName: string, url: string, prefix: string, reloadData: boolean = false) {
         // FIXME: why do we repeat this code?
-        console.log('define:: defineDatabaseFromUrl', unprefixedName, url)
         const name = prefixedIfNotGlobal(unprefixedName, [], prefix) // FIXME: should we pass global tables here too?
         if (this.savedDatabases[name]) {
             if (reloadData) {
@@ -326,7 +304,6 @@ export class SqlSealDatabase {
         }
         const file = this.app.vault.getFileByPath(url)
 
-        console.log('FILE', file)
         if (!file) {
             return name
         }

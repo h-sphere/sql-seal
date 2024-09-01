@@ -92,21 +92,13 @@ export const predictJson = (data: Array<Record<string, unknown>>) => {
         }
         const v = d[k].trim()
         if ((v.at(0) == '[' && v.at(-1) === ']') || (v.at(0) === '{' && v.at(-1) === '}')) {
-            // We can try parsing
-            if (k === 'events') {
-                console.log(`JSON DATA: ${d[k]}`)
-            }
             try {
                 const d = JSON5.parse(v)
-                if (k === 'events') {
-                    console.log('PARSED', d)
-                }
                 return {
                     ...o,
                     [k]: d
                 }
             } catch (e) {
-                console.log('NOT PARSED', e)
             }
         }
         return {
