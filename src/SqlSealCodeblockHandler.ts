@@ -74,7 +74,7 @@ export class SqlSealCodeblockHandler {
                     const stmt = await this.db.db.prepare(statement)
                     const columns = await stmt.columns().map(column => column.name);
                     const data = await stmt.all(frontmatter ?? {})
-                    displayData(el, columns, data)
+                    displayData(el, columns, data, this.app)
                 } catch (e) {
                     displayError(el, e)
                 }

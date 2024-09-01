@@ -1,6 +1,5 @@
-import { BaseFrom, Parser, Select } from "node-sql-parser"
+import { BaseFrom, From, Parser, Select } from "node-sql-parser"
 import { generatePrefix } from "./hash"
-import { table } from "console"
 
 const isGlobal = (table: string, globalTables: string[]) => {
     return globalTables.map(t =>
