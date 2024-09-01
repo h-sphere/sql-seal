@@ -4,20 +4,20 @@ import path from 'path'
 import Papa from 'papaparse'
 import { prefixedIfNotGlobal } from "./sqlReparseTables"
 import { camelCase } from 'lodash'
-import { fetchBlobData, predictType } from "./utils"
+import { fetchBlobData, FieldTypes, predictJson, predictType } from "./utils"
 import os from 'os'
 import fs from 'fs'
 
 export function isNumeric(str: string) {
     if (typeof str != "string") return false // we only process strings!  
-    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+    return !isNaN(str as any) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
         !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
 }
 
 function dataToCamelCase(data: Array<Record<string, unknown>>) {
     return data.map(d => Object.keys(d).reduce((acc, k) => ({
         ...acc,
-        [camelCase(k)]: Array.isArray(d[k]) ? d[k].join(', ') : d[k]
+        [camelCase(k)]: d[k]
     }), {}))
 }
 
@@ -48,10 +48,10 @@ const toTypeStatements = (header: Array<string>, data: Array<Record<string, stri
 
 export class SqlSealDatabase {
     private savedDatabases: Record<string, any> = {}
-    db: typeof Database
+    db: Database.Database
     private isConnected = false
-    private connectingPromise;
-    private connectingPromiseResolve;
+    private connectingPromise: Promise<void>;
+    private connectingPromiseResolve: (value: void | PromiseLike<void>) => void
     constructor(private readonly app: App, private readonly verbose = false) {
 
     }
@@ -168,24 +168,29 @@ export class SqlSealDatabase {
         return deleteMany(data)
     }
 
-    insertData(name: string, inData: Array<Record<string, unknown>>) {
+    async insertData(name: string, inData: Array<Record<string, unknown>>) {
+        console.log('IN DATA', inData)
         const data = dataToCamelCase(inData)
         const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
         // FIXME: reworking all fields to be camel case
         if (!fields || !fields.length) {
             return
         }
+        console.log('DATA', data)
         const insert = this.db.prepare(`INSERT INTO ${name} (${fields.join(', ')}) VALUES (${fields.map((key: string) => '@' + key).join(', ')})`);
         const insertMany = this.db.transaction((pData: Array<Record<string, any>>) => {
             pData.forEach(data => {
                 try {
                     // update data so all missing fields are set to null
                     fields.forEach(field => {
+                        if (field === 'events') {
+                            console.log('GOT FIELD events', data[field], typeof data[field])
+                        }
                         if (typeof data[field] === 'boolean') {
                             data[field] = data[field] ? 1 : 0
                         } else if (!data[field]) {
                             data[field] = null
-                        } else  if (typeof data[field] === 'object') {
+                        } else  if (typeof data[field] === 'object' || Array.isArray(data[field])) {
                             data[field] = JSON.stringify(data[field])
                         }
                     })
@@ -196,25 +201,26 @@ export class SqlSealDatabase {
             })
         })
 
-        return insertMany(data)
+        insertMany(data)
     }
 
-    async createTable(name: string, fields: Record<string, 'TEXT' | 'INTEGER' | 'REAL'>) {
+    async createTable(name: string, fields: Record<string, FieldTypes>) {
+        console.log(`CREATE TABLE ${name}`)
         const transformedFiels = Object.entries(fields).map(([key, type]) => [camelCase(key), type])
         const uniqueFields = [...new Map(transformedFiels.map(item =>
             [item[0], item])).values()]
         const sqlFields = uniqueFields.map(([key, type]) => `${key} ${type}`)
         // FIXME: probably use schema generator, for now create with hardcoded fields
-        await this.db.prepare(`DROP TABLE IF EXISTS ${name}`).run()
+        this.db.prepare(`DROP TABLE IF EXISTS ${name}`).run()
         const createSQL = `CREATE TABLE IF NOT EXISTS ${name} (
             ${sqlFields.join(', ')}
         );`
 
-        await this.db.prepare(createSQL).run()
+        this.db.prepare(createSQL).run()
         this.savedDatabases[name] = true
 
         // Dropping data.
-        await this.db.prepare(`DELETE FROM ${name}`).run()
+        this.db.prepare(`DELETE FROM ${name}`).run()
     }
     async getSchema(data: Array<Record<string, unknown>>) {
         const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
@@ -222,36 +228,64 @@ export class SqlSealDatabase {
         return types;
     }
 
-    async loadDataForDatabaseFromUrl(name: string, url: string) {
+    async loadDataForDatabaseFromUrl(name: string, url: string, reloadData: boolean = false) {
+        console.log('SHOULD WE RELOAD ALL THE DATA?', reloadData)
         const file = this.app.vault.getFileByPath(url)
+
+        if (!file) {
+            return
+        }
         const data = await this.app.vault.cachedRead(file)
 
-        const parsed = Papa.parse(data, {
+        const parsed = Papa.parse<Record<string, string>>(data, {
             header: true,
             dynamicTyping: false,
             skipEmptyLines: true
         })
-        const fields = parsed.meta.fields
-        const { data: parsedData, types } = toTypeStatements(fields, parsed.data)
 
-        // Purge the database
-        await this.db.prepare(`DELETE FROM ${name}`).run()
+        const processedData = dataToCamelCase(parsed.data)
+        const processedWithJsonParsed = predictJson(processedData)
+        const fields = parsed.meta.fields?.map((f: string) => camelCase(f))!
 
-        const insert = this.db.prepare(`INSERT INTO ${name} (${fields.join(', ')}) VALUES (${fields.map((key: string) => '@' + key).join(', ')})`);
-        const insertMany = this.db.transaction((pData: Array<Record<string, any>>) => {
-            pData.forEach(data => {
-                try {
-                    insert.run(data)
-                } catch (e) {
-                    console.error(e)
-                }
-            })
-        })
+        const { data: parsedData, types } = toTypeStatements(fields, processedWithJsonParsed)
 
-        await insertMany(parsedData)
+        try {
+            // Purge the database
+            await this.db.prepare(`DELETE FROM ${name}`).run()
+        } catch (e) {
+            // IF ERROR IS THAT TABLE DOES NOT EXIST, LETS CREATE ONE.
+            // FIXME: check if error is actually that the table does not exist
+            console.warn('Error', e)
+            await this.createTable(name, types)
+        }
+        await this.insertData(name, parsedData)
+        // const insert = this.db.prepare(`INSERT INTO ${name} (${fields.join(', ')}) VALUES (${fields.map((key: string) => '@' + key).join(', ')})`);
+        // console.log(`INSERT STMT`, insert)
+        // const insertMany = this.db.transaction((pData: Array<Record<string, any>>) => {
+        //     pData.forEach(data => {
+        //         try {
+        //             insert.run(data)
+        //         } catch (e) {
+        //             console.error(e)
+        //         }
+        //     })
+        // })
+
+        // await insertMany(parsedData)
+        return name
     }
 
+    /**
+     * @deprecated
+     * @param unprefixedName 
+     * @param url 
+     * @param prefix 
+     * @param reloadData 
+     * @returns 
+     */
     async defineDatabaseFromUrl(unprefixedName: string, url: string, prefix: string, reloadData: boolean = false) {
+        // FIXME: why do we repeat this code?
+        console.log('define:: defineDatabaseFromUrl', unprefixedName, url)
         const name = prefixedIfNotGlobal(unprefixedName, [], prefix) // FIXME: should we pass global tables here too?
         if (this.savedDatabases[name]) {
             if (reloadData) {
@@ -260,21 +294,23 @@ export class SqlSealDatabase {
             return name
         }
         const file = this.app.vault.getFileByPath(url)
+
+        console.log('FILE', file)
         if (!file) {
             return name
         }
         const data = await this.app.vault.cachedRead(file)
 
-        const parsed = Papa.parse(data, {
+        const parsed = Papa.parse<Record<string, string>>(data, {
             header: true,
             dynamicTyping: false,
             skipEmptyLines: true
         })
-        const fields = parsed.meta.fields
+        const fields = parsed.meta.fields!
         const { data: parsedData, types } = toTypeStatements(fields, parsed.data)
 
         await this.createTable(name, types)
-        // this.savedDatabases[name] = url
+        this.savedDatabases[name] = url
         await this.loadDataForDatabaseFromUrl(name, url)
 
 

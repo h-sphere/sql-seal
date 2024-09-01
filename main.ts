@@ -12,17 +12,15 @@ export default class SqlSealPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		const sqlSeal = new SqlSeal(this.app, false)
+		const sqlSeal = new SqlSeal(this.app, true)
 		this.registerMarkdownCodeBlockProcessor("sqlseal",  sqlSeal.getHandler())
-		await sqlSeal.connect()
-		
 		this.sqlSeal = sqlSeal
-
-
-		this.fileSync = new SealFileSync(this.app, sqlSeal, this)
 		// start syncing when files are loaded
 		this.app.workspace.onLayoutReady(() => {
+			sqlSeal.db.connect().then(() => {
+				this.fileSync = new SealFileSync(this.app, sqlSeal, this)
 			this.fileSync.init()
+			})
 		})
 
 	// this.addSettingTab(new SqlSealSettingsTab(this.app, this));
@@ -30,9 +28,6 @@ export default class SqlSealPlugin extends Plugin {
 	}
 
 	onunload() {
-		if (this.fileSync) {
-			this.fileSync.destroy();
-		}
 		this.sqlSeal.db.disconect();
 	}
 

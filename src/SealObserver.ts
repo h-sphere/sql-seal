@@ -27,7 +27,7 @@ export class SealObserver {
             if (observers !== undefined) {
                 observers.add(observer);
                 if (this.verbose) {
-                    console.log(`Observer registered for table "${tableName}".`);
+                    console.log(`Observer registered for "${tableName}".`);
                 }
             }
             if (tag) {
