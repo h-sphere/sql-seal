@@ -1,15 +1,17 @@
+import { Logger } from "./logger";
+
 type Callback = () => void;
 
 export class SealObserver {
     private tables: Map<string, Set<Callback>>;
-    private verbose: boolean;
 
     private tags: Map<string, Set<Callback>>;
+    private logger: Logger
 
     constructor(verbose = false) {
         this.tables = new Map();
         this.tags = new Map();
-        this.verbose = verbose;
+        this.logger = new Logger(verbose)
     }
 
     registerObserver(tableNames: string | string[], observer: Callback, tag?: string) {
@@ -19,16 +21,12 @@ export class SealObserver {
         tableNames.forEach(tableName => {
             if (!this.tables.has(tableName)) {
                 this.tables.set(tableName, new Set<Callback>());
-                if (this.verbose) {
-                    console.log(`Table "${tableName}" registered.`);
-                }
+                    this.logger.log(`Table "${tableName}" registered.`);
             }
             const observers = this.tables.get(tableName);
             if (observers !== undefined) {
                 observers.add(observer);
-                if (this.verbose) {
-                    console.log(`Observer registered for table "${tableName}".`);
-                }
+                this.logger.log(`Observer registered for "${tableName}".`);
             }
             if (tag) {
                 if (!this.tags.has(tag)) {
@@ -58,9 +56,7 @@ export class SealObserver {
         this.tables.forEach(observers => {
             observers.delete(observer);
         });
-        if (this.verbose) {
-            console.log(`Observer unregistered.`);
-        }
+        this.logger.log(`Observer unregistered.`);
     }
 
     fireObservers(tableName: string) {
@@ -68,9 +64,7 @@ export class SealObserver {
             const observers = this.tables.get(tableName);
             if (observers) {
                 observers.forEach(observer => observer());
-                if (this.verbose) {
-                    console.log(`Observers fired for table "${tableName}".`);
-                }
+                this.logger.log(`Observers fired for table "${tableName}".`);
             }
         }
     }

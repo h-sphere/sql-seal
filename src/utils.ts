@@ -1,5 +1,6 @@
 
 import { get } from "https"
+import JSON5 from 'json5'
 import * as fs from 'fs'
 import { isNumeric } from "./database";
 
@@ -76,4 +77,33 @@ export const predictType = (field: string, data: Array<Record<string, string | O
         return 'REAL'
     }
     return 'TEXT'
+}
+
+export type FieldTypes = ReturnType<typeof predictType>
+
+
+export const predictJson = (data: Array<Record<string, unknown>>) => {
+    return data.map(d => Object.keys(d).reduce((o, k) => {
+        if (typeof d[k] !== 'string') {
+            return {
+                ...o,
+                [k]: d[k]
+            }
+        }
+        const v = d[k].trim()
+        if ((v.at(0) == '[' && v.at(-1) === ']') || (v.at(0) === '{' && v.at(-1) === '}')) {
+            try {
+                const d = JSON5.parse(v)
+                return {
+                    ...o,
+                    [k]: d
+                }
+            } catch (e) {
+            }
+        }
+        return {
+            ...o,
+            [k]: d[k]
+        }
+    }, {}))
 }

@@ -1,5 +1,6 @@
 import { App, EventRef, Plugin, TAbstractFile, TFile } from "obsidian";
 import { SqlSeal } from "./sqlSeal";
+import { FieldTypes } from "./utils";
 
 function fileData(file: TAbstractFile, frontmatter: Record<string, any>) {
     return {
@@ -15,7 +16,7 @@ const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {
 }
 
 export class SealFileSync {
-    private currentSchema: Record<string, 'TEXT' | 'INTEGER' | 'REAL'> = {}
+    private currentSchema: Record<string, FieldTypes> = {}
     constructor(public readonly app: App, private readonly sqlSeal: SqlSeal, private readonly plugin: Plugin) {
         plugin.registerEvent(this.app.vault.on('modify', async (file) => {
             if (!(file instanceof TFile)) {
