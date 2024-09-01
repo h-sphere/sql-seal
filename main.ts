@@ -12,7 +12,7 @@ export default class SqlSealPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		const sqlSeal = new SqlSeal(this.app, true)
+		const sqlSeal = new SqlSeal(this.app, false)
 		this.registerMarkdownCodeBlockProcessor("sqlseal",  sqlSeal.getHandler())
 		this.sqlSeal = sqlSeal
 		// start syncing when files are loaded

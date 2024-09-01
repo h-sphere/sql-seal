@@ -42,12 +42,10 @@ export class SqlSealCodeblockHandler {
 
         // FIXME: do not register observer when it's already been registed for this ctx.
         this.observer.registerObserver(`file:${url}`, async () => {
-            console.log('UPDATE TABLE', name, url, prefix)
             // Update table
             await this.db.loadDataForDatabaseFromUrl(name, url, true)
 
             // Fire observers for the table
-            console.log('prefixed name', prefixedName)
             this.observer.fireObservers(`table:${prefixedName}`)
         }, ctx.docId)
         if (this.tablesConfig[prefixedName] !== url) {
@@ -104,7 +102,6 @@ export class SqlSealCodeblockHandler {
             if (e instanceof RangeError && ctx && Object.keys(ctx.frontmatter).length === 0) {
                 displayInfo(el, 'Cannot access frontmatter properties in Live Preview Mode. Switch to Reading Mode to see the results.')
             } else {
-                console.error('e', e)
                 displayError(el, e)
             }
         }
