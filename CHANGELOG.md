@@ -1,3 +1,9 @@
+# 0.6.0
+- fixing CSV loading when names has been converted to camelCase
+- Fixing constantly reloading files when modifying sql inside the same block that has table declaration in
+- Auto-parsing JSON values with JSON5
+- Better errors when error occurs in select statement
+
 # 0.5.0
 - Adding support for JSON objects! Automatically detecting JSON in the frontmatter and converting it to JSON type in SQLite. You can query fields using built-in SQLite functions like `json_extract`, `json_array_length`, etc. More about SQlite functionality [can be found here.](https://www.sqlite.org/json1.html).
 - Fixed issue with bookean types not being saved properly.
