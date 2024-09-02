@@ -40,6 +40,12 @@ export class SealObserver {
         });
     }
 
+    hasAnyObserver(tableNames: string[]) {
+        return tableNames.reduce((acc, t) => 
+            acc || (this.tables.has(t) && this.tables.get(t)!.size > 0),
+        false)
+    }
+
     unregisterObserversByTag(tag: string) {
         if (this.tags.has(tag)) {
             const observers = this.tags.get(tag);

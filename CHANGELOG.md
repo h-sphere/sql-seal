@@ -1,3 +1,7 @@
+# 0.7.0
+A lot of changes packed in this one! Now SQLSeal is parsing the input using proper language parser (thanks to ANTLR4) rather than relying on RegExes. This finally allows for proper support of CTE statements (WITH) and fixes a lot of other minor problems with the syntax.
+Also improved the way files are being observed and updated which should lead to performance improvements.
+
 # 0.6.0
 - fixing CSV loading when names has been converted to camelCase
 - Fixing constantly reloading files when modifying sql inside the same block that has table declaration in

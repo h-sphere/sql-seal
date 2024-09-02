@@ -1,6 +1,5 @@
-import { BaseFrom, Parser, Select } from "node-sql-parser"
+import { BaseFrom, From, Parser, Select, With } from "node-sql-parser"
 import { generatePrefix } from "./hash"
-import { table } from "console"
 
 const isGlobal = (table: string, globalTables: string[]) => {
     return globalTables.map(t =>
@@ -9,7 +8,7 @@ const isGlobal = (table: string, globalTables: string[]) => {
 }
 
 const isBaseFrom = (from: From): from is BaseFrom => {
-    return !!from['table']
+    return Object.keys(from).includes('table')
 }
 
 export const prefixedIfNotGlobal = (tableName: string, globalTables: string[], prefix: string) => {
@@ -20,7 +19,27 @@ export const prefixedIfNotGlobal = (tableName: string, globalTables: string[], p
     return generatePrefix(prefix, tableName)
 }
 
-const updateSelect = (selectAst: Select, globalTables: string[], prefix: string) => {
+const updateSelect = (selectAst: Select, globalTables: string[], prefix: string): { selectAst: Select, tables: string[] } => {
+
+    let cteGlobals: string[] = []
+    let withs = selectAst.with
+    let extraTables: string[] = []
+    if (selectAst.with) {
+        cteGlobals = selectAst.with.map(w => w.name.value)
+        const updatedWiths = selectAst.with.map(w => {
+            const { selectAst, tables } = updateSelect(w.stmt.ast, [...cteGlobals, ...globalTables], prefix)
+            extraTables.push(...tables)
+            return {
+                ...w,
+                stmt: {
+                    ...w.stmt,
+                    ast: selectAst
+                }
+            } satisfies With
+        })
+        withs = updatedWiths
+    }
+
     if (!selectAst.from) {
         return { selectAst: selectAst, tables: [] }
     }
@@ -29,11 +48,11 @@ const updateSelect = (selectAst: Select, globalTables: string[], prefix: string)
 
     const updatedFrom = selectAst.from.map(from => {
         if(isBaseFrom(from)) {
-            const t = prefixedIfNotGlobal(from.table, globalTables, prefix)
+            const t = prefixedIfNotGlobal(from.table, [...cteGlobals, ...globalTables], prefix)
             tables.push(t)
             return {
                 ...from,
-                table: t
+                table: t,
             }
         }
         return from
@@ -42,9 +61,10 @@ const updateSelect = (selectAst: Select, globalTables: string[], prefix: string)
     return {
         selectAst: {
             ...selectAst,
-            from: updatedFrom
+            from: updatedFrom,
+            with: withs
         },
-        tables
+        tables: [...tables, ...extraTables]
     }
 }
 
