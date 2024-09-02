@@ -27,3 +27,4 @@ better_sqlite3.node
 
 better_sqlite3*.node
 database.sqlite
+coverage/

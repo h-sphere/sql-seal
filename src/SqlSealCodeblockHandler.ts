@@ -6,80 +6,80 @@ import { prefixedIfNotGlobal, updateTables } from "./sqlReparseTables"
 import { SealObserver } from "./SealObserver"
 import { SqlSealDatabase } from "./database"
 import { Logger } from "./logger"
+import { ParsedLanguage, parseLanguage, TableStatement } from "./grammar/parser"
+import { SyncModel } from "./models/sync"
+
 
 export class SqlSealCodeblockHandler {
     get globalTables() {
         return ['files', 'tags']
     }
-    constructor(private readonly app: App, private readonly db: SqlSealDatabase,private readonly observer: SealObserver, private logger: Logger) { }
+    syncModel: SyncModel
+    constructor(private readonly app: App, private readonly db: SqlSealDatabase,private readonly observer: SealObserver, private logger: Logger) {
+        this.syncModel = new SyncModel(db)
+    }
 
-    tablesConfig: Record<string, string> = {}
+    setupTables(tables: ParsedLanguage['tables'], ctx: MarkdownPostProcessorContext) {
+        tables.forEach(table => {
+            this.setupTable(table, ctx)
+        })
+    }
 
-    getHandler() {
-        return async (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
-
-            displayLoader(el)
-            await this.db.connect()
-            this.observer.unregisterObserversByTag(ctx.docId) // Unregister all previous observers.
-
-            const frontmatter = await resolveFrontmatter(ctx, this.app)
-            const prefix = hashString(ctx.sourcePath)
-    const regex = /TABLE\s+(.+)\s+=\s+file\(([^)]+)\)/g;
-    let match
-    while ((match = regex.exec(source)) !== null) {
-        const name = match[1];
-        const url = match[2];
-        this.logger.log('CodedblockHandler. table', name, url)
+    setupTable({ url, name }: TableStatement, ctx: MarkdownPostProcessorContext) {
         // UPDATING TABLES IF THEY CHANGED SINCE LAST REGISTER
+        const prefix = hashString(ctx.sourcePath)
         const prefixedName = prefixedIfNotGlobal(name, this.globalTables, prefix)
-        if (this.tablesConfig[prefixedName] === url) {
-            // We do not need to rework it. Also, it should be watched, right?
-            // continue
-        }
 
-        if (!!this.tablesConfig[prefixedName]) {
-            // We need to remove old database as it's pointing to the wrong collection (probably).
-        }
-        
+        const existing = this.syncModel.getSync(ctx.sourcePath, prefixedName)
 
-        // FIXME: do not register observer when it's already been registed for this ctx.
         this.observer.registerObserver(`file:${url}`, async () => {
             // Update table
             await this.db.loadDataForDatabaseFromUrl(prefixedName, url, true)
 
+            // update when it was updated.
+            this.syncModel.removeSync(ctx.sourcePath, prefixedName)
+            this.syncModel.registerSync(ctx.sourcePath, url, prefixedName)
+
             // Fire observers for the table
             this.observer.fireObservers(`table:${prefixedName}`)
         }, ctx.docId)
-        if (this.tablesConfig[prefixedName] !== url) {
-            this.observer.fireObservers(`file:${url}`)
-            this.tablesConfig[prefixedName] = url
-        } else {
-            // We still need to update the table watchers?
-            requestAnimationFrame(() => {
-                this.observer.fireObservers(`table:${prefixedName}`)
-            })
+
+        if (existing) {
+
+            if (existing.url === url) {
+                // Already synced
+                // TODO: Check if the file was updated after we synced, if so, we should update it.
+                requestAnimationFrame(() => {
+                    this.observer.fireObservers(`table:${prefixedName}`)
+                })
+                return
+            } else {
+                // Old database is no-no. We need to update it.
+                this.db.db.prepare('DROP TABLE :tablename').run({
+                    tablename: prefixedName
+                })
+                this.syncModel.removeSync(ctx.sourcePath, prefixedName)
+            }
         }
+        this.observer.fireObservers(`file:${url}`)
     }
 
-    const selectRegexp = /SELECT\s+(.*)/g; // OR WITH?
-    const selectMatch = selectRegexp.exec(source)
-    if (selectMatch) {
+    setupSelect(selectStmt: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
         try {
-            // FIXME: WAIT FOR TABLES TO BE READDY!!!!
-            const selectStatement = selectMatch[0]
-            const { statement, tables } = updateTables(selectStatement, this.globalTables, prefix)
+        const prefix = hashString(ctx.sourcePath)
+            const { statement, tables } = updateTables(selectStmt, this.globalTables, prefix)
+            const frontmatter = resolveFrontmatter(ctx, this.app)
 
             const renderSelect = async () => {
                 try {
-                    const stmt = await this.db.db.prepare(statement)
-                    const columns = await stmt.columns().map(column => column.name);
-                    const data = await stmt.all(frontmatter ?? {})
+                    const stmt = this.db.db.prepare(statement)
+                    const columns = stmt.columns().map(column => column.name);
+                    const data = stmt.all(frontmatter ?? {})
                     displayData(el, columns, data)
                 } catch (e) {
                     displayError(el, e)
                 }
             }
-
             // Register observer for each table
             tables.forEach(table => {
                 const observer = async () => {
@@ -88,18 +88,22 @@ export class SqlSealCodeblockHandler {
                         this.observer.unregisterObserversByTag(ctx.docId)
                     }
 
-
                     displayLoader(el)
 
                     await renderSelect()
                 }
                 this.observer.registerObserver(`table:${table}`, observer, ctx.docId)
             })
-
             this.globalTables.forEach(t => this.observer.fireObservers(`table:${t}`))
-
-            // await renderSelect() <- this should get triggered automatically.
-
+            if (!this.observer.hasAnyObserver(this.globalTables.map(t => `table:${t}`))) {
+                renderSelect()
+            }
+            // Triggering the ones which exist
+            tables.forEach(t => {
+                if (this.syncModel.getSync(ctx.sourcePath, t)) {
+                    this.observer.fireObservers(`table:${t}`)
+                }
+            })
         } catch (e) {
             if (e instanceof RangeError && ctx && Object.keys(ctx.frontmatter).length === 0) {
                 displayInfo(el, 'Cannot access frontmatter properties in Live Preview Mode. Switch to Reading Mode to see the results.')
@@ -108,6 +112,27 @@ export class SqlSealCodeblockHandler {
             }
         }
     }
+
+    getHandler() {
+        return async (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+
+            displayLoader(el)
+            await this.db.connect()
+            this.observer.unregisterObserversByTag(ctx.docId) // Unregister all previous observers.
+
+            // NEW PARSING
+            try {
+            const results = parseLanguage(source)
+
+            // FIXME: if not properly parsed, we should display error.
+
+            this.setupTables(results.tables, ctx)
+            results.queryPart ? this.setupSelect(results.queryPart, el, ctx) : displayInfo(el, `SQLSeal. ${results.tables.map(t => `${t.name} table definition.`).join(' ')}`)
+
+            } catch (e) {
+                displayError(el, e.toString())
+            }
+
         }
     }
 }
