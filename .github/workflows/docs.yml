@@ -39,6 +39,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: docs/.vitepress/dist
+          name: github-pages
+          if-no-files-found: error
 
   deploy:
     environment:
