@@ -19,6 +19,7 @@ export default defineConfig({
           { text: 'Quick Start', link: '/quick-start' },
           { text: 'Using properties', link: '/using-properties' },
           { text: 'Query Vault Content', link: '/query-vault-content' },
+          { text: 'Links and Images', link: '/links-and-images' },
           { text: 'Troubleshooting', link: '/troubleshooting' },
           { text: 'Future Plans', link: '/future-plans' },
         ]
