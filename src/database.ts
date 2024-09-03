@@ -4,47 +4,9 @@ import path from 'path'
 import Papa from 'papaparse'
 import { prefixedIfNotGlobal } from "./sqlReparseTables"
 import { camelCase } from 'lodash'
-import { fetchBlobData, FieldTypes, predictJson, predictType } from "./utils"
+import { dataToCamelCase, fetchBlobData, FieldTypes, predictJson, predictType, toTypeStatements } from "./utils"
 import os from 'os'
 import fs from 'fs'
-
-export function isNumeric(str: string) {
-    if (typeof str != "string") return false // we only process strings!  
-    return !isNaN(str as any) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
-}
-
-function dataToCamelCase(data: Array<Record<string, unknown>>) {
-    return data.map(d => Object.keys(d).reduce((acc, k) => ({
-        ...acc,
-        [camelCase(k)]: d[k]
-    }), {}))
-}
-
-
-const toTypeStatements = (header: Array<string>, data: Array<Record<string, string>>) => {
-    let d: Array<Record<string, string | number>> = data
-    const types: Record<string, ReturnType<typeof predictType>> = {}
-    header.forEach(key => {
-        const type = predictType(key, data)
-        if (type === 'REAL' || type === 'INTEGER') {
-            // converting all data here to text
-            d = d.map(record => ({
-                ...record,
-                [key]: type === 'REAL'
-                    ? parseFloat(record[key] as string)
-                    : parseInt(record[key] as string)
-            }))
-        }
-
-        types[key] = type
-    })
-
-    return {
-        data: d,
-        types
-    }
-}
 
 export class SqlSealDatabase {
     private savedDatabases: Record<string, any> = {}

@@ -25,7 +25,7 @@ export const displayData = (el: HTMLElement, columns, data, app: App) => {
 
 const parseCell = (data: string, app: App) => {
     console.log('PARSE CELL', data)
-    if (data && data.startsWith('SQLSEALCUSTOM')) {
+    if (data && typeof data === 'string' && data.startsWith('SQLSEALCUSTOM')) {
         const parsedData = JSON.parse(data.slice('SQLSEALCUSTOM('.length, -1))
         return renderSqlSealCustomElement(parsedData, app)
     }

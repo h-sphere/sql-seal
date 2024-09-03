@@ -2,7 +2,6 @@ import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
 import replacePlugin from "esbuild-plugin-replace-regex";
-import fs from "fs";
 
 const patchStr = `
     const os = require("os")
