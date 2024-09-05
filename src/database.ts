@@ -53,6 +53,8 @@ export class SqlSealDatabase {
             const dbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, `plugins/sqlseal/database.sqlite`)
 
             this.db = new Database(dbPath, { verbose: this.verbose ? console.log : undefined })
+            await this.defineCustomFunctions()
+
 
             this.isConnected = true
             this.connectingPromiseResolve()
@@ -66,6 +68,44 @@ export class SqlSealDatabase {
                 Error: ${e}
                 `, e)
         }
+    }
+
+    private async defineCustomFunctions() {
+        this.db.function('a', (href: string, name: string) => {
+            const linkObject = {
+              type: 'link',
+              href: href,
+              name: name || href
+            };
+            return `SQLSEALCUSTOM(${JSON.stringify(linkObject)})`;
+          });
+
+        this.db.function('a', (href: string) => {
+        const linkObject = {
+            type: 'link',
+            href: href,
+            name: href
+        };
+        return `SQLSEALCUSTOM(${JSON.stringify(linkObject)})`;
+        });
+
+        this.db.function('img', (href: string) => {
+            const imgObject = {
+                type: 'img',
+                href: href
+            }
+            return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
+        })
+
+        this.db.function('img', (href: string, path: string) => {
+            const imgObject = {
+                type: 'img',
+                path,
+                href
+            }
+            return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
+        })
+
     }
 
     async disconect() {
