@@ -26,6 +26,13 @@ You can embed images within your results. You need to wrap your resulting column
 SELECT name, img(coverImg) FROM files
 ```
 
+### Local images
+When using local images (stored in Obsidian) you need to pass second parameter being path of the original note. For example:
+
+```sql
+SELECT path, img(cover, path) FROM files
+```
+
 ## Advanced Examples
 The example below uses [Goodreads-books](https://www.kaggle.com/datasets/jealousleopard/goodreadsbooks) Kaggle dataset in CSV loaded in obsidian to display books with links to Open Library and showing the covers from Open Library Cover API. It uses Obsidian property to filter the author name.
 
