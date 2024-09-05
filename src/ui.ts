@@ -24,7 +24,6 @@ export const displayData = (el: HTMLElement, columns, data, app: App) => {
 }
 
 const parseCell = (data: string, app: App) => {
-    console.log('PARSE CELL', data)
     if (data && typeof data === 'string' && data.startsWith('SQLSEALCUSTOM')) {
         const parsedData = JSON.parse(data.slice('SQLSEALCUSTOM('.length, -1))
         return renderSqlSealCustomElement(parsedData, app)
@@ -40,6 +39,7 @@ type SqlSealAnchorElement = {
 
 type SQLSealImgElement = {
     type: 'img',
+    path?: string,
     href: string
 }
 
@@ -80,7 +80,26 @@ const renderSqlSealCustomElement = (customConfig: SqlSealCustomElement, app: App
         case 'link':
             return generateLink(customConfig, app)
         case 'img':
-            return createEl('img', { attr: { src: customConfig.href } })
+            if (!isLinkLocal(customConfig.href)) {
+                return createEl('img', { attr: { src: customConfig.href } });
+            }
+            let href = (customConfig.href ?? '').trim()
+            if (href.startsWith('![[')) {
+                href = href.slice(3, -2)
+            }
+            let parentPath = ''
+            if (customConfig.path) {
+                const parent = app.vault.getFileByPath(customConfig.path)
+                if (parent) {
+                    parentPath = parent.parent?.path ?? ''
+                }
+            }
+            const path = (customConfig?.path ? parentPath + '/' : '') + href
+            const file = app.vault.getFileByPath(path);
+            if (!file) {
+                return 'File does not exist'
+            }
+            return createEl('img', { attr: { src: app.vault.getResourcePath(file) } });
         default:
             return 'Invalid Custom Element'
     }

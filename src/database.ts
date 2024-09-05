@@ -97,6 +97,15 @@ export class SqlSealDatabase {
             return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
         })
 
+        this.db.function('img', (href: string, path: string) => {
+            const imgObject = {
+                type: 'img',
+                path,
+                href
+            }
+            return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
+        })
+
     }
 
     async disconect() {
