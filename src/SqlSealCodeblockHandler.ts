@@ -8,6 +8,8 @@ import { SqlSealDatabase } from "./database"
 import { Logger } from "./logger"
 import { ParsedLanguage, parseLanguage, TableStatement } from "./grammar/parser"
 import { SyncModel } from "./models/sync"
+import { TablesManager } from "./dataLoader/collections/tablesManager"
+import { QueryManager } from "./dataLoader/collections/queryManager"
 
 
 export class SqlSealCodeblockHandler {
@@ -15,7 +17,14 @@ export class SqlSealCodeblockHandler {
         return ['files', 'tags']
     }
     syncModel: SyncModel
-    constructor(private readonly app: App, private readonly db: SqlSealDatabase,private readonly observer: SealObserver, private logger: Logger) {
+    constructor(
+        private readonly app: App,
+        private readonly db: SqlSealDatabase,
+        private readonly observer: SealObserver,
+        private logger: Logger,
+        private tableManager: TablesManager,
+        private queryManager: QueryManager
+    ) {
         this.syncModel = new SyncModel(db)
     }
 
@@ -66,7 +75,7 @@ export class SqlSealCodeblockHandler {
 
     setupSelect(selectStmt: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
         try {
-        const prefix = hashString(ctx.sourcePath)
+            const prefix = hashString(ctx.sourcePath)
             const { statement, tables } = updateTables(selectStmt, this.globalTables, prefix)
             const frontmatter = resolveFrontmatter(ctx, this.app)
 
@@ -113,22 +122,59 @@ export class SqlSealCodeblockHandler {
         }
     }
 
+    setupTableSignals(tables: Array<TableStatement>) {
+        tables.forEach(t => {
+            this.logger.log(`Registering table ${t.name} -> ${t.url}`)
+            this.tableManager.registerTable(t.name, t.url)
+        })
+    }
+
+    setupQuerySignals({ statement, tables }: ReturnType<typeof updateTables>, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
+        const frontmatter = resolveFrontmatter(ctx, this.app)
+
+        const renderSelect = async () => {
+            try {
+                const stmt = this.db.db.prepare(statement)
+                const columns = stmt.columns().map(column => column.name);
+                const data = stmt.all(frontmatter ?? {})
+                displayData(el, columns, data, this.app)
+            } catch (e) {
+                displayError(el, e)
+            }
+        }
+
+
+        const sig = this.queryManager.registerQuery(ctx.docId, tables)
+        sig(() => {
+            renderSelect()
+        })
+    }
+
     getHandler() {
         return async (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
 
             displayLoader(el)
             await this.db.connect()
-            this.observer.unregisterObserversByTag(ctx.docId) // Unregister all previous observers.
+            // this.observer.unregisterObserversByTag(ctx.docId) // Unregister all previous observers.
 
-            // NEW PARSING
             try {
-            const results = parseLanguage(source)
+                const results = parseLanguage(source)
 
-            // FIXME: if not properly parsed, we should display error.
+                const prefix = hashString(ctx.sourcePath)
 
-            this.setupTables(results.tables, ctx)
-            results.queryPart ? this.setupSelect(results.queryPart, el, ctx) : displayInfo(el, `SQLSeal. ${results.tables.map(t => `${t.name} table definition.`).join(' ')}`)
+                const prefixedTables = results.tables.map(t => {
+                    return {
+                        ...t,
+                        name: prefixedIfNotGlobal(t.name, this.globalTables, prefix)
+                    }
+                })
 
+                this.setupTableSignals(prefixedTables)
+
+                if (results.queryPart) {
+                    const { statement, tables } = updateTables(results.queryPart!, [...this.globalTables], prefix)
+                    this.setupQuerySignals({ statement, tables }, el, ctx)
+                }
             } catch (e) {
                 displayError(el, e.toString())
             }

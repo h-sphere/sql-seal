@@ -18,7 +18,7 @@ export default class SqlSealPlugin extends Plugin {
 		// start syncing when files are loaded
 		this.app.workspace.onLayoutReady(() => {
 			sqlSeal.db.connect().then(() => {
-				this.fileSync = new SealFileSync(this.app, sqlSeal, this)
+				this.fileSync = new SealFileSync(this.app, sqlSeal, this, sqlSeal.tablesManager)
 			this.fileSync.init()
 			})
 		})

@@ -1,6 +1,8 @@
 import { App, EventRef, Plugin, TAbstractFile, TFile } from "obsidian";
 import { SqlSeal } from "./sqlSeal";
 import { FieldTypes } from "./utils";
+import { TablesManager } from "./dataLoader/collections/tablesManager";
+import { sanitise } from "./utils/sanitiseColumn";
 
 function fileData(file: TAbstractFile, frontmatter: Record<string, any>) {
     return {
@@ -12,17 +14,28 @@ function fileData(file: TAbstractFile, frontmatter: Record<string, any>) {
 }
 
 const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {
-    return plugin.app.metadataCache.getFileCache(file)?.frontmatter || {}
+    const frontmatter = plugin.app.metadataCache.getFileCache(file)?.frontmatter || {}
+
+    return Object.fromEntries(
+        Object.entries(frontmatter)
+            .map(([v, s]) => ([sanitise(v), s]))
+    )
 }
 
 export class SealFileSync {
     private currentSchema: Record<string, FieldTypes> = {}
-    constructor(public readonly app: App, private readonly sqlSeal: SqlSeal, private readonly plugin: Plugin) {
+    constructor(
+        public readonly app: App,
+        private readonly sqlSeal: SqlSeal,
+        private readonly plugin: Plugin,
+        private readonly tableManager: TablesManager
+    ) {
         plugin.registerEvent(this.app.vault.on('modify', async (file) => {
             if (!(file instanceof TFile)) {
                 return
             }
-            const frontmatter = extractFrontmatterFromFile(file, plugin)
+            await sleep(100)
+            const frontmatter = await extractFrontmatterFromFile(file, plugin)
 
             if (this.hasNewColumns(frontmatter)) {
                 await sleep(1000)
@@ -35,12 +48,15 @@ export class SealFileSync {
             await this.sqlSeal.db.deleteData('tags', [{ fileId: file.path }], 'fileId')
 
             this.sqlSeal.observer.fireObservers('table:files')
+            this.tableManager.getTableSignal('files')(Date.now())
 
 
             // Wait 1 second before updating tags table
             await sleep(1000)
             await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
             this.sqlSeal.observer.fireObservers('table:tags')
+            this.tableManager.getTableSignal('tags')(Date.now())
+
         }))
 
         plugin.registerEvent(this.app.vault.on('create', async (file) => {
@@ -61,11 +77,14 @@ export class SealFileSync {
             // we need to update the row
             await this.sqlSeal.db.insertData('files', [fileData(file, frontmatter)])
             this.sqlSeal.observer.fireObservers('table:files')
+            this.tableManager.getTableSignal('files')(Date.now())
 
             // Wait 1 second before updating tags table
             await sleep(1000)
             await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
             this.sqlSeal.observer.fireObservers('table:tags')
+            this.tableManager.getTableSignal('tags')(Date.now())
+
         }))
         
         plugin.registerEvent(this.app.vault.on('delete', async (file) => {
@@ -75,9 +94,12 @@ export class SealFileSync {
 
             await this.sqlSeal.db.deleteData('files', [{ id: file.path }])
             this.sqlSeal.observer.fireObservers('table:files')
+            this.tableManager.getTableSignal('files')(Date.now())
+
 
             await this.sqlSeal.db.deleteData('tags', [{ fileId: file.path }], 'fileId')
             this.sqlSeal.observer.fireObservers('table:tags')
+            this.tableManager.getTableSignal('tags')(Date.now())
         }))
 
         plugin.registerEvent(this.app.vault.on('rename', async (file, oldPath) => {
@@ -93,11 +115,15 @@ export class SealFileSync {
 
             await this.sqlSeal.db.insertData('files', [fileData(file, await extractFrontmatterFromFile(file, this.plugin))])
             this.sqlSeal.observer.fireObservers('table:files')
+            this.tableManager.getTableSignal('files')(Date.now())
+
 
             // Wait 1 second before updating tags table
             await sleep(1000)
             await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
             this.sqlSeal.observer.fireObservers('table:tags')
+            this.tableManager.getTableSignal('tags')(Date.now())
+
 
         }))
 
@@ -141,6 +167,9 @@ export class SealFileSync {
         }
         this.sqlSeal.observer.fireObservers('table:files')
         this.sqlSeal.observer.fireObservers('table:tags')
+        this.tableManager.getTableSignal('files')(Date.now())
+        this.tableManager.getTableSignal('tags')(Date.now())
+
     }
 
     hasNewColumns(newFrontmatter: Record<string, any>) {
