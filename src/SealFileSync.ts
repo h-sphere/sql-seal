@@ -1,13 +1,12 @@
-import { App, EventRef, Plugin, TAbstractFile, TFile } from "obsidian";
+import { App, EventRef, getAllTags, Plugin, TAbstractFile, TFile } from "obsidian";
 import { SqlSeal } from "./sqlSeal";
 import { FieldTypes } from "./utils";
 import { TablesManager } from "./dataLoader/collections/tablesManager";
 import { sanitise } from "./utils/sanitiseColumn";
 
-function fileData(file: TAbstractFile, frontmatter: Record<string, any>) {
+function fileData(file: TAbstractFile, {tags: _tags, ...frontmatter }: Record<string, any>) {
     return {
         ...frontmatter,
-        tags: undefined,
         path: file.path,
         name: file.name.replace(/\.[^/.]+$/, ""),
         id: file.path
@@ -131,9 +130,18 @@ export class SealFileSync {
     }
 
     async getFileTags(file: TFile) {
-        const t = ((this.app.metadataCache.getFileCache(file)?.frontmatter?.tags || []) as string[])
-            .map(t => ({ tag: t, fileId: file.path }))
-        return t
+        const cache = this.app.metadataCache.getFileCache(file)
+        if (!cache) {
+            return []
+        }
+        const tags = getAllTags(cache)
+        if (!tags) {
+            return []
+        }
+        return tags.map((t) => ({
+            tag: t,
+            fileId: file.path
+        }))
     }
 
     async init() {
