@@ -6,3 +6,11 @@
     width: 100%;
     border-collapse: collapse;
 }
+
+.sqlseal-grid-wrapper {
+    height: auto;
+}
+
+.edit-block-button {
+    z-index: 1000;
+}

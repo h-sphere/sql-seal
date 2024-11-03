@@ -10,7 +10,6 @@ import { SyncModel } from "./models/sync"
 import { TablesManager } from "./dataLoader/collections/tablesManager"
 import { QueryManager } from "./dataLoader/collections/queryManager"
 
-
 export class SqlSealCodeblockHandler {
     get globalTables() {
         return ['files', 'tags']
