@@ -131,12 +131,8 @@ export class SealFileSync {
     }
 
     async getFileTags(file: TFile) {
-        console.log('file', file.basename)
-        console.log(this.app.metadataCache.getFileCache(file))
         const t = ((this.app.metadataCache.getFileCache(file)?.frontmatter?.tags || []) as string[])
-            // .map(t => t.tag)
             .map(t => ({ tag: t, fileId: file.path }))
-        console.log('FILE TAGS', t)
         return t
     }
 

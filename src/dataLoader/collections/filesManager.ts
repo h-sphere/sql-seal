@@ -10,7 +10,6 @@ export class FilesManager {
     constructor(private vault: Vault) {
         this.vault.on('modify', async (file) => {
             if (this.files.has(file.path)) {
-                console.log(`Modified ${file.path}`)
                 this.inputFiles.get(file.path)!(await this.loadFile(file.path))
             }
         })

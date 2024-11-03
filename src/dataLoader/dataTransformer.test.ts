@@ -9,7 +9,6 @@ describe('Data Transformer', () => {
         s(`a,b,c
 1,2,3
 4,5,6`)
-        console.log(dt.value)
         expect(dt.value.data).toHaveLength(2)
         expect(dt.value.data[0]).toEqual({
             a: 1,

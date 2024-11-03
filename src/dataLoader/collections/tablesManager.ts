@@ -21,10 +21,8 @@ export class TablesManager {
         if (this.tableLinks.has(tableName)) {
             const { fileName: prevFileName, unlink } = this.tableLinks.get(tableName)!
             if (prevFileName === fileName) {
-                console.log('Same filename', fileName)
                 return
             }
-            console.log('Different Filename')
             unlink()
             this.tableLinks.delete(tableName)
         }
