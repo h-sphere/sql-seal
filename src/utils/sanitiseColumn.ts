@@ -51,5 +51,5 @@ export function sanitise(input: string): string {
         sanitized += '_';
     }
 
-    return sanitized;
+    return sanitized.toLowerCase();
 }

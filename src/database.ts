@@ -185,16 +185,29 @@ export class SqlSealDatabase {
                 const insert = this.db.prepare(`INSERT INTO ${name} (${columns.join(', ')}) VALUES (${columns.map((key: string) => '@' + key).join(', ')})`);
                 const d = Object.keys(data).reduce((ret, key) => {
                     if (typeof data[key] === 'boolean') {
-                        return data[key] ? 1 : 0;
+                        return {
+                            ...ret,
+                            [key]: data[key] ? 1 : 0
+                        }
                     }
                     if (!data[key]) {
-                        return null
+                        return {
+                            ...ret,
+                            [key]: null
+                        }
                     }
                     if (typeof data[key] === 'object' || Array.isArray(data[key])) {
-                        return JSON.stringify(data[key])
+                        return {
+                            ...ret,
+                            [key]: JSON.stringify(data[key])
+                        }
+                    }
+                    return {
+                        ...ret,
+                        [key]: data[key]
                     }
                 }, {})
-                insert.run(data)
+                insert.run(d)
             })
         })
 

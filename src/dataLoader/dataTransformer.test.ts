@@ -29,10 +29,10 @@ describe('Data Transformer', () => {
         s(`BEGIN,PLAN,QUERY,RAISE,beak size (mm)
 1.5,hello world,343.423,22.34,2`)
         expect(dt.value.types).toEqual({
-            'BEGIN_': 'REAL',
-            'PLAN_': 'TEXT',
-            'QUERY_': 'REAL',
-            'RAISE_': 'REAL',
+            'begin_': 'REAL',
+            'plan_': 'TEXT',
+            'query_': 'REAL',
+            'raise_': 'REAL',
             'beak_size__mm_': 'INTEGER'
         })
     })
