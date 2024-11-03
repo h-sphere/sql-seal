@@ -1,3 +1,7 @@
+# 0.9.0
+We now use proper grid library to render data. This allow for many great features like pagination, sorting and more visally pleasing UI out of the box.
+Reworked internal communication to use Signals.
+
 # 0.8.0
 Now you can embed links and images (both local and external). Introduced `a` and `img` custom SQL functions.
 
