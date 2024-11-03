@@ -1,3 +1,7 @@
+# 0.9.2
+Adding checkbox method to display boolean values as checkboxes
+Fixing how updates are parsed
+
 # 0.9.1
 Turning off verbose mode
 # 0.9.0
