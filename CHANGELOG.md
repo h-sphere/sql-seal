@@ -1,3 +1,5 @@
+# 0.9.1
+Turning off verbose mode
 # 0.9.0
 We now use proper grid library to render data. This allow for many great features like pagination, sorting and more visally pleasing UI out of the box.
 Reworked internal communication to use Signals.
