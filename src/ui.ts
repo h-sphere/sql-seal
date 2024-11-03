@@ -26,6 +26,7 @@ export const displayData = (el: HTMLElement, columns: string[], data: Array<Reco
             type: 'fitGridWidth',
             defaultMinWidth: 150,
         },
+        pagination: true,
         suppressMovableColumns: true,
         loadThemeGoogleFonts: false,
         rowData: data,
