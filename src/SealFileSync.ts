@@ -7,6 +7,7 @@ import { sanitise } from "./utils/sanitiseColumn";
 function fileData(file: TAbstractFile, frontmatter: Record<string, any>) {
     return {
         ...frontmatter,
+        tags: undefined,
         path: file.path,
         name: file.name.replace(/\.[^/.]+$/, ""),
         id: file.path
@@ -138,9 +139,13 @@ export class SealFileSync {
     }
 
     async getFileTags(file: TFile) {
-        return (this.app.metadataCache.getFileCache(file)?.tags || [])
-            .map(t => t.tag)
+        console.log('file', file.basename)
+        console.log(this.app.metadataCache.getFileCache(file))
+        const t = ((this.app.metadataCache.getFileCache(file)?.frontmatter?.tags || []) as string[])
+            // .map(t => t.tag)
             .map(t => ({ tag: t, fileId: file.path }))
+        console.log('FILE TAGS', t)
+        return t
     }
 
     async init() {
