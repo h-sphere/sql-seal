@@ -1,26 +1,66 @@
 import { App } from "obsidian"
+import { createGrid, GridOptions } from 'ag-grid-community';
+import { themeQuartz } from '@ag-grid-community/theming';
 
-export const displayData = (el: HTMLElement, columns, data, app: App) => {
+export const displayData = (el: HTMLElement, columns: string[], data: Array<Record<string, any>>, app: App) => {
+    // FIXME: rework to always render ui this way and then use gridApi to update the data instead.
     el.empty()
-    const container = el.createDiv({
-        cls: 'sqlseal-table-container'
-    })
-    const table = container.createEl("table")
+    const div = el.createDiv()
+    div.classList.add('sqlseal-grid-wrapper')
+    const grid = div.createDiv()
+    grid.classList.add('ag-theme-quartz')
 
-    // HEADER
-    const header = table.createEl("thead").createEl("tr")
-    columns.forEach(c => {
-        header.createEl("th", { text: c })
-    })
+    // to use myTheme in an application, pass it to the theme grid option
+    const myTheme = themeQuartz
+    .withParams({
+        browserColorScheme: "light",
+        headerFontSize: 14,
+    });
 
-    const body = table.createEl("tbody")
-    data.forEach(d => {
-        const row = body.createEl("tr")
-        columns.forEach(c => {
-            row.createEl("td", { text: parseCell(d[c], app) })
+    const gridOptions: GridOptions = {
+        theme: myTheme,
+        defaultColDef: {
+            resizable: false,
+        },
+        autoSizeStrategy: {
+            type: 'fitGridWidth',
+            defaultMinWidth: 150,
+        },
+        suppressMovableColumns: true,
+        loadThemeGoogleFonts: false,
+        rowData: data,
+        columnDefs: columns.map(c => ({
+            field: c
+        })),
+        domLayout: 'autoHeight'
+    }
 
-        })
-    })
+    // Setup Grid
+    const gridApi = createGrid(
+        grid,
+        gridOptions,
+      );
+    return
+
+    // const container = el.createDiv({
+    //     cls: 'sqlseal-table-container'
+    // })
+    // const table = container.createEl("table")
+
+    // // HEADER
+    // const header = table.createEl("thead").createEl("tr")
+    // columns.forEach(c => {
+    //     header.createEl("th", { text: c })
+    // })
+
+    // const body = table.createEl("tbody")
+    // data.forEach(d => {
+    //     const row = body.createEl("tr")
+    //     columns.forEach(c => {
+    //         row.createEl("td", { text: parseCell(d[c], app) })
+
+    //     })
+    // })
 }
 
 const parseCell = (data: string, app: App) => {

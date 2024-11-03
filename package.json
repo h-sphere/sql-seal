@@ -44,6 +44,8 @@
     "vue": "^3.4.26"
   },
   "dependencies": {
+    "@ag-grid-community/theming": "^32.3.2",
+    "ag-grid-community": "^32.3.2",
     "antlr4ts": "0.5.0-alpha.4",
     "better-sqlite3": "^11.2.1",
     "json5": "^2.2.3",
