@@ -48,14 +48,12 @@ export class SealFileSync {
             await this.sqlSeal.db.updateData('files', [fileData(file, frontmatter)])
             await this.sqlSeal.db.deleteData('tags', [{ fileId: file.path }], 'fileId')
 
-            this.sqlSeal.observer.fireObservers('table:files')
             this.tableManager.getTableSignal('files')(Date.now())
 
 
             // Wait 1 second before updating tags table
             await sleep(1000)
             await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
-            this.sqlSeal.observer.fireObservers('table:tags')
             this.tableManager.getTableSignal('tags')(Date.now())
 
         }))
@@ -77,13 +75,11 @@ export class SealFileSync {
 
             // we need to update the row
             await this.sqlSeal.db.insertData('files', [fileData(file, frontmatter)])
-            this.sqlSeal.observer.fireObservers('table:files')
             this.tableManager.getTableSignal('files')(Date.now())
 
             // Wait 1 second before updating tags table
             await sleep(1000)
             await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
-            this.sqlSeal.observer.fireObservers('table:tags')
             this.tableManager.getTableSignal('tags')(Date.now())
 
         }))
@@ -94,12 +90,10 @@ export class SealFileSync {
             }
 
             await this.sqlSeal.db.deleteData('files', [{ id: file.path }])
-            this.sqlSeal.observer.fireObservers('table:files')
             this.tableManager.getTableSignal('files')(Date.now())
 
 
             await this.sqlSeal.db.deleteData('tags', [{ fileId: file.path }], 'fileId')
-            this.sqlSeal.observer.fireObservers('table:tags')
             this.tableManager.getTableSignal('tags')(Date.now())
         }))
 
@@ -115,14 +109,12 @@ export class SealFileSync {
             await this.sqlSeal.db.deleteData('tags', [{ fileId: oldPath }], 'fileId')
 
             await this.sqlSeal.db.insertData('files', [fileData(file, await extractFrontmatterFromFile(file, this.plugin))])
-            this.sqlSeal.observer.fireObservers('table:files')
             this.tableManager.getTableSignal('files')(Date.now())
 
 
             // Wait 1 second before updating tags table
             await sleep(1000)
             await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
-            this.sqlSeal.observer.fireObservers('table:tags')
             this.tableManager.getTableSignal('tags')(Date.now())
 
 
@@ -170,8 +162,6 @@ export class SealFileSync {
                 'fileId': 'TEXT'
             })
         }
-        this.sqlSeal.observer.fireObservers('table:files')
-        this.sqlSeal.observer.fireObservers('table:tags')
         this.tableManager.getTableSignal('files')(Date.now())
         this.tableManager.getTableSignal('tags')(Date.now())
 

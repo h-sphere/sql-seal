@@ -10,7 +10,7 @@ export class QueryManager {
             this.registeredQueries.get(fileId)!()
             this.registeredQueries.delete(fileId)
         }
-        const tableSignals = tables.map(t => this.tablesManager.getTableSignal(t))
+        const tableSignals = tables.map(t => this.tablesManager.getTableSignal(t, true))
         const quertySignal = createSignal<number>()
         const unregister = withSignals(...tableSignals)(() => {
             quertySignal(Date.now())

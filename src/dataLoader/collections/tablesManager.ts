@@ -38,8 +38,11 @@ export class TablesManager {
         })
     }
 
-    getTableSignal(tableName: string) {
+    getTableSignal(tableName: string, failOnUndefined: boolean = false) {
         if (!this.tableSignals.has(tableName)) {
+            if (failOnUndefined) {
+                throw new Error(`${tableName} does not exist`)
+            }
             this.tableSignals.set(tableName, createSignal<number>())
         }
         return this.tableSignals.get(tableName)!
