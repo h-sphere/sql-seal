@@ -31,7 +31,9 @@ export const displayData = (el: HTMLElement, columns: string[], data: Array<Reco
         loadThemeGoogleFonts: false,
         rowData: data,
         columnDefs: columns.map(c => ({
-            field: c
+            field: c,
+            cellRenderer: ({ value }: { value: string }) =>  parseCell(value, app),
+            autoHeight: true
         })),
         domLayout: 'autoHeight'
     }
