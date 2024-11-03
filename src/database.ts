@@ -14,6 +14,33 @@ export interface FieldDefinition {
     type: FieldTypes
 }
 
+const formatData = (data: Record<string, any>) => {
+    return Object.keys(data).reduce((ret, key) => {
+        if (typeof data[key] === 'boolean') {
+            return {
+                ...ret,
+                [key]: data[key] ? 1 : 0
+            }
+        }
+        if (!data[key]) {
+            return {
+                ...ret,
+                [key]: null
+            }
+        }
+        if (typeof data[key] === 'object' || Array.isArray(data[key])) {
+            return {
+                ...ret,
+                [key]: JSON.stringify(data[key])
+            }
+        }
+        return {
+            ...ret,
+            [key]: data[key]
+        }
+    }, {})
+}
+
 export class SqlSealDatabase {
     private savedDatabases: Record<string, any> = {}
     db: Database.Database
@@ -112,6 +139,14 @@ export class SqlSealDatabase {
             return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
         })
 
+        this.db.function('checkbox', (val: string) => {
+            const imgObject = {
+                type: 'checkbox',
+                value: val
+            }
+            return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
+        })
+
     }
 
     async disconect() {
@@ -151,7 +186,7 @@ export class SqlSealDatabase {
         const updateMany = this.db.transaction((pData: Array<Record<string, any>>) => {
             pData.forEach(data => {
                 try {
-                    update.run(data)
+                    update.run(formatData(data))
                 } catch (e) {
                     console.error(e)
                 }
@@ -183,30 +218,7 @@ export class SqlSealDatabase {
             pData.forEach(data => {
                 const columns = Object.keys(data)
                 const insert = this.db.prepare(`INSERT INTO ${name} (${columns.join(', ')}) VALUES (${columns.map((key: string) => '@' + key).join(', ')})`);
-                const d = Object.keys(data).reduce((ret, key) => {
-                    if (typeof data[key] === 'boolean') {
-                        return {
-                            ...ret,
-                            [key]: data[key] ? 1 : 0
-                        }
-                    }
-                    if (!data[key]) {
-                        return {
-                            ...ret,
-                            [key]: null
-                        }
-                    }
-                    if (typeof data[key] === 'object' || Array.isArray(data[key])) {
-                        return {
-                            ...ret,
-                            [key]: JSON.stringify(data[key])
-                        }
-                    }
-                    return {
-                        ...ret,
-                        [key]: data[key]
-                    }
-                }, {})
+                const d = formatData(data)
                 insert.run(d)
             })
         })

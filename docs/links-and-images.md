@@ -51,3 +51,9 @@ LIMIT 10
 ```
 
 ![Advanced links and images](links-and-images-advanced.png)
+
+## Checkboxes
+You can display boolean data as checkbox in the interface by calling `checkbox` function:
+```sql
+SELECT date, checkbox(excercised) FROM files WHERE date is not null
+```

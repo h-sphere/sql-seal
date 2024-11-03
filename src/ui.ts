@@ -32,7 +32,11 @@ export const displayData = (el: HTMLElement, columns: string[], data: Array<Reco
         rowData: data,
         columnDefs: columns.map(c => ({
             field: c,
-            cellRenderer: ({ value }: { value: string }) =>  parseCell(value, app),
+            cellRendererSelector: (data) => {
+                return {
+                    component: ({ value }: { value: string }) =>  parseCell(value, app)
+                }
+            },
             autoHeight: true
         })),
         domLayout: 'autoHeight'
@@ -86,7 +90,12 @@ type SQLSealImgElement = {
     href: string
 }
 
-type SqlSealCustomElement = SqlSealAnchorElement | SQLSealImgElement;
+type SQLSealCheckboxElement = {
+    type: 'checkbox',
+    value: number
+}
+
+type SqlSealCustomElement = SqlSealAnchorElement | SQLSealImgElement | SQLSealCheckboxElement;
 
 const isLinkLocal = (link: string) => !link?.trim().startsWith('http')
 
@@ -143,6 +152,11 @@ const renderSqlSealCustomElement = (customConfig: SqlSealCustomElement, app: App
                 return 'File does not exist'
             }
             return createEl('img', { attr: { src: app.vault.getResourcePath(file) } });
+        case 'checkbox':
+            const el = createEl('input', { type: 'checkbox' })
+            el.checked = !!customConfig.value
+            el.disabled = true
+            return el
         default:
             return 'Invalid Custom Element'
     }
