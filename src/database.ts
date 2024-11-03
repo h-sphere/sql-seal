@@ -1,5 +1,5 @@
 import Database from "better-sqlite3"
-import { App, normalizePath } from "obsidian"
+import { App } from "obsidian"
 import path from 'path'
 import Papa from 'papaparse'
 import { prefixedIfNotGlobal } from "./sqlReparseTables"
@@ -7,6 +7,12 @@ import { camelCase } from 'lodash'
 import { dataToCamelCase, fetchBlobData, FieldTypes, predictJson, predictType, toTypeStatements } from "./utils"
 import os from 'os'
 import fs from 'fs'
+import { sanitise } from "./utils/sanitiseColumn"
+
+export interface FieldDefinition {
+    name: string;
+    type: FieldTypes
+}
 
 export class SqlSealDatabase {
     private savedDatabases: Record<string, any> = {}
@@ -172,38 +178,56 @@ export class SqlSealDatabase {
     }
 
     async insertData(name: string, inData: Array<Record<string, unknown>>) {
-        const data = dataToCamelCase(inData)
-        const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
-        // FIXME: reworking all fields to be camel case
-        if (!fields || !fields.length) {
-            return
-        }
-        const insert = this.db.prepare(`INSERT INTO ${name} (${fields.join(', ')}) VALUES (${fields.map((key: string) => '@' + key).join(', ')})`);
         const insertMany = this.db.transaction((pData: Array<Record<string, any>>) => {
+            // FIXME: should we do this as a transaction or not?
             pData.forEach(data => {
-                try {
-                    // update data so all missing fields are set to null
-                    fields.forEach(field => {
-                        if (typeof data[field] === 'boolean') {
-                            data[field] = data[field] ? 1 : 0
-                        } else if (!data[field]) {
-                            data[field] = null
-                        } else  if (typeof data[field] === 'object' || Array.isArray(data[field])) {
-                            data[field] = JSON.stringify(data[field])
+                const columns = Object.keys(data)
+                const insert = this.db.prepare(`INSERT INTO ${name} (${columns.join(', ')}) VALUES (${columns.map((key: string) => '@' + key).join(', ')})`);
+                const d = Object.keys(data).reduce((ret, key) => {
+                    if (typeof data[key] === 'boolean') {
+                        return {
+                            ...ret,
+                            [key]: data[key] ? 1 : 0
                         }
-                    })
-                    insert.run(data)
-                } catch (e) {
-                    console.error(e, insert, data)
-                }
+                    }
+                    if (!data[key]) {
+                        return {
+                            ...ret,
+                            [key]: null
+                        }
+                    }
+                    if (typeof data[key] === 'object' || Array.isArray(data[key])) {
+                        return {
+                            ...ret,
+                            [key]: JSON.stringify(data[key])
+                        }
+                    }
+                    return {
+                        ...ret,
+                        [key]: data[key]
+                    }
+                }, {})
+                insert.run(d)
             })
         })
 
-        insertMany(data)
+        insertMany(inData)
+    }
+
+    dropTable(name: string) {
+        this.db.prepare(`DROP TABLE IF EXISTS ${name}`).run()
+        this.savedDatabases[name] = false
+    }
+
+    createTableClean(name: string, fields: Array<FieldDefinition>) {
+        const sqlFields = fields.map(({ name, type }) => `${name} ${type}`).join(', ')
+        const createSql = `CREATE TABLE IF NOT EXISTS ${name} (${sqlFields})`
+        this.db.prepare(createSql).run()
+        this.savedDatabases[name] = true
     }
 
     async createTable(name: string, fields: Record<string, FieldTypes>) {
-        const transformedFiels = Object.entries(fields).map(([key, type]) => [camelCase(key), type])
+        const transformedFiels = Object.entries(fields).map(([key, type]) => [sanitise(key), type])
         const uniqueFields = [...new Map(transformedFiels.map(item =>
             [item[0], item])).values()]
         const sqlFields = uniqueFields.map(([key, type]) => `${key} ${type}`)
