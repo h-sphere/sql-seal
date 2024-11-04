@@ -1,11 +1,11 @@
 {
 	"id": "sqlseal",
 	"name": "SQLSeal",
-	"version": "0.9.2",
+	"version": "0.10.0",
 	"minAppVersion": "0.15.0",
 	"description": "Use SQL in your notes to query your vault files and CSV content.",
 	"author": "hypersphere",
 	"authorUrl": "https://hypersphere.blog/",
 	"fundingUrl": "ko-fi.com/hypersphere",
-	"isDesktopOnly": true
+	"isDesktopOnly": false
 }

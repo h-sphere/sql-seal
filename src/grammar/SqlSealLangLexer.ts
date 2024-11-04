@@ -1,21 +1,17 @@
-// Generated from SqlSealLang.g4 by ANTLR 4.9.0-SNAPSHOT
-
-
-import { ATN } from "antlr4ts/atn/ATN";
-import { ATNDeserializer } from "antlr4ts/atn/ATNDeserializer";
-import { CharStream } from "antlr4ts/CharStream";
-import { Lexer } from "antlr4ts/Lexer";
-import { LexerATNSimulator } from "antlr4ts/atn/LexerATNSimulator";
-import { NotNull } from "antlr4ts/Decorators";
-import { Override } from "antlr4ts/Decorators";
-import { RuleContext } from "antlr4ts/RuleContext";
-import { Vocabulary } from "antlr4ts/Vocabulary";
-import { VocabularyImpl } from "antlr4ts/VocabularyImpl";
-
-import * as Utils from "antlr4ts/misc/Utils";
-
-
-export class SqlSealLangLexer extends Lexer {
+// Generated from SqlSealLang.g4 by ANTLR 4.13.2
+// noinspection ES6UnusedImports,JSUnusedGlobalSymbols,JSUnusedLocalSymbols
+import {
+	ATN,
+	ATNDeserializer,
+	CharStream,
+	DecisionState, DFA,
+	Lexer,
+	LexerATNSimulator,
+	RuleContext,
+	PredictionContextCache,
+	Token
+} from "antlr4";
+export default class SqlSealLangLexer extends Lexer {
 	public static readonly T__0 = 1;
 	public static readonly T__1 = 2;
 	public static readonly T__2 = 3;
@@ -29,103 +25,81 @@ export class SqlSealLangLexer extends Lexer {
 	public static readonly FILE_URL = 11;
 	public static readonly WS = 12;
 	public static readonly ANY = 13;
+	public static readonly EOF = Token.EOF;
 
-	// tslint:disable:no-trailing-whitespace
-	public static readonly channelNames: string[] = [
-		"DEFAULT_TOKEN_CHANNEL", "HIDDEN",
-	];
-
-	// tslint:disable:no-trailing-whitespace
-	public static readonly modeNames: string[] = [
-		"DEFAULT_MODE",
-	];
+	public static readonly channelNames: string[] = [ "DEFAULT_TOKEN_CHANNEL", "HIDDEN" ];
+	public static readonly literalNames: (string | null)[] = [ null, "'='", 
+                                                            "'('", "')'", 
+                                                            "','", "'TABLE'", 
+                                                            "'file'", "'WITH'", 
+                                                            "'AS'", "'SELECT'" ];
+	public static readonly symbolicNames: (string | null)[] = [ null, null, 
+                                                             null, null, 
+                                                             null, "TABLE", 
+                                                             "FILE", "WITH", 
+                                                             "AS", "SELECT", 
+                                                             "ID", "FILE_URL", 
+                                                             "WS", "ANY" ];
+	public static readonly modeNames: string[] = [ "DEFAULT_MODE", ];
 
 	public static readonly ruleNames: string[] = [
 		"T__0", "T__1", "T__2", "T__3", "TABLE", "FILE", "WITH", "AS", "SELECT", 
 		"ID", "FILE_URL", "WS", "ANY",
 	];
 
-	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
-		undefined, "'='", "'('", "')'", "','", "'TABLE'", "'file'", "'WITH'", 
-		"'AS'", "'SELECT'",
-	];
-	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
-		undefined, undefined, undefined, undefined, undefined, "TABLE", "FILE", 
-		"WITH", "AS", "SELECT", "ID", "FILE_URL", "WS", "ANY",
-	];
-	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(SqlSealLangLexer._LITERAL_NAMES, SqlSealLangLexer._SYMBOLIC_NAMES, []);
-
-	// @Override
-	// @NotNull
-	public get vocabulary(): Vocabulary {
-		return SqlSealLangLexer.VOCABULARY;
-	}
-	// tslint:enable:no-trailing-whitespace
-
 
 	constructor(input: CharStream) {
 		super(input);
-		this._interp = new LexerATNSimulator(SqlSealLangLexer._ATN, this);
+		this._interp = new LexerATNSimulator(this, SqlSealLangLexer._ATN, SqlSealLangLexer.DecisionsToDFA, new PredictionContextCache());
 	}
 
-	// @Override
 	public get grammarFileName(): string { return "SqlSealLang.g4"; }
 
-	// @Override
+	public get literalNames(): (string | null)[] { return SqlSealLangLexer.literalNames; }
+	public get symbolicNames(): (string | null)[] { return SqlSealLangLexer.symbolicNames; }
 	public get ruleNames(): string[] { return SqlSealLangLexer.ruleNames; }
 
-	// @Override
-	public get serializedATN(): string { return SqlSealLangLexer._serializedATN; }
+	public get serializedATN(): number[] { return SqlSealLangLexer._serializedATN; }
 
-	// @Override
 	public get channelNames(): string[] { return SqlSealLangLexer.channelNames; }
 
-	// @Override
 	public get modeNames(): string[] { return SqlSealLangLexer.modeNames; }
 
-	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x02\x0FR\b\x01\x04" +
-		"\x02\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04" +
-		"\x07\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r" +
-		"\x04\x0E\t\x0E\x03\x02\x03\x02\x03\x03\x03\x03\x03\x04\x03\x04\x03\x05" +
-		"\x03\x05\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03\x07\x03\x07" +
-		"\x03\x07\x03\x07\x03\x07\x03\b\x03\b\x03\b\x03\b\x03\b\x03\t\x03\t\x03" +
-		"\t\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\n\x03\v\x03\v\x07\vB\n\v\f" +
-		"\v\x0E\vE\v\v\x03\f\x06\fH\n\f\r\f\x0E\fI\x03\r\x06\rM\n\r\r\r\x0E\rN" +
-		"\x03\x0E\x03\x0E\x02\x02\x02\x0F\x03\x02\x03\x05\x02\x04\x07\x02\x05\t" +
-		"\x02\x06\v\x02\x07\r\x02\b\x0F\x02\t\x11\x02\n\x13\x02\v\x15\x02\f\x17" +
-		"\x02\r\x19\x02\x0E\x1B\x02\x0F\x03\x02\x06\x05\x02C\\aac|\x06\x022;C\\" +
-		"aac|\x07\x02/;C\\^^aac|\x05\x02\v\f\x0F\x0F\"\"\x02T\x02\x03\x03\x02\x02" +
-		"\x02\x02\x05\x03\x02\x02\x02\x02\x07\x03\x02\x02\x02\x02\t\x03\x02\x02" +
-		"\x02\x02\v\x03\x02\x02\x02\x02\r\x03\x02\x02\x02\x02\x0F\x03\x02\x02\x02" +
-		"\x02\x11\x03\x02\x02\x02\x02\x13\x03\x02\x02\x02\x02\x15\x03\x02\x02\x02" +
-		"\x02\x17\x03\x02\x02\x02\x02\x19\x03\x02\x02\x02\x02\x1B\x03\x02\x02\x02" +
-		"\x03\x1D\x03\x02\x02\x02\x05\x1F\x03\x02\x02\x02\x07!\x03\x02\x02\x02" +
-		"\t#\x03\x02\x02\x02\v%\x03\x02\x02\x02\r+\x03\x02\x02\x02\x0F0\x03\x02" +
-		"\x02\x02\x115\x03\x02\x02\x02\x138\x03\x02\x02\x02\x15?\x03\x02\x02\x02" +
-		"\x17G\x03\x02\x02\x02\x19L\x03\x02\x02\x02\x1BP\x03\x02\x02\x02\x1D\x1E" +
-		"\x07?\x02\x02\x1E\x04\x03\x02\x02\x02\x1F \x07*\x02\x02 \x06\x03\x02\x02" +
-		"\x02!\"\x07+\x02\x02\"\b\x03\x02\x02\x02#$\x07.\x02\x02$\n\x03\x02\x02" +
-		"\x02%&\x07V\x02\x02&\'\x07C\x02\x02\'(\x07D\x02\x02()\x07N\x02\x02)*\x07" +
-		"G\x02\x02*\f\x03\x02\x02\x02+,\x07h\x02\x02,-\x07k\x02\x02-.\x07n\x02" +
-		"\x02./\x07g\x02\x02/\x0E\x03\x02\x02\x0201\x07Y\x02\x0212\x07K\x02\x02" +
-		"23\x07V\x02\x0234\x07J\x02\x024\x10\x03\x02\x02\x0256\x07C\x02\x0267\x07" +
-		"U\x02\x027\x12\x03\x02\x02\x0289\x07U\x02\x029:\x07G\x02\x02:;\x07N\x02" +
-		"\x02;<\x07G\x02\x02<=\x07E\x02\x02=>\x07V\x02\x02>\x14\x03\x02\x02\x02" +
-		"?C\t\x02\x02\x02@B\t\x03\x02\x02A@\x03\x02\x02\x02BE\x03\x02\x02\x02C" +
-		"A\x03\x02\x02\x02CD\x03\x02\x02\x02D\x16\x03\x02\x02\x02EC\x03\x02\x02" +
-		"\x02FH\t\x04\x02\x02GF\x03\x02\x02\x02HI\x03\x02\x02\x02IG\x03\x02\x02" +
-		"\x02IJ\x03\x02\x02\x02J\x18\x03\x02\x02\x02KM\t\x05\x02\x02LK\x03\x02" +
-		"\x02\x02MN\x03\x02\x02\x02NL\x03\x02\x02\x02NO\x03\x02\x02\x02O\x1A\x03" +
-		"\x02\x02\x02PQ\v\x02\x02\x02Q\x1C\x03\x02\x02\x02\x06\x02CIN\x02";
-	public static __ATN: ATN;
+	public static readonly _serializedATN: number[] = [4,0,13,80,6,-1,2,0,7,
+	0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,7,7,2,8,7,8,2,9,7,
+	9,2,10,7,10,2,11,7,11,2,12,7,12,1,0,1,0,1,1,1,1,1,2,1,2,1,3,1,3,1,4,1,4,
+	1,4,1,4,1,4,1,4,1,5,1,5,1,5,1,5,1,5,1,6,1,6,1,6,1,6,1,6,1,7,1,7,1,7,1,8,
+	1,8,1,8,1,8,1,8,1,8,1,8,1,9,1,9,5,9,64,8,9,10,9,12,9,67,9,9,1,10,4,10,70,
+	8,10,11,10,12,10,71,1,11,4,11,75,8,11,11,11,12,11,76,1,12,1,12,0,0,13,1,
+	1,3,2,5,3,7,4,9,5,11,6,13,7,15,8,17,9,19,10,21,11,23,12,25,13,1,0,4,3,0,
+	65,90,95,95,97,122,4,0,48,57,65,90,95,95,97,122,5,0,45,57,65,90,92,92,95,
+	95,97,122,3,0,9,10,13,13,32,32,82,0,1,1,0,0,0,0,3,1,0,0,0,0,5,1,0,0,0,0,
+	7,1,0,0,0,0,9,1,0,0,0,0,11,1,0,0,0,0,13,1,0,0,0,0,15,1,0,0,0,0,17,1,0,0,
+	0,0,19,1,0,0,0,0,21,1,0,0,0,0,23,1,0,0,0,0,25,1,0,0,0,1,27,1,0,0,0,3,29,
+	1,0,0,0,5,31,1,0,0,0,7,33,1,0,0,0,9,35,1,0,0,0,11,41,1,0,0,0,13,46,1,0,
+	0,0,15,51,1,0,0,0,17,54,1,0,0,0,19,61,1,0,0,0,21,69,1,0,0,0,23,74,1,0,0,
+	0,25,78,1,0,0,0,27,28,5,61,0,0,28,2,1,0,0,0,29,30,5,40,0,0,30,4,1,0,0,0,
+	31,32,5,41,0,0,32,6,1,0,0,0,33,34,5,44,0,0,34,8,1,0,0,0,35,36,5,84,0,0,
+	36,37,5,65,0,0,37,38,5,66,0,0,38,39,5,76,0,0,39,40,5,69,0,0,40,10,1,0,0,
+	0,41,42,5,102,0,0,42,43,5,105,0,0,43,44,5,108,0,0,44,45,5,101,0,0,45,12,
+	1,0,0,0,46,47,5,87,0,0,47,48,5,73,0,0,48,49,5,84,0,0,49,50,5,72,0,0,50,
+	14,1,0,0,0,51,52,5,65,0,0,52,53,5,83,0,0,53,16,1,0,0,0,54,55,5,83,0,0,55,
+	56,5,69,0,0,56,57,5,76,0,0,57,58,5,69,0,0,58,59,5,67,0,0,59,60,5,84,0,0,
+	60,18,1,0,0,0,61,65,7,0,0,0,62,64,7,1,0,0,63,62,1,0,0,0,64,67,1,0,0,0,65,
+	63,1,0,0,0,65,66,1,0,0,0,66,20,1,0,0,0,67,65,1,0,0,0,68,70,7,2,0,0,69,68,
+	1,0,0,0,70,71,1,0,0,0,71,69,1,0,0,0,71,72,1,0,0,0,72,22,1,0,0,0,73,75,7,
+	3,0,0,74,73,1,0,0,0,75,76,1,0,0,0,76,74,1,0,0,0,76,77,1,0,0,0,77,24,1,0,
+	0,0,78,79,9,0,0,0,79,26,1,0,0,0,4,0,65,71,76,0];
+
+	private static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!SqlSealLangLexer.__ATN) {
-			SqlSealLangLexer.__ATN = new ATNDeserializer().deserialize(Utils.toCharArray(SqlSealLangLexer._serializedATN));
+			SqlSealLangLexer.__ATN = new ATNDeserializer().deserialize(SqlSealLangLexer._serializedATN);
 		}
 
 		return SqlSealLangLexer.__ATN;
 	}
 
-}
 
+	static DecisionsToDFA = SqlSealLangLexer._ATN.decisionToState.map( (ds: DecisionState, index: number) => new DFA(ds, index) );
+}

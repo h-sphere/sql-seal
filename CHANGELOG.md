@@ -1,3 +1,6 @@
+# 0.10.0
+SQLSeal is not compatible with mobile! Plugin now uses SQL.JS instead of better-sqlite3 which is written in Web Assembly so no longer native binaries are needed. This makes plugin portable.
+
 # 0.9.2
 Adding checkbox method to display boolean values as checkboxes
 Fixing how updates are parsed
