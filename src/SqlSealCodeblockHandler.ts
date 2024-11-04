@@ -35,11 +35,9 @@ export class SqlSealCodeblockHandler {
     setupQuerySignals({ statement, tables }: ReturnType<typeof updateTables>, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
         const frontmatter = resolveFrontmatter(ctx, this.app)
 
-        const renderSelect = async () => {
+        const renderSelect = () => {
             try {
-                const stmt = this.db.db.prepare(statement)
-                const columns = stmt.columns().map(column => column.name);
-                const data = stmt.all(frontmatter ?? {})
+                const { data, columns } = this.db.select(statement, frontmatter ?? {})
                 displayData(el, columns, data, this.app)
             } catch (e) {
                 displayError(el, e)

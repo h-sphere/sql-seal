@@ -8,7 +8,7 @@
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
-    "importHelpers": true,
+    "importHelpers": false,
     "isolatedModules": true,
     "skipLibCheck": true,
     "types": [],

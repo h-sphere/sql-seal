@@ -1,4 +1,3 @@
-import Database from "better-sqlite3"
 import { App } from "obsidian"
 import path from 'path'
 import Papa from 'papaparse'
@@ -8,6 +7,8 @@ import { dataToCamelCase, fetchBlobData, FieldTypes, predictJson, predictType, t
 import os from 'os'
 import fs from 'fs'
 import { sanitise } from "./utils/sanitiseColumn"
+import initSqlJs, { BindParams, Database, Statement } from 'sql.js'
+import wasmBinary from '../node_modules/sql.js/dist/sql-wasm.wasm'
 
 export interface FieldDefinition {
     name: string;
@@ -43,14 +44,14 @@ const formatData = (data: Record<string, any>) => {
 
 export class SqlSealDatabase {
     private savedDatabases: Record<string, any> = {}
-    db: Database.Database
+    db: Database
+    private SQL: initSqlJs.SqlJsStatic
     private isConnected = false
     private connectingPromise: Promise<void>;
     private connectingPromiseResolve: (value: void | PromiseLike<void>) => void
     constructor(private readonly app: App, private readonly verbose = false) {
 
     }
-
 
     async connect() {
         if (this.isConnected) {
@@ -64,47 +65,24 @@ export class SqlSealDatabase {
         this.connectingPromise = new Promise((resolve) => {
             this.connectingPromiseResolve = resolve
         })
-        //@ts-ignore
-        // const dbPath = normalizePath(this.app.vault.adapter.basePath + '/' + this.app.vault.configDir + '/sqlseal.db')
 
-        const arch = os.arch()
-        const platform = os.platform()
-        const better_sql_version = 'v11.2.1'
-
-        const dbNodeFilePath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, `plugins/sqlseal/better_sqlite3-${platform}-${arch}.node`)
-        // check if file "better_sqlite3.node" exists in the plugin folder, if not, download it from better sqlite release.
         try {
-            if (!fs.existsSync(dbNodeFilePath)) {
-                const url = `https://github.com/h-sphere/bettersql3-builds/releases/download/processed-${better_sql_version}/better-sqlite3-${better_sql_version}-electron-v${process.versions.modules}-${platform}-${arch}.node`
-
-                await fetchBlobData(url, dbNodeFilePath)
-            }
-
-            await sleep(500)
-
-
-            const dbPath = path.resolve(this.app.vault.adapter.basePath, this.app.vault.configDir, `plugins/sqlseal/database.sqlite`)
-
-            this.db = new Database(dbPath, { verbose: this.verbose ? console.log : undefined })
+            this.SQL = await initSqlJs({
+                wasmBinary: wasmBinary
+            })
+            
+            this.db = new this.SQL.Database()
             await this.defineCustomFunctions()
-
-
+            
             this.isConnected = true
             this.connectingPromiseResolve()
-
         } catch (e) {
-            console.error(`Error while loading SQLSeal. Please reload Obsiidan. If it repeats, please create new issue on GitHub: https://github.com/h-sphere/sql-seal/issues . Please quote following parameters:
-                Architecture: ${arch}
-                Platform: ${platform}
-                Electron Version: ${process.versions.modules}
-                BetterSQLite Version: ${better_sql_version}
-                Error: ${e}
-                `, e)
+            console.error('Error initializing SQLite database:', e)
         }
     }
 
     private async defineCustomFunctions() {
-        this.db.function('a', (href: string, name: string) => {
+        this.db.create_function('a', (href: string, name: string) => {
             const linkObject = {
               type: 'link',
               href: href,
@@ -113,7 +91,7 @@ export class SqlSealDatabase {
             return `SQLSEALCUSTOM(${JSON.stringify(linkObject)})`;
           });
 
-        this.db.function('a', (href: string) => {
+        this.db.create_function('a', (href: string) => {
         const linkObject = {
             type: 'link',
             href: href,
@@ -122,7 +100,7 @@ export class SqlSealDatabase {
         return `SQLSEALCUSTOM(${JSON.stringify(linkObject)})`;
         });
 
-        this.db.function('img', (href: string) => {
+        this.db.create_function('img', (href: string) => {
             const imgObject = {
                 type: 'img',
                 href: href
@@ -130,7 +108,7 @@ export class SqlSealDatabase {
             return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
         })
 
-        this.db.function('img', (href: string, path: string) => {
+        this.db.create_function('img', (href: string, path: string) => {
             const imgObject = {
                 type: 'img',
                 path,
@@ -139,7 +117,7 @@ export class SqlSealDatabase {
             return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
         })
 
-        this.db.function('checkbox', (val: string) => {
+        this.db.create_function('checkbox', (val: string) => {
             const imgObject = {
                 type: 'checkbox',
                 value: val
@@ -167,7 +145,7 @@ export class SqlSealDatabase {
 
     async addNewColumns(name: string, data: Array<Record<string, unknown>>) {
         const schema = await this.getSchema(data)
-        const currentSchema = this.db.prepare(`PRAGMA table_info(${name})`).all()
+        const currentSchema = this.toObjectsArray(this.db.prepare(`PRAGMA table_info(${name})`))
         const currentFields = currentSchema.map((f: any) => f.name)
         const newFields = Object.keys(schema).filter(f => !currentFields.includes(f))
 
@@ -180,50 +158,43 @@ export class SqlSealDatabase {
         alter.run()
     }
 
+    private toObjectsArray(stmt: Statement) {
+        const ret = []
+        while(stmt.step()) {
+            ret.push(stmt.getAsObject())
+        }
+        return ret
+    }
+
+    private recordToBindParams(record: Record<string, unknown>) {
+        const bindParams = Object.fromEntries(Object.entries(record).map(([key, val]) => ([`@${key}`, val]))) as BindParams
+        return bindParams
+    }
+
     updateData(name: string, data: Array<Record<string, unknown>>) {
         const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
         const update = this.db.prepare(`UPDATE ${name} SET ${fields.map((key: string) => `${key} = @${key}`).join(', ')} WHERE id = @id`);
-        const updateMany = this.db.transaction((pData: Array<Record<string, any>>) => {
-            pData.forEach(data => {
-                try {
-                    update.run(formatData(data))
-                } catch (e) {
-                    console.error(e)
-                }
-            })
+        data.forEach((d: Record<string, unknown>) => {
+            const stmt = this.db.prepare(`UPDATE ${name} SET ${fields.map((key: string) => `${key} = @${key}`).join(', ')} WHERE id = @id`)
+            stmt.run(this.recordToBindParams(d))
         })
-
-        return updateMany(data)
     }
 
     deleteData(name: string, data: Array<Record<string, unknown>>, key: string = 'id') {
-
-        const deleteStmt = this.db.prepare(`DELETE FROM ${name} WHERE ${key} = @${key}`);
-        const deleteMany = this.db.transaction((pData: Array<Record<string, any>>) => {
-            pData.forEach(data => {
-                try {
-                    deleteStmt.run(data)
-                } catch (e) {
-                    console.error(e)
-                }
-            })
+        data.forEach(d => {
+            const stmt = this.db.prepare(`DELETE FROM ${name} WHERE ${key} = @${key}`);
+            stmt.run({
+                [`@${key}`]: d[key]
+            } as BindParams)
         })
-
-        return deleteMany(data)
     }
 
     async insertData(name: string, inData: Array<Record<string, unknown>>) {
-        const insertMany = this.db.transaction((pData: Array<Record<string, any>>) => {
-            // FIXME: should we do this as a transaction or not?
-            pData.forEach(data => {
-                const columns = Object.keys(data)
-                const insert = this.db.prepare(`INSERT INTO ${name} (${columns.join(', ')}) VALUES (${columns.map((key: string) => '@' + key).join(', ')})`);
-                const d = formatData(data)
-                insert.run(d)
-            })
+        inData.forEach(d => {
+            const columns = Object.keys(d)
+            const insertStatement = this.db.prepare(`INSERT INTO ${name} (${columns.join(', ')}) VALUES (${columns.map((key: string) => '@' + key).join(', ')})`);
+            insertStatement.run(this.recordToBindParams(formatData(d)))
         })
-
-        insertMany(inData)
     }
 
     dropTable(name: string) {
@@ -290,6 +261,15 @@ export class SqlSealDatabase {
         }
         await this.insertData(name, parsedData)
         return name
+    }
+
+    select(statement: string, frontmatter: Record<string, unknown>) {
+        const stmt = this.db.prepare(statement)
+        stmt.bind(this.recordToBindParams(frontmatter ?? {}))
+        return {
+            data: this.toObjectsArray(stmt) as Record<string, any>[],
+            columns: stmt.getColumnNames()
+        }
     }
 
     /**
