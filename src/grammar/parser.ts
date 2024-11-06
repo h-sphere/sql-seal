@@ -21,7 +21,7 @@ export interface ParsedLanguage {
 class SQLSealErrorListener extends ErrorListener<any>  {
   private errors: string[] = [];
 
-  syntaxError(recognizer, offendingSymbol: any, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined): void {
+  syntaxError(recognizer: any, offendingSymbol: any, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined): void {
     this.errors.push(`Line ${line}:${charPositionInLine} ${msg}`);
   }
 
