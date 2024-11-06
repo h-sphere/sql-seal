@@ -16,6 +16,8 @@ export class SqlSeal {
 
         const fileManager = new FilesManager(this.app.vault)
         this.tablesManager = new TablesManager(fileManager, this.db)
+        this.tablesManager.getTableSignal('files')
+        this.tablesManager.getTableSignal('tags')
         const queryManager = new QueryManager(this.tablesManager)
 
         this.codeBlockHandler = new SqlSealCodeblockHandler(app, this.db, logger, this.tablesManager, queryManager)

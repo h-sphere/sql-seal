@@ -2,15 +2,15 @@ import { App } from "obsidian"
 import { createGrid, GridOptions } from 'ag-grid-community';
 import { themeQuartz } from '@ag-grid-community/theming';
 
-export const displayData = (el: HTMLElement, columns: string[], data: Array<Record<string, any>>, app: App) => {
-    // FIXME: rework to always render ui this way and then use gridApi to update the data instead.
+export const displayData = (el: HTMLElement, columns: string[], data: Array<Record<string, any>>, app: App, prefix: string) => {
     el.empty()
     const div = el.createDiv()
     div.classList.add('sqlseal-grid-wrapper')
     const grid = div.createDiv()
+    const errorMessageOverlay = div.createDiv({ cls: [ 'sqlseal-grid-error-message-overlay', 'hidden' ]})
+    const errorMessage = errorMessageOverlay.createDiv({ cls: [ 'sqlseal-grid-error-message' ]})
     grid.classList.add('ag-theme-quartz')
 
-    // to use myTheme in an application, pass it to the theme grid option
     const myTheme = themeQuartz
     .withParams({
         browserColorScheme: "light",
@@ -21,6 +21,12 @@ export const displayData = (el: HTMLElement, columns: string[], data: Array<Reco
         theme: myTheme,
         defaultColDef: {
             resizable: false,
+            cellRendererSelector: () => {
+                return {
+                    component: ({ value }: { value: string }) =>  parseCell(value, app)
+                }
+            },
+            autoHeight: true
         },
         autoSizeStrategy: {
             type: 'fitGridWidth',
@@ -32,12 +38,6 @@ export const displayData = (el: HTMLElement, columns: string[], data: Array<Reco
         rowData: data,
         columnDefs: columns.map(c => ({
             field: c,
-            cellRendererSelector: (data) => {
-                return {
-                    component: ({ value }: { value: string }) =>  parseCell(value, app)
-                }
-            },
-            autoHeight: true
         })),
         domLayout: 'autoHeight'
     }
@@ -47,27 +47,20 @@ export const displayData = (el: HTMLElement, columns: string[], data: Array<Reco
         grid,
         gridOptions,
       );
-    return
 
-    // const container = el.createDiv({
-    //     cls: 'sqlseal-table-container'
-    // })
-    // const table = container.createEl("table")
+    const errorApi = {
+        hide: () => {
+            errorMessageOverlay.classList.add('hidden')
+        },
+        show: (message: string) => {
+            gridApi.setGridOption('loading', false)
+            console.log('PREFIX?', prefix)
+            errorMessage.textContent = message.replace(`TTT${prefix}_`, '');
+            errorMessageOverlay.classList.remove('hidden')
+        }
 
-    // // HEADER
-    // const header = table.createEl("thead").createEl("tr")
-    // columns.forEach(c => {
-    //     header.createEl("th", { text: c })
-    // })
-
-    // const body = table.createEl("tbody")
-    // data.forEach(d => {
-    //     const row = body.createEl("tr")
-    //     columns.forEach(c => {
-    //         row.createEl("td", { text: parseCell(d[c], app) })
-
-    //     })
-    // })
+    }
+    return { api: gridApi, errorApi: errorApi}
 }
 
 const parseCell = (data: string, app: App) => {
@@ -160,23 +153,4 @@ const renderSqlSealCustomElement = (customConfig: SqlSealCustomElement, app: App
         default:
             return 'Invalid Custom Element'
     }
-}
-
-export const displayError = (el: HTMLElement, e: Error) => {
-    el.empty()
-    const callout = el.createEl("div", { text: e.toString(), cls: 'callout' })
-    callout.dataset.callout = 'error'
-}
-
-export const displayInfo = (el: HTMLElement, message: string) => {
-    el.empty()
-    el.childNodes.forEach(c => c.remove())
-    const callout = el.createEl("div", { text: message, cls: 'callout' })
-    callout.dataset.callout = 'info'
-}
-
-export const displayLoader = (el: HTMLElement) => {
-    el.empty()
-    const loader = el.createEl("div", { cls: 'callout', text: 'Loading SQLSeal database...' })
-    loader.dataset.callout = 'info'
 }

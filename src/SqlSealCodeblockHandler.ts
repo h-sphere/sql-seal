@@ -1,5 +1,5 @@
 import { App, MarkdownPostProcessorContext } from "obsidian"
-import { displayData, displayError, displayInfo, displayLoader } from "./ui"
+import { displayData } from "./ui"
 import { resolveFrontmatter } from "./frontmatter"
 import { hashString } from "./hash"
 import { prefixedIfNotGlobal, updateTables } from "./sqlReparseTables"
@@ -32,17 +32,20 @@ export class SqlSealCodeblockHandler {
         })
     }
 
-    setupQuerySignals({ statement, tables }: ReturnType<typeof updateTables>, el: HTMLElement, ctx: MarkdownPostProcessorContext) {
+    setupQuerySignals({ statement, tables }: ReturnType<typeof updateTables>, { api, errorApi }: ReturnType<typeof displayData>, ctx: MarkdownPostProcessorContext) {
         const frontmatter = resolveFrontmatter(ctx, this.app)
-
         const renderSelect = async () => {
             try {
                 const stmt = this.db.db.prepare(statement)
                 const columns = stmt.columns().map(column => column.name);
                 const data = stmt.all(frontmatter ?? {})
-                displayData(el, columns, data, this.app)
+
+                api.setGridOption('columnDefs', columns.map(c => ({ field: c })))
+                api.setGridOption('rowData', data)
+                api.setGridOption('loading', false)
+                errorApi.hide()
             } catch (e) {
-                displayError(el, e)
+                errorApi.show(e.toString())
             }
         }
 
@@ -55,14 +58,14 @@ export class SqlSealCodeblockHandler {
 
     getHandler() {
         return async (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
-
-            displayLoader(el)
+            const prefix = hashString(ctx.sourcePath)
+            const { api, errorApi} = displayData(el, [], [], this.app, prefix)
+            api.setGridOption('loading', true)
             await this.db.connect()
 
             try {
                 const results = parseLanguage(source)
 
-                const prefix = hashString(ctx.sourcePath)
 
                 const prefixedTables = results.tables.map(t => {
                     return {
@@ -75,10 +78,10 @@ export class SqlSealCodeblockHandler {
 
                 if (results.queryPart) {
                     const { statement, tables } = updateTables(results.queryPart!, [...this.globalTables], prefix)
-                    this.setupQuerySignals({ statement, tables }, el, ctx)
+                    this.setupQuerySignals({ statement, tables }, { api, errorApi }, ctx)
                 }
             } catch (e) {
-                displayError(el, e.toString())
+                errorApi.show(e.toString())
             }
 
         }
