@@ -38,15 +38,14 @@ export class SyncModel {
     }
 
     getSync(filename: string, tableName: string) {
-        const data = this.db.db.prepare(`
-            SELECT *
+        const { data } = this.db.select(`SELECT *
             FROM sqlseal_sync
             WHERE filename = @filename
-              AND name = @name
-        `).all({
-            filename: filename,
-            name: tableName,
-        })
+              AND name = @name`,
+              {
+                name: tableName,
+                filename: filename
+              })
 
         if (data) {
             return data[0] as SyncEntry
@@ -55,6 +54,7 @@ export class SyncModel {
     }
 
     removeSync(filename: string, tableName: string) {
+        // FIXME: do not use exposed db, instead implement "exec" method inside the file.
         this.db.db.prepare('DELETE FROM sqlseal_sync WHERE filename = :filename AND name = :name').run({
             filename: filename,
             name: tableName

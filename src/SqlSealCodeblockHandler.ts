@@ -36,10 +36,7 @@ export class SqlSealCodeblockHandler {
         const frontmatter = resolveFrontmatter(ctx, this.app)
         const renderSelect = async () => {
             try {
-                const stmt = this.db.db.prepare(statement)
-                const columns = stmt.columns().map(column => column.name);
-                const data = stmt.all(frontmatter ?? {})
-
+                 const { data, columns } = this.db.select(statement, frontmatter ?? {})
                 api.setGridOption('columnDefs', columns.map(c => ({ field: c })))
                 api.setGridOption('rowData', data)
                 api.setGridOption('loading', false)

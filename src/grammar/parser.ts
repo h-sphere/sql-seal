@@ -1,8 +1,9 @@
-import { ANTLRErrorListener, CharStreams, CommonTokenStream, RecognitionException, Recognizer } from 'antlr4ts';
-import { SqlSealLangLexer } from './SqlSealLangLexer';
-import { QueryStatementContext, TableStatementContext, SqlSealLangParser, ParseContext, StatementContext, WithClauseContext, SelectStatementContext } from './SqlSealLangParser';
-import { SqlSealLangVisitor } from './SqlSealLangVisitor';
-import { AbstractParseTreeVisitor } from 'antlr4ts/tree/AbstractParseTreeVisitor';
+import { CommonTokenStream, ErrorListener, ParseTreeVisitor, RecognitionException } from 'antlr4';
+import SqlSealLangLexer from './SqlSealLangLexer';
+import { QueryStatementContext, TableStatementContext, ParseContext, StatementContext, WithClauseContext, SelectStatementContext } from './SqlSealLangParser';
+import SqlSealLangParser from './SqlSealLangParser';
+import SqlSealLangVisitor from './SqlSealLangVisitor';
+import { CharStream, TokenStream } from 'antlr4';
 
 export interface TableStatement {
   name: string;
@@ -17,10 +18,10 @@ export interface ParsedLanguage {
 }
 
 
-class ErrorListener implements ANTLRErrorListener<any> {
+class SQLSealErrorListener extends ErrorListener<any>  {
   private errors: string[] = [];
 
-  syntaxError(recognizer: Recognizer<any, any>, offendingSymbol: any, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined): void {
+  syntaxError(recognizer: any, offendingSymbol: any, line: number, charPositionInLine: number, msg: string, e: RecognitionException | undefined): void {
     this.errors.push(`Line ${line}:${charPositionInLine} ${msg}`);
   }
 
@@ -31,9 +32,13 @@ class ErrorListener implements ANTLRErrorListener<any> {
   getErrors(): string {
     return this.errors.join('\n');
   }
+
+  reportAttemtpingFullContext() {
+    
+  }
 }
 
-export class SqlSealLangVisitorImpl extends AbstractParseTreeVisitor<ParsedLanguage> implements SqlSealLangVisitor<ParsedLanguage> {
+export class SqlSealLangVisitorImpl extends ParseTreeVisitor<ParsedLanguage> implements SqlSealLangVisitor<ParsedLanguage> {
   private tables: TableStatement[] = [];
   private queryPart: string | null = null;
 
@@ -42,7 +47,7 @@ export class SqlSealLangVisitorImpl extends AbstractParseTreeVisitor<ParsedLangu
   }
 
   visitParse(ctx: ParseContext): ParsedLanguage {
-    ctx.statement().forEach(stmt => this.visit(stmt));
+    ctx.statement_list().forEach(stmt => this.visit(stmt));
     return this.defaultResult();
   }
 
@@ -56,11 +61,11 @@ export class SqlSealLangVisitorImpl extends AbstractParseTreeVisitor<ParsedLangu
   }
 
   visitTableStatement(ctx: TableStatementContext): ParsedLanguage {
-    const tableName = ctx.ID().text;
-    const fileUrl = ctx.FILE_URL().text;
+    const tableName = ctx.ID().getText();
+    const fileUrl = ctx.FILE_URL().getText();
     
     // Reconstruct the original table statement with whitespace
-    const tableStmt = ctx.children!.map(child => child.text).join('');
+    const tableStmt = ctx.children!.map(child => child.getText()).join('');
     
     this.tables.push({
       name: tableName,
@@ -73,7 +78,7 @@ export class SqlSealLangVisitorImpl extends AbstractParseTreeVisitor<ParsedLangu
 
   visitQueryStatement(ctx: QueryStatementContext): ParsedLanguage {
     // Reconstruct the original query statement with whitespace and all characters
-    this.queryPart = ctx.children!.map(child => child.text).join('');
+    this.queryPart = ctx.children!.map(child => child.getText()).join('');
     return this.defaultResult();
   }
 
@@ -89,12 +94,16 @@ export class SqlSealLangVisitorImpl extends AbstractParseTreeVisitor<ParsedLangu
 }
 
 export function parseLanguage(input: string): ParsedLanguage {
-  const chars = CharStreams.fromString(input);
-  const lexer = new SqlSealLangLexer(chars);
+  const chars = new CharStream(input); // replace this with a FileStream as required
+// const lexer = new MyGrammarLexer(chars);
+// const tokens = new CommonTokenStream(lexer);
+// const parser = new MyGrammarParser(tokens);
+
+  const lexer = new SqlSealLangLexer(new CharStream(input));
   const tokens = new CommonTokenStream(lexer);
   const parser = new SqlSealLangParser(tokens);
 
-  const errorListener = new ErrorListener();
+  const errorListener = new SQLSealErrorListener();
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
 
