@@ -12,6 +12,18 @@
     position: relative;
 }
 
+.sqlseal-error {
+    padding: 1em;
+    background: #b80f0f;
+    color: #FFF;
+}
+
+.sqlseal-notice {
+    padding: 1em;
+    background: #1f3f98;
+    color: #FFF;
+}
+
 .sqlseal-grid-error-message {
     box-sizing: border-box;
     width: 80%;

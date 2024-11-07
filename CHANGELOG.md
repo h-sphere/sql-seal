@@ -1,3 +1,11 @@
+# 0.10.1
+Many small fixes:
+- Changed how parsing is done to simplify code greatly
+- Grid now supports dark mode
+- Grid now supports highlighting and copy and pasting
+- Restored ability to have `TABLE` syntax without select.
+
+
 # 0.10.0
 SQLSeal is not compatible with mobile! Plugin now uses SQL.JS instead of better-sqlite3 which is written in Web Assembly so no longer native binaries are needed. This makes plugin portable.
 Also reworked implementation of the parser from Antlr4TS into Antlr4.
