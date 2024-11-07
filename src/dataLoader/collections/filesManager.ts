@@ -2,6 +2,7 @@ import { Signal, SignalUnsubscriber } from "src/utils/signal";
 import { dataTransformer, DataTransformerOut } from "../dataTransformer";
 import { csvFileSignal } from "../csvFile";
 import { Vault } from "obsidian";
+import { isNull } from "lodash";
 
 export class FilesManager {
     files: Map<string, Signal<DataTransformerOut>> = new Map()
@@ -23,6 +24,11 @@ export class FilesManager {
         }
         const data = await this.vault.cachedRead(file)
         return data
+    }
+
+    doesFileExist(url: string) {
+        const file = this.vault.getFileByPath(url)
+        return !isNull(file)
     }
 
     destroy() {

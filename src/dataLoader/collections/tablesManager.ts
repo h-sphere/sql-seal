@@ -1,8 +1,8 @@
 import { SqlSealDatabase } from "src/database";
 import { FilesManager } from "./filesManager";
 import { createSignal, Signal, SignalUnsubscriber } from "src/utils/signal";
-import { SignalConstants } from "os";
 import { linkTableWithFile } from "../tableSignal";
+import { FileManager } from "obsidian";
 
 interface Definition {
     fileName: string;
@@ -18,6 +18,10 @@ export class TablesManager {
     }
 
     registerTable(tableName: string, fileName: string) {
+        if (!this.filesManager.doesFileExist(fileName)) {
+            throw new Error(`File ${fileName} does not exist`)
+        }
+
         if (this.tableLinks.has(tableName)) {
             const { fileName: prevFileName, unlink } = this.tableLinks.get(tableName)!
             if (prevFileName === fileName) {

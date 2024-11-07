@@ -2,6 +2,34 @@ import { App } from "obsidian"
 import { createGrid, GridOptions } from 'ag-grid-community';
 import { themeQuartz } from '@ag-grid-community/theming';
 
+const getCurrentTheme =() => {
+    return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+}
+
+const getAgGridTheme = (theme: 'dark' | 'light') => {
+    return {
+        backgroundColor: "var(--color-primary)", //"#1f2836",
+        browserColorScheme: theme,
+        chromeBackgroundColor: {
+            ref: "foregroundColor",
+            mix: 0.07,
+            onto: "backgroundColor"
+        },
+        foregroundColor: "var(--text-normal)",
+        headerFontSize: 14
+    } as const
+}
+
+export  const displayNotice = (el: HTMLElement, text: string) => {
+    el.empty()
+    el.createDiv({ text: text, cls: 'sqlseal-notice' })
+}
+
+export  const displayError= (el: HTMLElement, text: string) => {
+    el.empty()
+    el.createDiv({ text: text, cls: 'sqlseal-error' })
+}
+
 export const displayData = (el: HTMLElement, columns: string[], data: Array<Record<string, any>>, app: App, prefix: string) => {
     el.empty()
     const div = el.createDiv()
@@ -12,10 +40,7 @@ export const displayData = (el: HTMLElement, columns: string[], data: Array<Reco
     grid.classList.add('ag-theme-quartz')
 
     const myTheme = themeQuartz
-    .withParams({
-        browserColorScheme: "light",
-        headerFontSize: 14,
-    });
+    .withParams(getAgGridTheme(getCurrentTheme()))
 
     const gridOptions: GridOptions = {
         theme: myTheme,
@@ -39,7 +64,9 @@ export const displayData = (el: HTMLElement, columns: string[], data: Array<Reco
         columnDefs: columns.map(c => ({
             field: c,
         })),
-        domLayout: 'autoHeight'
+        domLayout: 'autoHeight',
+        enableCellTextSelection: true,
+        ensureDomOrder: true
     }
 
     // Setup Grid
@@ -54,7 +81,6 @@ export const displayData = (el: HTMLElement, columns: string[], data: Array<Reco
         },
         show: (message: string) => {
             gridApi.setGridOption('loading', false)
-            console.log('PREFIX?', prefix)
             errorMessage.textContent = message.replace(`TTT${prefix}_`, '');
             errorMessageOverlay.classList.remove('hidden')
         }
