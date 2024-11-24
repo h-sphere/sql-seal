@@ -2,6 +2,7 @@ import { createGrid, GridApi, GridOptions, themeQuartz } from "ag-grid-community
 import { merge } from "lodash";
 import { App } from "obsidian";
 import { RendererConfig } from "src/rendererRegistry";
+import { parse } from 'json5'
 import { displayError, displayNotice, parseCell } from "src/ui";
 
 const getCurrentTheme = () => {
@@ -116,7 +117,10 @@ export class GridRenderer implements RendererConfig {
     isInitialised = false
 
     validateConfig(config: string) {
-        return {}
+        if (!config || !config.trim()) {
+            return {}
+        }
+        return parse(config)
     }
 
 
