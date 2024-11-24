@@ -17,9 +17,11 @@ export default defineConfig({
         text: 'Documentation',
         items: [
           { text: 'Quick Start', link: '/quick-start' },
+          { text: 'Changing Render Methods', link: '/changing-render-method'},
           { text: 'Using properties', link: '/using-properties' },
           { text: 'Query Vault Content', link: '/query-vault-content' },
           { text: 'Links and Images', link: '/links-and-images' },
+          { text: 'CSV Viewer', link: '/csv-viewer'},
           { text: 'Troubleshooting', link: '/troubleshooting' },
           { text: 'Future Plans', link: '/future-plans' },
         ]

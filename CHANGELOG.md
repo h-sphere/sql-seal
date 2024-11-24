@@ -1,3 +1,13 @@
+# 0.11.0
+The biggest update yet with plenty of exciting features:
+
+Added CSV Viewer! Now you can see all your CSV files in your vault in the file explorer and open it to preview the data. You can also edit the data in place (remember always to backup your files!)
+Added different renderer methods: you can now use GRID (default), HTML (standard table) and MARKDOWN (renders markdown / ASCII text representation of the table).
+Added "tasks" table with all tasks from across the vault
+Now the files in the queries are resolved relatively to the file they are in. You can also use leading slash (/) to force fetching from the root of the vault or relative paths (./, ../) to traverse the tree down from your location.
+Added more lax parser implementation for now
+Minor: updated dependencies to the latest versions
+
 # 0.10.1
 Many small fixes:
 - Changed how parsing is done to simplify code greatly
@@ -7,7 +17,7 @@ Many small fixes:
 
 
 # 0.10.0
-SQLSeal is not compatible with mobile! Plugin now uses SQL.JS instead of better-sqlite3 which is written in Web Assembly so no longer native binaries are needed. This makes plugin portable.
+SQLSeal is now compatible with mobile! Plugin now uses SQL.JS instead of better-sqlite3 which is written in Web Assembly so no longer native binaries are needed. This makes plugin portable.
 Also reworked implementation of the parser from Antlr4TS into Antlr4.
 
 # 0.9.2

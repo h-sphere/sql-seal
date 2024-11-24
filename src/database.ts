@@ -232,37 +232,6 @@ export class SqlSealDatabase {
         return types;
     }
 
-    async loadDataForDatabaseFromUrl(name: string, url: string, reloadData: boolean = false) {
-        const file = this.app.vault.getFileByPath(url)
-
-        if (!file) {
-            return
-        }
-        const data = await this.app.vault.cachedRead(file)
-
-        const parsed = Papa.parse<Record<string, string>>(data, {
-            header: true,
-            dynamicTyping: false,
-            skipEmptyLines: true
-        })
-
-        const processedData = dataToCamelCase(parsed.data)
-        const processedWithJsonParsed = predictJson(processedData)
-        const fields = parsed.meta.fields?.map((f: string) => camelCase(f))!
-
-        const { data: parsedData, types } = toTypeStatements(fields, processedWithJsonParsed)
-
-        try {
-            // Purge the database
-            await this.db.prepare(`DELETE FROM ${name}`).run()
-        } catch (e) {
-            // FIXME: check if error is actually that the table does not exist
-            await this.createTable(name, types)
-        }
-        await this.insertData(name, parsedData)
-        return name
-    }
-
     select(statement: string, frontmatter: Record<string, unknown>) {
         const stmt = this.db.prepare(statement)
         stmt.bind(this.recordToBindParams(frontmatter ?? {}))
@@ -270,45 +239,5 @@ export class SqlSealDatabase {
             data: this.toObjectsArray(stmt) as Record<string, any>[],
             columns: stmt.getColumnNames()
         }
-    }
-
-    /**
-     * @deprecated
-     * @param unprefixedName 
-     * @param url 
-     * @param prefix 
-     * @param reloadData 
-     * @returns 
-     */
-    async defineDatabaseFromUrl(unprefixedName: string, url: string, prefix: string, reloadData: boolean = false) {
-        // FIXME: why do we repeat this code?
-        const name = prefixedIfNotGlobal(unprefixedName, [], prefix) // FIXME: should we pass global tables here too?
-        if (this.savedDatabases[name]) {
-            if (reloadData) {
-                await this.loadDataForDatabaseFromUrl(name, url)
-            }
-            return name
-        }
-        const file = this.app.vault.getFileByPath(url)
-
-        if (!file) {
-            return name
-        }
-        const data = await this.app.vault.cachedRead(file)
-
-        const parsed = Papa.parse<Record<string, string>>(data, {
-            header: true,
-            dynamicTyping: false,
-            skipEmptyLines: true
-        })
-        const fields = parsed.meta.fields!
-        const { data: parsedData, types } = toTypeStatements(fields, parsed.data)
-
-        await this.createTable(name, types)
-        this.savedDatabases[name] = url
-        await this.loadDataForDatabaseFromUrl(name, url)
-
-
-        return name
     }
 }

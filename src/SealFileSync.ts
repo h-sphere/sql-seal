@@ -1,8 +1,9 @@
-import { App, EventRef, getAllTags, Plugin, TAbstractFile, TFile } from "obsidian";
+import { App, Plugin, TAbstractFile, TFile } from "obsidian";
 import { SqlSeal } from "./sqlSeal";
 import { FieldTypes } from "./utils";
 import { TablesManager } from "./dataLoader/collections/tablesManager";
 import { sanitise } from "./utils/sanitiseColumn";
+import { AFileSyncTable } from "./fileSyncTable/abstractFileSyncTable";
 
 function fileData(file: TAbstractFile, {tags: _tags, ...frontmatter }: Record<string, any>) {
     return {
@@ -24,11 +25,10 @@ const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {
 
 export class SealFileSync {
     private currentSchema: Record<string, FieldTypes> = {}
+    private tablePlugins: Array<AFileSyncTable> = []
     constructor(
         public readonly app: App,
-        private readonly sqlSeal: SqlSeal,
         private readonly plugin: Plugin,
-        private readonly tableManager: TablesManager
     ) {
         plugin.registerEvent(this.app.vault.on('modify', async (file) => {
             if (!(file instanceof TFile)) {
@@ -40,20 +40,10 @@ export class SealFileSync {
             if (this.hasNewColumns(frontmatter)) {
                 await sleep(1000)
                 await this.init()
-
                 return
             }
-            // we need to update the row
-            await this.sqlSeal.db.updateData('files', [fileData(file, frontmatter)])
-            await this.sqlSeal.db.deleteData('tags', [{ fileId: file.path }], 'fileId')
 
-            this.tableManager.getTableSignal('files')(Date.now())
-
-
-            // Wait 1 second before updating tags table
-            await sleep(1000)
-            await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
-            this.tableManager.getTableSignal('tags')(Date.now())
+            await Promise.all(this.tablePlugins.map(p => p.onFileModify(file)))
 
         }))
 
@@ -70,16 +60,7 @@ export class SealFileSync {
 
                 return
             }
-
-
-            // we need to update the row
-            await this.sqlSeal.db.insertData('files', [fileData(file, frontmatter)])
-            this.tableManager.getTableSignal('files')(Date.now())
-
-            // Wait 1 second before updating tags table
-            await sleep(1000)
-            await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
-            this.tableManager.getTableSignal('tags')(Date.now())
+            await Promise.all(this.tablePlugins.map(p => p.onFileCreate(file)))
 
         }))
         
@@ -88,12 +69,7 @@ export class SealFileSync {
                 return
             }
 
-            await this.sqlSeal.db.deleteData('files', [{ id: file.path }])
-            this.tableManager.getTableSignal('files')(Date.now())
-
-
-            await this.sqlSeal.db.deleteData('tags', [{ fileId: file.path }], 'fileId')
-            this.tableManager.getTableSignal('tags')(Date.now())
+            await Promise.all(this.tablePlugins.map(p => p.onFileDelete(file.path)))
         }))
 
         plugin.registerEvent(this.app.vault.on('rename', async (file, oldPath) => {
@@ -101,22 +77,10 @@ export class SealFileSync {
                 return
             }
 
-            // deleting old one and adding new one
-            await this.sqlSeal.db.deleteData('files', [{ id: oldPath }])
+            await Promise.all(this.tablePlugins.map(p => p.onFileDelete(oldPath)))
 
-            // delete old tags
-            await this.sqlSeal.db.deleteData('tags', [{ fileId: oldPath }], 'fileId')
-
-            await this.sqlSeal.db.insertData('files', [fileData(file, await extractFrontmatterFromFile(file, this.plugin))])
-            this.tableManager.getTableSignal('files')(Date.now())
-
-
-            // Wait 1 second before updating tags table
             await sleep(1000)
-            await this.sqlSeal.db.insertData('tags', await this.getFileTags(file))
-            this.tableManager.getTableSignal('tags')(Date.now())
-
-
+            await Promise.all(this.tablePlugins.map(p => p.onFileCreate(file)))
         }))
 
         // add Obsidian command to reload SQLSeal file database
@@ -129,45 +93,23 @@ export class SealFileSync {
         })
     }
 
-    async getFileTags(file: TFile) {
-        const cache = this.app.metadataCache.getFileCache(file)
-        if (!cache) {
-            return []
-        }
-        const tags = getAllTags(cache)
-        if (!tags) {
-            return []
-        }
-        return tags.map((t) => ({
-            tag: t,
-            fileId: file.path
-        }))
+    addTablePlugin(tp: AFileSyncTable) {
+        this.tablePlugins.push(tp);
     }
 
     async init() {
         const files = this.app.vault.getMarkdownFiles();
 
-        const data = []
-        const tags: Array<{fileId: string, tag: string }> = []
+        await Promise.all(this.tablePlugins.map(p => p.onInit()))
 
-        for (const file of files) {
-            const frontmatter = await extractFrontmatterFromFile(file, this.plugin)
-            tags.push(...await this.getFileTags(file))
-            data.push(fileData(file, frontmatter))
-        }
+        const bulkPlugins = this.tablePlugins.filter(p => p.shouldPerformBulkInsert)
+        const nonBulkPlugins = this.tablePlugins.filter(p => !p.shouldPerformBulkInsert)
 
-        const schema = await this.sqlSeal.db.createTableWithData('files', data)
-        this.currentSchema = schema
-        if (tags && tags.length) {
-            await this.sqlSeal.db.createTableWithData('tags', tags)
-        } else {
-            await this.sqlSeal.db.createTable('tags', {
-                'tag': 'TEXT',
-                'fileId': 'TEXT'
-            })
-        }
-        this.tableManager.getTableSignal('files')(Date.now())
-        this.tableManager.getTableSignal('tags')(Date.now())
+        // Think of adding PLIMIT HERE.
+        await Promise.all(bulkPlugins.map(p => p.onFileCreateBulk(files)))
+        await Promise.all(files.map(file =>
+            Promise.all(nonBulkPlugins.map(p => p.onFileCreate(file))))
+        )
 
     }
 

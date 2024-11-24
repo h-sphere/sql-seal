@@ -1,14 +1,14 @@
 import { Signal, SignalUnsubscriber } from "src/utils/signal";
 import { dataTransformer, DataTransformerOut } from "../dataTransformer";
 import { csvFileSignal } from "../csvFile";
-import { Vault } from "obsidian";
+import { App, TFile, Vault } from "obsidian";
 import { isNull } from "lodash";
 
 export class FilesManager {
     files: Map<string, Signal<DataTransformerOut>> = new Map()
     inputFiles: Map<string, Signal<string>> = new Map()
     unregisters: Array<SignalUnsubscriber> = []
-    constructor(private vault: Vault) {
+    constructor(private vault: Vault, private app: App) {
         this.vault.on('modify', async (file) => {
             if (this.files.has(file.path)) {
                 this.inputFiles.get(file.path)!(await this.loadFile(file.path))
@@ -16,9 +16,13 @@ export class FilesManager {
         })
     }
 
-    private async loadFile(url: string) {
-        const file = this.vault.getFileByPath(url)
-
+    private async loadFile(url: string, sourcePath?: string) {
+        let file: TFile | null;
+        if (sourcePath) {
+            file = this.app.metadataCache.getFirstLinkpathDest(url, sourcePath)
+        } else {
+            file = this.vault.getFileByPath(url)
+        }
         if (!file) {
             return ''
         }
@@ -26,8 +30,12 @@ export class FilesManager {
         return data
     }
 
-    doesFileExist(url: string) {
-        const file = this.vault.getFileByPath(url)
+    getFile(url: string, sourcePath: string) {
+        return this.app.metadataCache.getFirstLinkpathDest(url, sourcePath)
+    }
+
+    doesFileExist(url: string, sourcePath: string) {
+        const file = this.app.metadataCache.getFirstLinkpathDest(url, sourcePath)
         return !isNull(file)
     }
 
