@@ -18,9 +18,6 @@ jobs:
           node-version: "18.x"
       - name: Install packages
         run: npm install
-      - name: Recompile Better SQLite3 for Electron
-        run: |
-          npm run rebuild
       - name: Build plugin
         run: |
           npm run build
