@@ -3,6 +3,7 @@ import { FilesManager } from "./filesManager";
 import { createSignal, Signal, SignalUnsubscriber } from "src/utils/signal";
 import { linkTableWithFile } from "../tableSignal";
 import { FileManager } from "obsidian";
+import { isNull } from "lodash";
 
 interface Definition {
     fileName: string;
@@ -17,8 +18,9 @@ export class TablesManager {
 
     }
 
-    registerTable(tableName: string, fileName: string) {
-        if (!this.filesManager.doesFileExist(fileName)) {
+    registerTable(tableName: string, fileName: string, parentPath: string) {
+        const file = this.filesManager.getFile(fileName, parentPath)
+        if (isNull(file)) {
             throw new Error(`File ${fileName} does not exist`)
         }
 
@@ -30,12 +32,13 @@ export class TablesManager {
             unlink()
             this.tableLinks.delete(tableName)
         }
-        const fileSignal = this.filesManager.getFileSignal(fileName)
+        const resolvedFileName = file.path
+        const fileSignal = this.filesManager.getFileSignal(resolvedFileName)
         const tableSignal = this.getTableSignal(tableName)
 
         const unlink = linkTableWithFile(fileSignal, tableSignal, tableName, this.db)
         this.tableLinks.set(tableName, {
-            fileName,
+            fileName: resolvedFileName,
             unlink
         })
     }

@@ -2,24 +2,6 @@ import { App } from "obsidian"
 import { createGrid, GridOptions } from 'ag-grid-community';
 import { themeQuartz } from '@ag-grid-community/theming';
 
-const getCurrentTheme =() => {
-    return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
-}
-
-const getAgGridTheme = (theme: 'dark' | 'light') => {
-    return {
-        backgroundColor: "var(--color-primary)", //"#1f2836",
-        browserColorScheme: theme,
-        chromeBackgroundColor: {
-            ref: "foregroundColor",
-            mix: 0.07,
-            onto: "backgroundColor"
-        },
-        foregroundColor: "var(--text-normal)",
-        headerFontSize: 14
-    } as const
-}
-
 export  const displayNotice = (el: HTMLElement, text: string) => {
     el.empty()
     el.createDiv({ text: text, cls: 'sqlseal-notice' })
@@ -30,66 +12,7 @@ export  const displayError= (el: HTMLElement, text: string) => {
     el.createDiv({ text: text, cls: 'sqlseal-error' })
 }
 
-export const displayData = (el: HTMLElement, columns: string[], data: Array<Record<string, any>>, app: App, prefix: string) => {
-    el.empty()
-    const div = el.createDiv()
-    div.classList.add('sqlseal-grid-wrapper')
-    const grid = div.createDiv()
-    const errorMessageOverlay = div.createDiv({ cls: [ 'sqlseal-grid-error-message-overlay', 'hidden' ]})
-    const errorMessage = errorMessageOverlay.createDiv({ cls: [ 'sqlseal-grid-error-message' ]})
-    grid.classList.add('ag-theme-quartz')
-
-    const myTheme = themeQuartz
-    .withParams(getAgGridTheme(getCurrentTheme()))
-
-    const gridOptions: GridOptions = {
-        theme: myTheme,
-        defaultColDef: {
-            resizable: false,
-            cellRendererSelector: () => {
-                return {
-                    component: ({ value }: { value: string }) =>  parseCell(value, app)
-                }
-            },
-            autoHeight: true
-        },
-        autoSizeStrategy: {
-            type: 'fitGridWidth',
-            defaultMinWidth: 150,
-        },
-        pagination: true,
-        suppressMovableColumns: true,
-        loadThemeGoogleFonts: false,
-        rowData: data,
-        columnDefs: columns.map(c => ({
-            field: c,
-        })),
-        domLayout: 'autoHeight',
-        enableCellTextSelection: true,
-        ensureDomOrder: true
-    }
-
-    // Setup Grid
-    const gridApi = createGrid(
-        grid,
-        gridOptions,
-      );
-
-    const errorApi = {
-        hide: () => {
-            errorMessageOverlay.classList.add('hidden')
-        },
-        show: (message: string) => {
-            gridApi.setGridOption('loading', false)
-            errorMessage.textContent = message.replace(`TTT${prefix}_`, '');
-            errorMessageOverlay.classList.remove('hidden')
-        }
-
-    }
-    return { api: gridApi, errorApi: errorApi}
-}
-
-const parseCell = (data: string, app: App) => {
+export const parseCell = (data: string, app: App) => {
     if (data && typeof data === 'string' && data.startsWith('SQLSEALCUSTOM')) {
         const parsedData = JSON.parse(data.slice('SQLSEALCUSTOM('.length, -1))
         return renderSqlSealCustomElement(parsedData, app)

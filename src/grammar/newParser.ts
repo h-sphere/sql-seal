@@ -3,6 +3,10 @@ export interface Table {
     fileName: string;
 }
 
+export interface TableWithParentPath extends Table {
+    parentPath: string;
+}
+
 interface ParsedLanguage {
     tables: Table[];
     queryPart: string;
