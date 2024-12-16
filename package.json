@@ -42,7 +42,9 @@
   },
   "dependencies": {
     "@ag-grid-community/theming": "^32.3.3",
+    "absurd-sql": "^0.0.54",
     "ag-grid-community": "^32.3.3",
+    "comlink": "^4.4.2",
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
     "markdown-table-ts": "^1.0.3",

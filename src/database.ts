@@ -9,6 +9,8 @@ import fs from 'fs'
 import { sanitise } from "./utils/sanitiseColumn"
 import initSqlJs, { BindParams, Database, Statement } from 'sql.js'
 import wasmBinary from '../node_modules/sql.js/dist/sql-wasm.wasm'
+import * as Comlink from 'comlink'
+import workerCode from 'virtual:worker-code';
 
 export interface FieldDefinition {
     name: string;
@@ -61,6 +63,22 @@ export class SqlSealDatabase {
         if (this.connectingPromise) {
             return this.connectingPromise
         }
+        const blob = new Blob([workerCode], { type: 'text/javascript' });
+        const workerUrl = URL.createObjectURL(blob);
+        
+        const worker = new Worker(workerUrl, {
+            name: 'SQLSeal Database'
+        });
+        const DatabaseWrap = Comlink.wrap(worker)
+
+        const instance = await new DatabaseWrap()
+
+        console.log('wrap', instance)
+        // console.log('wrap result', await instance.connect())
+
+        const database = await instance.connect()
+
+        console.log('DATABASE', database)
 
         this.connectingPromise = new Promise((resolve) => {
             this.connectingPromiseResolve = resolve
