@@ -4,7 +4,7 @@ import { SqlSealDatabase } from "src/database";
 import { FieldTypes } from "src/utils";
 
 export const linkTableWithFile = (dataSig: Signal<DataTransformerOut>, tableSignal: Signal<number>, tableName: string, db: SqlSealDatabase) => {
-    return dataSig(({ data, types}) => {
+    return dataSig(({ data, types }) => {
 
         // Check if the columns are exactly the same. If not, delete and reinstantiate the table.
 

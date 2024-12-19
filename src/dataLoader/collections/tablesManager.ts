@@ -26,7 +26,7 @@ export class TablesManager {
 
         if (this.tableLinks.has(tableName)) {
             const { fileName: prevFileName, unlink } = this.tableLinks.get(tableName)!
-            if (prevFileName === fileName) {
+            if (prevFileName === file.path) {
                 return
             }
             unlink()

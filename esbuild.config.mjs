@@ -10,10 +10,10 @@ if you want to view the source, please visit the github repository of this plugi
 */
 `;
 
+// Plugin to handle WASM files
 const wasmPlugin = {
     name: 'wasm',
     setup(build) {
-        // Handle direct importing of wasm files
         build.onResolve({ filter: /\.wasm$/ }, args => {
             if (args.resolveDir === '') return;
             return {
@@ -22,7 +22,6 @@ const wasmPlugin = {
             };
         });
 
-        // Load and encode the wasm file
         build.onLoad({ filter: /\.wasm$/, namespace: 'wasm-binary' }, async (args) => {
             const contents = readFileSync(args.path);
             const wasmBase64 = contents.toString('base64');
@@ -32,6 +31,78 @@ const wasmPlugin = {
                     const wasmBase64 = "${wasmBase64}";
                     const wasmBinary = Uint8Array.from(atob(wasmBase64), c => c.charCodeAt(0));
                     export default wasmBinary;
+                `,
+                loader: 'js',
+            };
+        });
+    },
+};
+
+// Plugin to handle Node.js module shims
+// const nodeModulesPlugin = {
+//     name: 'node-modules',
+//     setup(build) {
+//         build.onResolve({ filter: /^path$/ }, args => ({
+//             path: args.path,
+//             namespace: 'node-modules',
+//         }));
+
+//         build.onLoad({ filter: /^path$/, namespace: 'node-modules' }, () => ({
+//             contents: `
+//                 export function dirname(path) {
+//                     return path.replace(/\\/[^\\/]*$/, '');
+//                 }
+//                 export function normalize(path) {
+//                     return path;
+//                 }
+//             `,
+//         }));
+
+//         build.onResolve({ filter: /^fs$/ }, args => ({
+//             path: args.path,
+//             namespace: 'node-modules',
+//         }));
+
+//         build.onLoad({ filter: /^fs$/, namespace: 'node-modules' }, () => ({
+//             contents: `
+//                 export function readFileSync() {
+//                     throw new Error('readFileSync is not supported in the browser');
+//                 }
+//             `,
+//         }));
+//     },
+// };
+
+// Plugin to inject worker code
+const workerPlugin = {
+    name: 'worker',
+    setup(build) {
+        build.onResolve({ filter: /^virtual:worker-code$/ }, args => ({
+            path: args.path,
+            namespace: 'worker-code',
+        }));
+
+        build.onLoad({ filter: /.*/, namespace: 'worker-code' }, async () => {
+            // Build worker code
+            const result = await esbuild.build({
+                entryPoints: ['src/database-worker.ts'],
+                bundle: true,
+                write: false,
+                format: 'iife',
+                target: 'es2020',
+                external: ['fs', 'path'],
+                plugins: [wasmPlugin, /*nodeModulesPlugin*/],
+                minify: process.argv[2] === 'production',
+                define: {
+                    'process.env.NODE_ENV': JSON.stringify(process.argv[2] === 'production' ? 'production' : 'development'),
+                    '__dirname': '"/"'
+                }
+            });
+
+            return {
+                contents: `
+                    const workerCode = ${JSON.stringify(result.outputFiles[0].text)};
+                    export default workerCode;
                 `,
                 loader: 'js',
             };
@@ -64,14 +135,20 @@ const context = await esbuild.context({
         ...builtins
     ],
     format: "cjs",
-    target: "es2018",
+    target: "ES2020",
     logLevel: "info",
     sourcemap: prod ? false : "inline",
     treeShaking: true,
     outfile: "main.js",
     plugins: [
-        wasmPlugin
-    ]
+        wasmPlugin,
+        // nodeModulesPlugin,
+        workerPlugin
+    ],
+    define: {
+        'process.env.NODE_ENV': JSON.stringify(prod ? 'production' : 'development'),
+        '__dirname': '"/"'
+    }
 });
 
 if (prod) {

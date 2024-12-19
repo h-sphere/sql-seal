@@ -15,7 +15,7 @@ export class SqlSeal {
         this.db = new SqlSealDatabase(app, verbose)
         const logger = new Logger(verbose)
 
-        const fileManager = new FilesManager(this.app.vault, this.app)
+        const fileManager = new FilesManager(this.app.vault, this.app, this.db)
         this.tablesManager = new TablesManager(fileManager, this.db)
         this.tablesManager.getTableSignal('files')
         this.tablesManager.getTableSignal('tags')

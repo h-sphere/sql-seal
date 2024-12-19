@@ -1,3 +1,8 @@
+# 0.12.0
+This update does not bring any functionality changes yet but it fixes some problems with underlying architecture, helping to make SQLSeal more efficient in the future. If you work with many datasets, you might see slightly smaller memory usage as the database is now persisted in the IndexedDb (tech comment: as block storage).
+Technical update:
+Database has been moved to WebWorker, making data loading and retrieval slightly more efficient. Also integrated with [Absurd-SQL](https://github.com/jlongster/absurd-sql) which allows to store SQLite inside IndexedDb block storage, meaning it can be persisted and offloaded from the memory. Due to Obsidian API limitations, we still need to load huge files CSV to the memory instead of streaming their content but once the content is loaded, the memory usage should significantly go down now. More changes using this update to come soon!
+
 # 0.11.0
 The biggest update yet with plenty of exciting features:
 
