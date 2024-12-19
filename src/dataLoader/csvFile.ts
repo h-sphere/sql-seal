@@ -1,3 +1,4 @@
+import { TFile } from "obsidian";
 import { createSignal, Signal } from "src/utils/signal";
 
 export type CSVData = string

@@ -5,7 +5,6 @@ import { hashString } from "./hash"
 import { prefixedIfNotGlobal, updateTables } from "./sqlReparseTables"
 import { SqlSealDatabase } from "./database"
 import { Logger } from "./logger"
-import { SyncModel } from "./models/sync"
 import { TablesManager } from "./dataLoader/collections/tablesManager"
 import { QueryManager } from "./dataLoader/collections/queryManager"
 import { parseLanguage, Table, TableWithParentPath } from "./grammar/newParser"
@@ -15,7 +14,6 @@ export class SqlSealCodeblockHandler {
     get globalTables() {
         return ['files', 'tags', 'tasks'] // Make this come from SealFileSync and plugins.
     }
-    syncModel: SyncModel
     constructor(
         private readonly app: App,
         private readonly db: SqlSealDatabase,
@@ -24,21 +22,19 @@ export class SqlSealCodeblockHandler {
         private queryManager: QueryManager,
         private rendererRegistry: RendererRegistry
     ) {
-        this.syncModel = new SyncModel(db)
     }
 
     setupTableSignals(tables: Array<TableWithParentPath>) {
         tables.forEach(t => {
-            this.logger.log(`Registering table ${t.tableName} -> ${t.fileName}`)
             this.tableManager.registerTable(t.tableName, t.fileName, t.parentPath)
         })
     }
 
-    setupQuerySignals({ statement, tables }: ReturnType<typeof updateTables>, renderer: RenderReturn, ctx: MarkdownPostProcessorContext) {
+    setupQuerySignals({ statement, tables }: ReturnType<typeof updateTables>, renderer: RenderReturn, ctx: MarkdownPostProcessorContext, el: Element) {
         const frontmatter = resolveFrontmatter(ctx, this.app)
         const renderSelect = async () => {
             try {
-                 const { data, columns } = this.db.select(statement, frontmatter ?? {})
+                 const { data, columns } = await this.db.select(statement, frontmatter ?? {})
                  renderer.render({ data, columns })
             } catch (e) {
                 renderer.error(e.toString())
@@ -47,7 +43,11 @@ export class SqlSealCodeblockHandler {
 
 
         const sig = this.queryManager.registerQuery(ctx.docId, tables)
-        sig(() => {
+        const unsubscribe = sig(() => {
+            if (!el.isConnected) {
+                unsubscribe()
+                return
+            }
             renderSelect()
         })
     }
@@ -88,7 +88,7 @@ export class SqlSealCodeblockHandler {
             try {
                 if (results.queryPart) {
                     const { statement, tables } = updateTables(results.queryPart!, [...this.globalTables], prefix)
-                    this.setupQuerySignals({ statement, tables }, renderer!, ctx)
+                    this.setupQuerySignals({ statement, tables }, renderer!, ctx, el)
                 }
             } catch (e) {
                 renderer!.error(e.toString())
