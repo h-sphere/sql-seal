@@ -1,3 +1,6 @@
+# 0.12.1
+fix: Fixed issue with the library on mobile - now it should load properly.
+
 # 0.12.0
 This update does not bring any functionality changes yet but it fixes some problems with underlying architecture, helping to make SQLSeal more efficient in the future. If you work with many datasets, you might see slightly smaller memory usage as the database is now persisted in the IndexedDb (tech comment: as block storage).
 Technical update:
