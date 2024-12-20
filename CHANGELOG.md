@@ -1,3 +1,6 @@
+# 0.12.3
+- fix: Fixing completed flag in tasks being reversed
+
 # 0.12.2
 fix: Fixed issue with CTE table names being incorrectly processed causing error
 
