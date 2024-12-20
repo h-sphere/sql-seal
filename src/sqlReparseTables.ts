@@ -78,3 +78,14 @@ export const updateTables = (selectStatement: string, globalTables: string[], pr
         throw new Error('Invalid Statement. Only single SELECTs are accepted at the moment.')
     }
 }
+
+export const extractCtes = (selectStatement: string) => {
+    const parser = new Parser()
+    const { ast } = parser.parse(selectStatement)
+    if (!Array.isArray(ast) && ast.type === 'select') {
+        if (ast.with) {
+            return ast.with.map(w => w.name.value)
+        }
+    }
+    return []
+}

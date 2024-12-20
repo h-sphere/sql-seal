@@ -1,3 +1,6 @@
+# 0.12.2
+fix: Fixed issue with CTE table names being incorrectly processed causing error
+
 # 0.12.1
 fix: Fixed issue with the library on mobile - now it should load properly.
 
