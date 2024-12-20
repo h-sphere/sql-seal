@@ -2,7 +2,7 @@ import { App, MarkdownPostProcessorContext } from "obsidian"
 import { displayError, displayNotice } from "./ui"
 import { resolveFrontmatter } from "./frontmatter"
 import { hashString } from "./hash"
-import { prefixedIfNotGlobal, updateTables } from "./sqlReparseTables"
+import { extractCtes, prefixedIfNotGlobal, updateTables } from "./sqlReparseTables"
 import { SqlSealDatabase } from "./database"
 import { Logger } from "./logger"
 import { TablesManager } from "./dataLoader/collections/tablesManager"
@@ -12,7 +12,7 @@ import { RendererRegistry, RenderReturn } from "./rendererRegistry"
 
 export class SqlSealCodeblockHandler {
     get globalTables() {
-        return ['files', 'tags', 'tasks'] // Make this come from SealFileSync and plugins.
+        return ['files', 'tags', 'tasks', 'xyz'] // Make this come from SealFileSync and plugins.
     }
     constructor(
         private readonly app: App,
@@ -88,7 +88,9 @@ export class SqlSealCodeblockHandler {
             try {
                 if (results.queryPart) {
                     const { statement, tables } = updateTables(results.queryPart!, [...this.globalTables], prefix)
-                    this.setupQuerySignals({ statement, tables }, renderer!, ctx, el)
+                    const ctes = extractCtes(results.queryPart)
+                    const tablesWithoutCtes = tables.filter(t => !ctes.includes(t))
+                    this.setupQuerySignals({ statement, tables: tablesWithoutCtes }, renderer!, ctx, el)
                 }
             } catch (e) {
                 renderer!.error(e.toString())
