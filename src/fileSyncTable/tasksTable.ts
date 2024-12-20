@@ -29,7 +29,7 @@ export class TasksFileSyncTable extends AFileSyncTable {
             // Check if it's a task
             if (!listItem.task) return;
 
-            const status = listItem.task === ' '
+            const status = listItem.task !== ' '
             
             // Get the full line content
             const lineContent = lines[listItem.position.start.line];
