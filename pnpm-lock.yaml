@@ -11,6 +11,9 @@ importers:
       '@ag-grid-community/theming':
         specifier: ^32.3.3
         version: 32.3.3
+      '@hypersphere/omnibus':
+        specifier: ^0.1.6
+        version: 0.1.6
       '@jlongster/sql.js':
         specifier: ^1.6.7
         version: 1.6.7
@@ -44,6 +47,9 @@ importers:
       util:
         specifier: ^0.12.5
         version: 0.12.5
+      uuid:
+        specifier: ^11.0.4
+        version: 11.0.4
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -718,6 +724,9 @@ packages:
   '@humanwhocodes/retry@0.4.1':
     resolution: {integrity: sha512-c7hNEllBlenFTHBky65mhq8WD2kbN9Q6gk0bTk8lSBvc554jpXSkST1iePudpt7+A/AQvuHs9EMqjHDXMY1lrA==}
     engines: {node: '>=18.18'}
+
+  '@hypersphere/omnibus@0.1.6':
+    resolution: {integrity: sha512-agZuKyhdW0n1JoLYZUuA6Du1QoQn39/LapFgRtbJs7fyRM62C9O2PWISHUCwAKnC1Splshpd8glQgx5pA2zkCg==}
 
   '@iconify-json/simple-icons@1.2.12':
     resolution: {integrity: sha512-lRNORrIdeLStShxAjN6FgXE1iMkaAgiAHZdP0P0GZecX91FVYW58uZnRSlXLlSx5cxMoELulkAAixybPA2g52g==}
@@ -2974,6 +2983,10 @@ packages:
   util@0.12.5:
     resolution: {integrity: sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==}
 
+  uuid@11.0.4:
+    resolution: {integrity: sha512-IzL6VtTTYcAhA/oghbFJ1Dkmqev+FpQWnCBaKq/gUluLxliWvO8DPFWfIviRmYbtaavtSQe4WBL++rFjdcGWEg==}
+    hasBin: true
+
   v8-to-istanbul@9.3.0:
     resolution: {integrity: sha512-kiGUalWN+rgBJ/1OHZsBtU4rXZOfj/7rKQxULKlIzwzQSvMJUUNgPwJEEh7gU6xEVxC0ahoOBvN2YI8GH6FNgA==}
     engines: {node: '>=10.12.0'}
@@ -3642,6 +3655,8 @@ snapshots:
   '@humanwhocodes/retry@0.3.1': {}
 
   '@humanwhocodes/retry@0.4.1': {}
+
+  '@hypersphere/omnibus@0.1.6': {}
 
   '@iconify-json/simple-icons@1.2.12':
     dependencies:
@@ -6312,6 +6327,8 @@ snapshots:
       is-generator-function: 1.0.10
       is-typed-array: 1.1.13
       which-typed-array: 1.1.15
+
+  uuid@11.0.4: {}
 
   v8-to-istanbul@9.3.0:
     dependencies:

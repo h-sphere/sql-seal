@@ -112,20 +112,23 @@ export class WorkerDatabase {
         })
     }
 
-    async createTable(tableName: string, fields:  Record<string, FieldTypes>) {
+    async createTable(tableName: string, fields:  Record<string, FieldTypes>, noDrop: boolean = false) {
         const transformedFiels = Object.entries(fields).map(([key, type]) => [sanitise(key), type])
         const uniqueFields = [...new Map(transformedFiels.map(item =>
             [item[0], item])).values()]
         const sqlFields = uniqueFields.map(([key, type]) => `${key} ${type}`)
         // FIXME: probably use schema generator, for now create with hardcoded fields
-        await this.dropTable(tableName)
+        if (!noDrop) {
+            await this.dropTable(tableName)
+        }
         const createSQL = `CREATE TABLE IF NOT EXISTS ${tableName} (
                     ${sqlFields.join(', ')}
                 );`
 
         this.db.prepare(createSQL).run()
-        await this.clearTable(tableName)
-
+        if (!noDrop) {
+            await this.clearTable(tableName)
+        }
         // Dropping data.
     }
 
@@ -154,10 +157,10 @@ export class WorkerDatabase {
         }
     }
 
-    async updateData(tableName: string, data: Array<Record<string, unknown>>) {
+    async updateData(tableName: string, data: Array<Record<string, unknown>>, matchKey: string = 'id') {
         const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
         data.forEach((d: Record<string, unknown>) => {
-            const stmt = this.db.prepare(`UPDATE ${tableName} SET ${fields.map((key: string) => `${key} = @${key}`).join(', ')} WHERE id = @id`)
+            const stmt = this.db.prepare(`UPDATE ${tableName} SET ${fields.map((key: string) => `${key} = @${key}`).join(', ')} WHERE ${matchKey} = @${matchKey}`)
             stmt.run(recordToBindParams(d))
         })
     }

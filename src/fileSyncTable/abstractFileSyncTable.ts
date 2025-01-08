@@ -1,12 +1,10 @@
 import { App, TFile } from "obsidian";
 import { SqlSealDatabase } from "src/database";
-import { TablesManager } from "src/dataLoader/collections/tablesManager";
 
 export abstract class AFileSyncTable {
     constructor(
         protected readonly db: SqlSealDatabase,
-        protected readonly app: App,
-        protected tableManager: TablesManager
+        protected readonly app: App
     ) {
     }
 

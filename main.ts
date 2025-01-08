@@ -1,4 +1,4 @@
-import { Menu, MenuItem, Plugin, TAbstractFile, Tasks, TFile } from 'obsidian';
+import { Menu, Plugin, TAbstractFile, Tasks, TFile } from 'obsidian';
 import { FilesFileSyncTable } from 'src/fileSyncTable/filesTable';
 import { TagsFileSyncTable } from 'src/fileSyncTable/tagsTable';
 import { TasksFileSyncTable } from 'src/fileSyncTable/tasksTable';
@@ -37,18 +37,22 @@ export default class SqlSealPlugin extends Plugin {
 
 		this.registerGlobalApi();
 		const sqlSeal = new SqlSeal(this.app, false, this.rendererRegistry) // FIXME: set verbose based on the env.
-		this.registerMarkdownCodeBlockProcessor("sqlseal", sqlSeal.getHandler())
 		this.sqlSeal = sqlSeal
+
+		await this.sqlSeal.db.connect()
+
 		// start syncing when files are loaded
 		this.app.workspace.onLayoutReady(() => {
 			sqlSeal.db.connect().then(() => {
+
 				this.fileSync = new SealFileSync(this.app, this)
 
-				this.fileSync.addTablePlugin(new FilesFileSyncTable(sqlSeal.db, this.app, sqlSeal.tablesManager, this))
-				this.fileSync.addTablePlugin(new TagsFileSyncTable(sqlSeal.db, this.app, sqlSeal.tablesManager))
-				this.fileSync.addTablePlugin(new TasksFileSyncTable(sqlSeal.db, this.app, sqlSeal.tablesManager))
+				this.fileSync.addTablePlugin(new FilesFileSyncTable(sqlSeal.db, this.app, this))
+				this.fileSync.addTablePlugin(new TagsFileSyncTable(sqlSeal.db, this.app))
+				this.fileSync.addTablePlugin(new TasksFileSyncTable(sqlSeal.db, this.app))
 
 				this.fileSync.init()
+				this.registerMarkdownCodeBlockProcessor("sqlseal", sqlSeal.getHandler())
 			})
 		})
 

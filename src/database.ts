@@ -1,8 +1,5 @@
 import { App } from "obsidian"
 import { FieldTypes, toTypeStatements } from "./utils"
-import { sanitise } from "./utils/sanitiseColumn"
-import initSqlJs, { BindParams, Database, Statement } from 'sql.js'
-import wasmBinary from '../node_modules/sql.js/dist/sql-wasm.wasm'
 import * as Comlink from 'comlink'
 import workerCode from 'virtual:worker-code'
 import { WorkerDatabase } from "./database-worker"
@@ -96,21 +93,6 @@ export class SqlSealDatabase {
         return schema
     }
 
-    // async addNewColumns(name: string, data: Array<Record<string, unknown>>) {
-    //     const schema = await this.getSchema(data)
-    //     const currentSchema = this.toObjectsArray(this.db.prepare(`PRAGMA table_info(${name})`))
-    //     const currentFields = currentSchema.map((f: any) => f.name)
-    //     const newFields = Object.keys(schema).filter(f => !currentFields.includes(f))
-
-    //     if (newFields.length === 0) {
-    //         return
-    //     }
-
-    //     const alter = this.db.prepare(`ALTER TABLE ${name} ADD 
-    //         COLUMN ${newFields.map(f => `${f} ${schema[f]}`).join(', ')}`)
-    //     alter.run()
-    // }
-
     async updateData(name: string, data: Array<Record<string, unknown>>) {
         return this.db.updateData(name, data)
     }
@@ -135,8 +117,8 @@ export class SqlSealDatabase {
         await this.createTable(name, fieldsToRecord)
     }
 
-    async createTable(name: string, fields: Record<string, FieldTypes>) {
-        await this.db.createTable(name, fields)
+    async createTable(name: string, fields: Record<string, FieldTypes>, noDrop?: boolean) {
+        await this.db.createTable(name, fields, noDrop)
     }
     async getSchema(data: Array<Record<string, unknown>>) {
         const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));

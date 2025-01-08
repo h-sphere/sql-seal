@@ -1,101 +1,116 @@
-import { App, MarkdownPostProcessorContext } from "obsidian"
+import { App, MarkdownPostProcessorContext, MarkdownRenderChild, normalizePath, Vault } from "obsidian"
 import { displayError, displayNotice } from "./ui"
-import { resolveFrontmatter } from "./frontmatter"
-import { hashString } from "./hash"
-import { extractCtes, prefixedIfNotGlobal, updateTables } from "./sqlReparseTables"
 import { SqlSealDatabase } from "./database"
 import { Logger } from "./logger"
-import { TablesManager } from "./dataLoader/collections/tablesManager"
-import { QueryManager } from "./dataLoader/collections/queryManager"
-import { parseLanguage, Table, TableWithParentPath } from "./grammar/newParser"
+import { parseLanguage, Table } from "./grammar/newParser"
 import { RendererRegistry, RenderReturn } from "./rendererRegistry"
+import { Sync } from "./datamodel/sync"
+import { OmnibusRegistrator } from "@hypersphere/omnibus"
+import { transformQuery } from "./datamodel/transformer"
+
+class CodeblockProcessor extends MarkdownRenderChild {
+
+    registrator: OmnibusRegistrator
+    renderer: RenderReturn
+
+    constructor(
+        private el: HTMLElement,
+        private source: string,
+        private ctx: MarkdownPostProcessorContext,
+        private rendererRegistry: RendererRegistry,
+        private db: SqlSealDatabase,
+        private app: App,
+        private sync: Sync) {
+        super(el)
+        this.registrator = this.sync.getRegistrator()
+    }
+
+    query: string;
+
+    async onload() {
+        try {
+            const results = parseLanguage(this.source)
+            if (results.tables) {
+                await this.registerTables(results.tables)
+                if (!results.queryPart) {
+                    displayNotice(this.el, `Creating tables: ${results.tables.map(t => t.tableName).join(', ')}`)
+                    return
+                }
+            }
+
+            this.renderer = this.rendererRegistry.prepareRender(results.intermediateContent)(this.el)
+            
+            // FIXME: probably should save the one before transform and perform transform every time we execute it.
+            this.query = results.queryPart
+            await this.render()
+        } catch (e) {
+            displayError(this.el, e.toString())
+        }
+    }
+
+    onunload() {
+        this.registrator.offAll()
+    }
+
+    async render() {
+        try {
+
+        const registeredTablesForContext = await this.sync.getTablesMappingForContext(this.ctx.sourcePath)
+        const tranformedQuery = transformQuery(this.query, registeredTablesForContext)
+
+        this.registrator.offAll()
+        Object.values(registeredTablesForContext).forEach(v => {
+            this.registrator.on(`change::${v}`, () => {
+                this.render()
+            })
+            this.registrator.on('file::change::'+this.ctx.sourcePath, () => {
+                sleep(250).then(() => this.render())
+
+            })
+        })
+
+
+        const file = this.app.vault.getFileByPath(this.ctx.sourcePath)
+        if (!file) {
+            return
+        }
+        const fileCache = this.app.metadataCache.getFileCache(file)
+            const { data, columns } = await this.db.select(tranformedQuery, fileCache?.frontmatter ?? {})
+            this.renderer.render({ data, columns })
+       } catch (e) {
+           this.renderer.error(e.toString())
+       }
+    }
+
+    async registerTables(tables: Table[]) {
+        await Promise.all(tables.map((table) => {
+            const path = this.app.metadataCache.getFirstLinkpathDest(table.fileName, this.ctx.sourcePath)
+            if (!path) {
+                throw new Error(`File does not exist: ${table.fileName} (for ${table.tableName}).`)
+            }
+            return this.sync.registerTable({
+                aliasName: table.tableName,
+                fileName: path.path,
+                sourceFile: this.ctx.sourcePath
+            })
+        }))
+    }
+}
+
 
 export class SqlSealCodeblockHandler {
-    get globalTables() {
-        return ['files', 'tags', 'tasks', 'xyz'] // Make this come from SealFileSync and plugins.
-    }
     constructor(
         private readonly app: App,
         private readonly db: SqlSealDatabase,
-        private logger: Logger,
-        private tableManager: TablesManager,
-        private queryManager: QueryManager,
+        private sync: Sync,
         private rendererRegistry: RendererRegistry
     ) {
     }
 
-    setupTableSignals(tables: Array<TableWithParentPath>) {
-        tables.forEach(t => {
-            this.tableManager.registerTable(t.tableName, t.fileName, t.parentPath)
-        })
-    }
-
-    setupQuerySignals({ statement, tables }: ReturnType<typeof updateTables>, renderer: RenderReturn, ctx: MarkdownPostProcessorContext, el: Element) {
-        const frontmatter = resolveFrontmatter(ctx, this.app)
-        const renderSelect = async () => {
-            try {
-                 const { data, columns } = await this.db.select(statement, frontmatter ?? {})
-                 renderer.render({ data, columns })
-            } catch (e) {
-                renderer.error(e.toString())
-            }
-        }
-
-
-        const sig = this.queryManager.registerQuery(ctx.docId, tables)
-        const unsubscribe = sig(() => {
-            if (!el.isConnected) {
-                unsubscribe()
-                return
-            }
-            renderSelect()
-        })
-    }
-
     getHandler() {
         return async (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
-            const prefix = hashString(ctx.sourcePath)
-
-            let results;
-            let renderer: RenderReturn;
-
-            try {
-                await this.db.connect()
-                // Before we display data, we need to parse query to see if there is query part.
-                results = parseLanguage(source)
-                if (results.queryPart) {
-                    // FIXME: this one probably needs both renderer and error api.
-                    renderer = this.rendererRegistry.prepareRender(results.intermediateContent)(el)
-                } else {
-                    displayNotice(el, `Creating tables: ${results.tables.map(t => t.tableName).join(', ')}`)
-                }
-
-                const prefixedTables = results.tables.map(t => {
-                    return {
-                        ...t,
-                        tableName: prefixedIfNotGlobal(t.tableName, this.globalTables, prefix),
-                        parentPath: ctx.sourcePath
-                    }
-                }) satisfies TableWithParentPath[]
-
-                this.setupTableSignals(prefixedTables)
-
-            } catch (e) {
-                displayError(el, e.toString())
-                return
-            }
-
-            try {
-                if (results.queryPart) {
-                    const { statement, tables } = updateTables(results.queryPart!, [...this.globalTables], prefix)
-                    const ctes = extractCtes(results.queryPart)
-                    const tablesWithoutCtes = tables.filter(t => !ctes.includes(t))
-                    this.setupQuerySignals({ statement, tables: tablesWithoutCtes }, renderer!, ctx, el)
-                }
-            } catch (e) {
-                renderer!.error(e.toString())
-            }
-
+            const processor = new CodeblockProcessor(el, source, ctx, this.rendererRegistry, this.db, this.app, this.sync)
+            ctx.addChild(processor)
         }
     }
 }
