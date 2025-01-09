@@ -105,3 +105,20 @@
     font-family: monospace;
     padding: 8px;
 }
+
+
+/* INLINE QUERIES */
+.sqlseal-inline-result {
+    display: inline-block;
+    padding: 0 4px;
+    margin: 0 2px;
+    background-color: var(--background-secondary);
+    border-radius: 4px;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+.sqlseal-inline-result .error {
+    color: var(--text-error);
+    font-style: italic;
+}

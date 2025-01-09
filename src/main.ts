@@ -10,6 +10,7 @@ import { FilesFileSyncTable } from 'src/vaultSync/tables/filesTable';
 import { TagsFileSyncTable } from 'src/vaultSync/tables/tagsTable';
 import { TasksFileSyncTable } from 'src/vaultSync/tables/tasksTable';
 import { CSV_VIEW_TYPE, CSVView } from 'src/view/CSVView';
+import { createSqlSealEditorExtension } from './editorExtension/inlineCodeBlock';
 
 const GLOBAL_KEY = 'sqlSealApi'
 
@@ -43,7 +44,7 @@ export default class SqlSealPlugin extends Plugin {
 
 		// start syncing when files are loaded
 		this.app.workspace.onLayoutReady(() => {
-			sqlSeal.db.connect().then(() => {
+			sqlSeal.db.connect().then(async () => {
 
 				this.fileSync = new SealFileSync(this.app, this)
 
@@ -51,8 +52,9 @@ export default class SqlSealPlugin extends Plugin {
 				this.fileSync.addTablePlugin(new TagsFileSyncTable(sqlSeal.db, this.app))
 				this.fileSync.addTablePlugin(new TasksFileSyncTable(sqlSeal.db, this.app))
 
-				this.fileSync.init()
+				await this.fileSync.init()
 				this.registerMarkdownCodeBlockProcessor("sqlseal", sqlSeal.getHandler())
+				this.registerInlineCodeblocks()
 			})
 		})
 
@@ -61,6 +63,33 @@ export default class SqlSealPlugin extends Plugin {
                 this.addCSVCreatorMenuItem(menu, file);
             })
         );
+	}
+
+	private registerInlineCodeblocks() {
+
+		// Extension for Live Preview
+		const editorExtension = createSqlSealEditorExtension(
+			this.app,
+			this.sqlSeal.db,
+			this.sqlSeal.sync,
+		);
+		this.registerEditorExtension(editorExtension);
+
+		// Extension for Read mode
+		this.registerMarkdownPostProcessor((el, ctx) => {
+			const inlineCodeBlocks = el.querySelectorAll('code');
+			inlineCodeBlocks.forEach((node: HTMLSpanElement) => {
+				const text = node.innerText;
+				if (text.startsWith('S>')) {
+					const container = createEl('span', { cls: 'sqlseal-inline-result' });
+					container.setAttribute('aria-label', text.slice(3));
+					container.classList.add('has-tooltip');
+					node.replaceWith(container);
+					this.sqlSeal.getInlineHandler()(text, container, ctx);
+				}
+			});
+		});
+
 	}
 
 	private addCSVCreatorMenuItem(menu: Menu, file: TAbstractFile) {
