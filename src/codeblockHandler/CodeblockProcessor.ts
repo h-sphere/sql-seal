@@ -2,7 +2,7 @@ import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
 import { SqlSealDatabase } from "src/database/database";
 import { Sync } from "src/datamodel/sync";
-import { transformQuery } from "src/datamodel/transformer";
+import { transformQuery } from "src/sql/transformer";
 import { parseLanguage, Table } from "src/grammar/newParser";
 import { RendererRegistry, RenderReturn } from "src/renderer/rendererRegistry";
 import { displayError, displayNotice } from "src/utils/ui";

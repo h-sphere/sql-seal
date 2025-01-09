@@ -5,7 +5,7 @@ import { TAbstractFile, TFile, Vault } from "obsidian";
 import { parse } from "papaparse";
 import { sanitise } from "src/utils/sanitiseColumn";
 import { FieldTypes, toTypeStatements } from "src/utils/typePredictions";
-import { FilepathHasher } from "./hasher";
+import { FilepathHasher } from "../utils/hasher";
 import { Omnibus } from "@hypersphere/omnibus";
 
 
