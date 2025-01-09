@@ -1,3 +1,6 @@
+# 0.12.4
+- added "Create CSV file" option in context menu in file explorer.
+
 # 0.12.3
 - fix: Fixing completed flag in tasks being reversed
 

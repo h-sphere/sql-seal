@@ -1,4 +1,4 @@
-import { Plugin, Tasks } from 'obsidian';
+import { Menu, MenuItem, Plugin, TAbstractFile, Tasks, TFile } from 'obsidian';
 import { FilesFileSyncTable } from 'src/fileSyncTable/filesTable';
 import { TagsFileSyncTable } from 'src/fileSyncTable/tagsTable';
 import { TasksFileSyncTable } from 'src/fileSyncTable/tasksTable';
@@ -52,8 +52,59 @@ export default class SqlSealPlugin extends Plugin {
 			})
 		})
 
-		// this.addSettingTab(new SqlSealSettingsTab(this.app, this));
+		this.registerEvent(
+            this.app.workspace.on('file-menu', (menu: Menu, file: TAbstractFile) => {
+                this.addCSVCreatorMenuItem(menu, file);
+            })
+        );
+	}
 
+	private addCSVCreatorMenuItem(menu: Menu, file: TAbstractFile) {
+		menu.addItem((item) => {
+		item
+			.setTitle('New CSV file')
+			.setIcon('table')
+			.onClick(async () => {
+				try {
+					await this.createNewCSVFile(file)
+				} catch (error) {
+					console.error('Failed to create CSV file:', error)
+				}
+			});
+		});
+	}
+
+	private async createNewCSVFile(file: TAbstractFile) {
+		const targetDir = file instanceof TFile ? file.parent : file
+		const basePath = targetDir!.path
+
+		const csvTemplate = 'Id,Name\n1,Test Data'
+
+		const defaultName = 'Untitled CSV'
+		let fileName = defaultName
+		let filePath = `${basePath}/${fileName}.csv`;
+		let counter = 1;
+
+		while (await this.app.vault.adapter.exists(filePath)) {
+			fileName = `${defaultName} ${counter}`;
+			filePath = `${basePath}/${fileName}.csv`;
+			counter++;
+		}
+
+		try {
+			const newFile = await this.app.vault.create(filePath, csvTemplate);
+
+			const leaf = this.app.workspace.getLeaf(false);
+			await leaf.openFile(newFile);
+
+			const fileExplorer = this.app.workspace.getLeavesOfType('file-explorer')[0]?.view;
+            if (fileExplorer) {
+                await (fileExplorer as any).revealInFolder(newFile);
+            }
+		} catch (error) {
+			console.error('Error creating CSV file:', error);
+			throw error;
+		}
 	}
 
 	async registerCsvView() {
@@ -86,8 +137,10 @@ export default class SqlSealPlugin extends Plugin {
 
 	unregisterCSVView() {
 		this.app.workspace.detachLeavesOfType(CSV_VIEW_TYPE);
-		this.app.viewRegistry.unregisterExtensions(['csv'])
-		this.app.viewRegistry.unregisterView(CSV_VIEW_TYPE)
+
+		// TODO: figure out why viewRegistry is not being 
+		(this.app as any).viewRegistry.unregisterExtensions(['csv'])
+		(this.app as any).viewRegistry.unregisterView(CSV_VIEW_TYPE)
 
 	}
 
