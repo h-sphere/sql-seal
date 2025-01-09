@@ -26,10 +26,6 @@ export class SQLSealSettingsTab extends PluginSettingTab {
         const {containerEl} = this;
         containerEl.empty();
 
-        // CSV Viewer section
-        // containerEl.createEl('h3', { text: 'CSV Viewer' });
-
-
         new Setting(containerEl)
             .setName('Enable CSV Viewer')
             .setDesc('Enables CSV files in your vault and adds ability to display them in a grid.')

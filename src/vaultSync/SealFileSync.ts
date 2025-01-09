@@ -1,18 +1,7 @@
-import { App, Plugin, TAbstractFile, TFile } from "obsidian";
-import { SqlSeal } from "./sqlSeal";
-import { FieldTypes } from "./utils";
-import { TablesManager } from "./dataLoader/collections/tablesManager";
-import { sanitise } from "./utils/sanitiseColumn";
-import { AFileSyncTable } from "./fileSyncTable/abstractFileSyncTable";
-
-function fileData(file: TAbstractFile, {tags: _tags, ...frontmatter }: Record<string, any>) {
-    return {
-        ...frontmatter,
-        path: file.path,
-        name: file.name.replace(/\.[^/.]+$/, ""),
-        id: file.path
-    }
-}
+import { App, Plugin, TFile } from "obsidian";
+import { FieldTypes } from "src/utils/typePredictions";
+import { sanitise } from "src/utils/sanitiseColumn";
+import { AFileSyncTable } from "./tables/abstractFileSyncTable";
 
 const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {
     const frontmatter = plugin.app.metadataCache.getFileCache(file)?.frontmatter || {}

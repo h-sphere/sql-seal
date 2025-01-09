@@ -1,3 +1,9 @@
+# 0.13.0
+Huge upgrade to the code codebase. SQLSeal should be now much faster and more reliable thanks to the following:
+- Rewritten how files are synched - now each CSV file creates AT MOST one table in the database (synchronisations are being reused accross files)
+- Rewritten SQL parser - this enables using more advanced SQLite functionality like recursive CTEs, UNIONS and `json_each`!
+- (minor, technical): code got restructured and fixed so it's easier to contribute.
+
 # 0.12.4
 - added "Create CSV file" option in context menu in file explorer.
 

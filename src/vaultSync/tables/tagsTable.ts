@@ -8,13 +8,11 @@ export class TagsFileSyncTable extends AFileSyncTable {
     }
     async onFileDelete(path: string): Promise<void> {
         await this.db.deleteData('tags', [{ fileId: path }], 'fileId')
-        this.tableManager.getTableSignal('tags')(Date.now())
     }
 
     async onFileCreate(file: TFile): Promise<void> {
         const tags = await this.getFileTags(file)
         this.db.insertData('tags', tags)
-        this.tableManager.getTableSignal('tags')(Date.now())
     }
 
     private async getFileTags(file: TFile) {
@@ -38,6 +36,5 @@ export class TagsFileSyncTable extends AFileSyncTable {
             'tag': 'TEXT',
             'fileId': 'TEXT'
         })
-        this.tableManager.getTableSignal('tags')(Date.now())
     }
 }

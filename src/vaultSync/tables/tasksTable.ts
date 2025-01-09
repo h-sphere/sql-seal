@@ -8,13 +8,11 @@ export class TasksFileSyncTable extends AFileSyncTable {
     }
     async onFileDelete(path: string): Promise<void> {
         await this.db.deleteData('tasks', [{ filePath: path }], 'filePath')
-        this.tableManager.getTableSignal('tasks')(Date.now())
     }
 
     async onFileCreate(file: TFile): Promise<void> {
         const tasks = await this.getFileTags(file)
         this.db.insertData('tasks', tasks)
-        this.tableManager.getTableSignal('tasks')(Date.now())
     }
 
     async getFileTags(file: TFile) {
@@ -52,6 +50,5 @@ export class TasksFileSyncTable extends AFileSyncTable {
             'completed': 'INTEGER',
             'filePath': 'TEXT'
         })
-        this.tableManager.getTableSignal('tasks')(Date.now())
     }
 }
