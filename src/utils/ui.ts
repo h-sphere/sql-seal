@@ -1,6 +1,4 @@
 import { App } from "obsidian"
-import { createGrid, GridOptions } from 'ag-grid-community';
-import { themeQuartz } from '@ag-grid-community/theming';
 
 export  const displayNotice = (el: HTMLElement, text: string) => {
     el.empty()
@@ -51,7 +49,6 @@ const generateLink = (config: SqlSealAnchorElement, app: App) => {
           
           link.addEventListener('click', (event) => {
             event.preventDefault();
-            
             // Open the file in the active leaf (same tab)
             const leaf = app.workspace.getLeaf();
             const file = app.vault.getFileByPath(config.href)

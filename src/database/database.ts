@@ -1,9 +1,8 @@
 import { App } from "obsidian"
-import { FieldTypes, toTypeStatements } from "./utils"
+import { FieldTypes, toTypeStatements } from "../utils/typePredictions"
 import * as Comlink from 'comlink'
 import workerCode from 'virtual:worker-code'
-import { WorkerDatabase } from "./database-worker"
-
+import { WorkerDatabase } from "./worker/database";
 
 export interface FieldDefinition {
     name: string;

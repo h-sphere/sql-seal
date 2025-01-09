@@ -1,14 +1,14 @@
 import { Menu, Plugin, TAbstractFile, Tasks, TFile } from 'obsidian';
-import { FilesFileSyncTable } from 'src/fileSyncTable/filesTable';
-import { TagsFileSyncTable } from 'src/fileSyncTable/tagsTable';
-import { TasksFileSyncTable } from 'src/fileSyncTable/tasksTable';
 import { GridRenderer } from 'src/renderer/GridRenderer';
 import { MarkdownRenderer } from 'src/renderer/MarkdownRenderer';
 import { TableRenderer } from 'src/renderer/TableRenderer';
-import { RendererConfig, RendererRegistry } from 'src/rendererRegistry';
-import { SealFileSync } from 'src/SealFileSync';
+import { RendererConfig, RendererRegistry } from 'src/renderer/rendererRegistry';
 import { DEFAULT_SETTINGS, SQLSealSettings, SQLSealSettingsTab } from 'src/settings/SQLSealSettingsTab';
 import { SqlSeal } from 'src/sqlSeal';
+import { SealFileSync } from 'src/vaultSync/SealFileSync';
+import { FilesFileSyncTable } from 'src/vaultSync/tables/filesTable';
+import { TagsFileSyncTable } from 'src/vaultSync/tables/tagsTable';
+import { TasksFileSyncTable } from 'src/vaultSync/tables/tasksTable';
 import { CSV_VIEW_TYPE, CSVView } from 'src/view/CSVView';
 
 const GLOBAL_KEY = 'sqlSealApi'

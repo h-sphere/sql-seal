@@ -1,9 +1,9 @@
 import { createGrid, GridApi, GridOptions, themeQuartz } from "ag-grid-community";
 import { merge } from "lodash";
 import { App } from "obsidian";
-import { RendererConfig } from "src/rendererRegistry";
+import { RendererConfig } from "src/renderer/rendererRegistry";
 import { parse } from 'json5'
-import { displayError, displayNotice, parseCell } from "src/ui";
+import { parseCell } from "src/utils/ui";
 
 const getCurrentTheme = () => {
     return document.body.classList.contains('theme-dark') ? 'dark' : 'light';

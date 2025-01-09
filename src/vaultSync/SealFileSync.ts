@@ -1,7 +1,7 @@
-import { App, Plugin, TAbstractFile, TFile } from "obsidian";
-import { FieldTypes } from "./utils";
-import { sanitise } from "./utils/sanitiseColumn";
-import { AFileSyncTable } from "./fileSyncTable/abstractFileSyncTable";
+import { App, Plugin, TFile } from "obsidian";
+import { FieldTypes } from "src/utils/typePredictions";
+import { sanitise } from "src/utils/sanitiseColumn";
+import { AFileSyncTable } from "./tables/abstractFileSyncTable";
 
 const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {
     const frontmatter = plugin.app.metadataCache.getFileCache(file)?.frontmatter || {}

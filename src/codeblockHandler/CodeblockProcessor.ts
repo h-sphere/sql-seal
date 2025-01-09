@@ -1,14 +1,13 @@
-import { App, MarkdownPostProcessorContext, MarkdownRenderChild, normalizePath, Vault } from "obsidian"
-import { displayError, displayNotice } from "./ui"
-import { SqlSealDatabase } from "./database"
-import { Logger } from "./logger"
-import { parseLanguage, Table } from "./grammar/newParser"
-import { RendererRegistry, RenderReturn } from "./rendererRegistry"
-import { Sync } from "./datamodel/sync"
-import { OmnibusRegistrator } from "@hypersphere/omnibus"
-import { transformQuery } from "./datamodel/transformer"
+import { OmnibusRegistrator } from "@hypersphere/omnibus";
+import { App, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
+import { SqlSealDatabase } from "src/database/database";
+import { Sync } from "src/datamodel/sync";
+import { transformQuery } from "src/datamodel/transformer";
+import { parseLanguage, Table } from "src/grammar/newParser";
+import { RendererRegistry, RenderReturn } from "src/renderer/rendererRegistry";
+import { displayError, displayNotice } from "src/utils/ui";
 
-class CodeblockProcessor extends MarkdownRenderChild {
+export class CodeblockProcessor extends MarkdownRenderChild {
 
     registrator: OmnibusRegistrator
     renderer: RenderReturn
@@ -94,23 +93,5 @@ class CodeblockProcessor extends MarkdownRenderChild {
                 sourceFile: this.ctx.sourcePath
             })
         }))
-    }
-}
-
-
-export class SqlSealCodeblockHandler {
-    constructor(
-        private readonly app: App,
-        private readonly db: SqlSealDatabase,
-        private sync: Sync,
-        private rendererRegistry: RendererRegistry
-    ) {
-    }
-
-    getHandler() {
-        return async (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
-            const processor = new CodeblockProcessor(el, source, ctx, this.rendererRegistry, this.db, this.app, this.sync)
-            ctx.addChild(processor)
-        }
     }
 }

@@ -1,7 +1,7 @@
 // This is renderer for a very basic Table view.
 import { App } from "obsidian";
-import { RendererConfig } from "src/rendererRegistry";
-import { displayError, parseCell } from "src/ui";
+import { RendererConfig } from "src/renderer/rendererRegistry";
+import { displayError, parseCell } from "src/utils/ui";
 
 export class TableRenderer implements RendererConfig {
 

@@ -1,8 +1,8 @@
-import { SqlSealDatabase } from "./database";
+import { SqlSealDatabase } from "./database/database";
 import { App } from "obsidian";
-import { SqlSealCodeblockHandler } from "./SqlSealCodeblockHandler";
-import { Logger } from "./logger";
-import { RendererRegistry } from "./rendererRegistry";
+import { SqlSealCodeblockHandler } from "./codeblockHandler/SqlSealCodeblockHandler";
+import { Logger } from "./utils/logger";
+import { RendererRegistry } from "./renderer/rendererRegistry";
 import { Sync } from "./datamodel/sync";
 
 export class SqlSeal {

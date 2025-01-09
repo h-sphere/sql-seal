@@ -51,7 +51,7 @@ const workerPlugin = {
         build.onLoad({ filter: /.*/, namespace: 'worker-code' }, async () => {
             // Build worker code
             const result = await esbuild.build({
-                entryPoints: ['src/database-worker.ts'],
+                entryPoints: ['src/database/worker/database.ts'],
                 bundle: true,
                 write: false,
                 format: 'iife',
@@ -83,7 +83,7 @@ const context = await esbuild.context({
     banner: {
         js: banner,
     },
-    entryPoints: ["main.ts"],
+    entryPoints: ["src/main.ts"],
     bundle: true,
     external: [
         "obsidian",

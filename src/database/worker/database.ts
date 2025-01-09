@@ -1,11 +1,11 @@
 import * as Comlink from "comlink"
 import initSqlJs from '@jlongster/sql.js';
-import wasmBinary from '../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm'
+import wasmBinary from '../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm'
 import { SQLiteFS } from 'absurd-sql';
-import IndexedDBBackend from '../node_modules/absurd-sql/dist/indexeddb-backend.js';
+import IndexedDBBackend from '../../../node_modules/absurd-sql/dist/indexeddb-backend.js';
 import type { BindParams, Database, Statement } from "sql.js";
-import { sanitise } from "./utils/sanitiseColumn";
-import { FieldTypes } from "./utils";
+import { sanitise } from "../../utils/sanitiseColumn";
+import { FieldTypes } from "../../utils/typePredictions";
 
 
 function toObjectArray(stmt: Statement) {

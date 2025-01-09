@@ -1,10 +1,10 @@
-import { SqlSealDatabase } from "src/database";
+import { SqlSealDatabase } from "src/database/database";
 import { FileLog, FileLogRepository } from "./repository/fileLog";
 import { TableMapLogRepository } from "./repository/tableMapLog";
 import { TAbstractFile, TFile, Vault } from "obsidian";
 import { parse } from "papaparse";
 import { sanitise } from "src/utils/sanitiseColumn";
-import { FieldTypes, toTypeStatements } from "src/utils";
+import { FieldTypes, toTypeStatements } from "src/utils/typePredictions";
 import { FilepathHasher } from "./hasher";
 import { Omnibus } from "@hypersphere/omnibus";
 

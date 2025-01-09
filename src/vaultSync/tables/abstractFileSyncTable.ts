@@ -1,5 +1,5 @@
 import { App, TFile } from "obsidian";
-import { SqlSealDatabase } from "src/database";
+import { SqlSealDatabase } from "src/database/database";
 
 export abstract class AFileSyncTable {
     constructor(

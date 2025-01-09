@@ -1,8 +1,7 @@
 import { describe, it, expect } from '@jest/globals'
-import { predictJson, predictType } from './utils'
+import { predictJson, predictType } from './typePredictions'
 
 describe('Utils', () => {
-
     it('should properly predict TEXT type', () => {
         expect(predictType('xxx', [{ 'xxx': 'dhjkafhkjafhkfas' }])).toEqual('TEXT')
     })
