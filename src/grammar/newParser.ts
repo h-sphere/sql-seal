@@ -1,5 +1,8 @@
+export type SourceType = 'file' | 'table'
+
 export interface Table {
     tableName: string;
+    type: SourceType,
     fileName: string;
 }
 
@@ -42,13 +45,15 @@ export function parseLanguage(input: string): ParsedLanguage {
         
         // Parse TABLE declaration
         // Format: TABLE tableName = file(filename.csv)
-        const tableMatch = line.match(/TABLE\s+(\w+)\s*=\s*file\(([^)]+)\)/);
+        const tableMatch = line.match(/TABLE\s+(\w+)\s*=\s*(file|table)\(([^)]+)\)/);
         if (tableMatch) {
             result.tables.push({
                 tableName: tableMatch[1],
-                fileName: tableMatch[2]
+                type: tableMatch[2] as SourceType,
+                fileName: tableMatch[3]
             });
         }
+        console.log(result.tables)
         
         currentPosition++;
     }

@@ -12,7 +12,7 @@ export class SqlSeal {
         this.db = new SqlSealDatabase(app, verbose)
         const logger = new Logger(verbose)
 
-        const sync = new Sync(this.db, this.app.vault)
+        const sync = new Sync(this.db, this.app.vault, app)
         sync.init()
 
         this.codeBlockHandler = new SqlSealCodeblockHandler(app, this.db, sync, rendererRegistry)

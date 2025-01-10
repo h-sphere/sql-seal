@@ -1,3 +1,4 @@
+import { SourceType } from "src/grammar/newParser";
 import { Repository } from "./abstractRepository";
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,7 +8,9 @@ export interface FileLog {
     file_name: string,
     created_at: string,
     updated_at: string,
-    file_hash: string
+    file_hash: string,
+    type: SourceType,
+    extras: Record<string, string>
 }
 
 export class FileLogRepository extends Repository {
@@ -23,7 +26,9 @@ export class FileLogRepository extends Repository {
             'file_name': 'TEXT',
             'created_at': 'TEXT',
             'updated_at': 'TEXT',
-            'file_hash': 'TEXT'
+            'file_hash': 'TEXT',
+            'type': 'TEXT',
+            extras: 'TEXT'
         }, true)
     }
 
@@ -34,6 +39,8 @@ export class FileLogRepository extends Repository {
             table_name: log.table_name,
             file_name: log.file_name,
             file_hash: log.file_hash,
+            type: log.type,
+            extras: JSON.stringify(log.extras ?? {}),
             created_at: now,
             updated_at: now
         }])
@@ -47,12 +54,21 @@ export class FileLogRepository extends Repository {
         if (!data.length) {
             return null
         }
-        return data[0] as unknown as FileLog
+        const d = data[0]
+        return {
+            ...d,
+            type: d.type ?? 'file',
+            extras: JSON.parse(d.extras ? d.extras.toString() :  '{}')
+        } as FileLog
     }
 
     async getAll() {
         const { data } = await this.db.select('SELECT * FROM file_log', {})
-        return data as unknown[] as FileLog[];
+        return data.map(d => ({
+            ...d,
+            type: d.type ?? 'file',
+            extras: JSON.parse(d.extras ? d.extras.toString() : '{}')
+        })) as FileLog[]
     }
 
     async updateHash(tableName: string, newHash: string) {
