@@ -1,3 +1,6 @@
+# 0.14.0
+Added support for inline code blocks. Create a codeblock (backtick `) and use prefix S> to indicate it's SQLSeal query.
+
 # 0.13.0
 Huge upgrade to the code codebase. SQLSeal should be now much faster and more reliable thanks to the following:
 - Rewritten how files are synched - now each CSV file creates AT MOST one table in the database (synchronisations are being reused accross files)
