@@ -80,11 +80,13 @@ export class Sync {
                 skipEmptyLines: true,
                 transformHeader: sanitise
             })
+            console.log('PARSED', parsed)
             const typeStatements = toTypeStatements(parsed.meta.fields ?? [], parsed.data)
             const columns = Object.entries(typeStatements.types).map(([key, value]) => ({
                 name: key,
                 type: value as FieldTypes
             }));
+            console.log('COLUMNZ', columns)
             const tableName = entry.table_name
             await this.db.createTableClean(tableName, columns)
             await this.db.insertData(tableName, typeStatements.data)
