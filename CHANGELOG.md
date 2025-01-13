@@ -1,3 +1,7 @@
+# 0.14.1
+fix: fixed the issue where rows with extra data in them (rows with more columns that a header) were not synchronised correctly
+fix: fixed the issue where queries with lowercase SELECT would not work in certain cases.
+
 # 0.14.0
 Added support for inline code blocks. Create a codeblock (backtick `) and use prefix S> to indicate it's SQLSeal query.
 

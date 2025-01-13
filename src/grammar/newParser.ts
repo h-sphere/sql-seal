@@ -56,7 +56,8 @@ export function parseLanguage(input: string): ParsedLanguage {
     // Find the position of SELECT statement
     let selectPosition = -1;
     for (let i = currentPosition; i < lines.length; i++) {
-        if (lines[i].trim().startsWith('SELECT') || lines[i].trim().startsWith('WITH')) {
+        const line = lines[i].trim().toUpperCase()
+        if (line.startsWith('SELECT') || line.startsWith('WITH')) {
             selectPosition = i;
             break;
         }
