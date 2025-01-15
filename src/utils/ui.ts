@@ -42,25 +42,13 @@ const isLinkLocal = (link: string) => !link?.trim().startsWith('http')
 const generateLink = (config: SqlSealAnchorElement, app: App) => {
     let href = config.href
     if (isLinkLocal(config.href)) {
-        const link = createEl('a', {
-            text: config.name,
-            cls: 'internal-link' // This class is used by Obsidian for internal links
-          });
-          
-          link.addEventListener('click', (event) => {
-            event.preventDefault();
-            // Open the file in the active leaf (same tab)
-            const leaf = app.workspace.getLeaf();
-            const file = app.vault.getFileByPath(config.href)
-            if (!file) {
-                return
-            }
-            leaf.openFile(file);
-          });
-        const encodedPath = encodeURIComponent(config.href);
-        // Create the Obsidian URI
-         href = `app://obsidian.md/${encodedPath}`;
-         return link
+        let fileHref = config.href
+        if (fileHref.endsWith('.md')) {
+            fileHref = fileHref.slice(0, -3)
+        }
+        const vaultName = encodeURIComponent(app.appId);
+        const encodedPath = encodeURIComponent(fileHref);
+        href = `obsidian://open?vault=${vaultName}&file=${encodedPath}`;
     }
     const el = createEl('a', { text: config.name, href: href })
     return el
