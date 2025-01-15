@@ -1,3 +1,6 @@
+# UNRELEASED
+fix: fix issue with local links not being clickable
+
 # 0.14.1
 fix: fixed the issue where rows with extra data in them (rows with more columns that a header) were not synchronised correctly
 fix: fixed the issue where queries with lowercase SELECT would not work in certain cases.
