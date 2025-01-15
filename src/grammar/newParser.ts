@@ -13,6 +13,7 @@ interface ParsedLanguage {
     intermediateContent: string;
 }
 
+// TODO: this should be retwitten to use proper grammar but this seems to work, at least for now :)
 export function parseLanguage(input: string): ParsedLanguage {
     const lines = input.split('\n');
     const result: ParsedLanguage = {
@@ -23,36 +24,34 @@ export function parseLanguage(input: string): ParsedLanguage {
 
     // State tracking
     let currentPosition = 0;
-    let intermediateContentStarted = false;
-    
     // Parse TABLE declarations
     while (currentPosition < lines.length) {
         const line = lines[currentPosition].trim();
-        
+
         // Skip empty lines at the beginning
         if (line === '') {
             currentPosition++;
             continue;
         }
-        
+
         // If we hit SELECT or any other non-TABLE part, break
-        if (!line.startsWith('TABLE')) {
+        if (!line.toUpperCase().startsWith('TABLE')) {
             break;
         }
-        
+
         // Parse TABLE declaration
         // Format: TABLE tableName = file(filename.csv)
-        const tableMatch = line.match(/TABLE\s+(\w+)\s*=\s*file\(([^)]+)\)/);
+        const tableMatch = line.match(/TABLE\s+(\w+)\s*=\s*file\(([^)]+)\)/i);
         if (tableMatch) {
             result.tables.push({
                 tableName: tableMatch[1],
                 fileName: tableMatch[2]
             });
         }
-        
+
         currentPosition++;
     }
-    
+
     // Find the position of SELECT statement
     let selectPosition = -1;
     for (let i = currentPosition; i < lines.length; i++) {
@@ -62,7 +61,7 @@ export function parseLanguage(input: string): ParsedLanguage {
             break;
         }
     }
-    
+
     // Extract intermediate content (if any)
     if (selectPosition > currentPosition) {
         result.intermediateContent = lines
@@ -70,7 +69,7 @@ export function parseLanguage(input: string): ParsedLanguage {
             .join('\n')
             .trim();
     }
-    
+
     // Extract SQL query
     if (selectPosition !== -1) {
         result.queryPart = lines
@@ -84,6 +83,6 @@ export function parseLanguage(input: string): ParsedLanguage {
             .join('\n')
             .trim();
     }
-    
+
     return result;
 }

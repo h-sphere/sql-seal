@@ -69,19 +69,40 @@ SELECT * FROM a JOIN y ON a.id=y.id`)).toEqual({
         expect(parseLanguage(`
 HTML
 select * from files`)).toEqual({
-    "intermediateContent": "HTML",
-  "queryPart": "select * from files",
-  "tables": [],
-})
+            "intermediateContent": "HTML",
+            "queryPart": "select * from files",
+            "tables": [],
+        })
     })
 
     it('should properly parse query where SELECT is in sPoNgeBoB-cAsE', () => {
         expect(parseLanguage(`
 HTML
 sElEcT * fRoM files`)).toEqual({
-    "intermediateContent": "HTML",
-  "queryPart": "sElEcT * fRoM files",
-  "tables": [],
-})
+            "intermediateContent": "HTML",
+            "queryPart": "sElEcT * fRoM files",
+            "tables": [],
+        })
+    })
+
+    it('should allow for lowercase TABLE syntax', () => {
+        expect(parseLanguage(`
+            
+            table x = file(a.csv)
+
+            html
+
+            select * from files
+            
+            `)).toEqual({
+            'intermediateContent': 'html',
+            'queryPart': 'select * from files',
+            tables: [
+                {
+                    tableName: 'x',
+                    fileName: 'a.csv'
+                }
+            ]
+        })
     })
 })

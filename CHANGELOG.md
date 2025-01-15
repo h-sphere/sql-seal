@@ -1,5 +1,6 @@
 # UNRELEASED
 fix: fix issue with local links not being clickable
+fix: query is now less case sensitive. You can use keywords like `TABLE`, `HTML`, `MARKDOWN` in any casing you want
 
 # 0.14.1
 fix: fixed the issue where rows with extra data in them (rows with more columns that a header) were not synchronised correctly
