@@ -51,8 +51,8 @@
     "json5": "^2.2.3",
     "lodash": "^4.17.21",
     "markdown-table-ts": "^1.0.3",
-    "node-sql-parser": "^5.3.4",
     "papaparse": "^5.4.1",
+    "sql-parser-cst": "^0.32.0",
     "util": "^0.12.5",
     "uuid": "^11.0.4"
   }

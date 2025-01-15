@@ -1,9 +1,9 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
-import { App, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
+import { App, MarkdownRenderChild } from "obsidian";
 import { SqlSealDatabase } from "src/database/database";
 import { Sync } from "src/datamodel/sync";
-import { RendererRegistry, RenderReturn } from "src/renderer/rendererRegistry";
-import { transformQuery } from "src/sql/transformer";
+import { RenderReturn } from "src/renderer/rendererRegistry";
+import { transformQuery } from "src/sql/sqlTransformer";
 import { displayError } from "src/utils/ui";
 
 export class InlineProcessor extends MarkdownRenderChild {
@@ -57,7 +57,7 @@ export class InlineProcessor extends MarkdownRenderChild {
 
             const fileCache = this.app.metadataCache.getFileCache(file);
             const { data, columns } = await this.db.select(
-                transformedQuery, 
+                transformedQuery.sql, 
                 fileCache?.frontmatter ?? {}
             );
 

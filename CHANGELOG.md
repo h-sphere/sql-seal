@@ -1,10 +1,11 @@
 # UNRELEASED
-fix: fix issue with local links not being clickable
-fix: query is now less case sensitive. You can use keywords like `TABLE`, `HTML`, `MARKDOWN` in any casing you want
+- fix: fix issue with local links not being clickable
+- fix: query is now less case sensitive. You can use keywords like `TABLE`, `HTML`, `MARKDOWN` in any casing you want
+- fix: improved SQL parser - now more complex syntax like recursive CTE, window functions, etc. should work properly. Migrated from `node-sql-parser` to `sql-parser-cst`
 
 # 0.14.1
-fix: fixed the issue where rows with extra data in them (rows with more columns that a header) were not synchronised correctly
-fix: fixed the issue where queries with lowercase SELECT would not work in certain cases.
+- fix: fixed the issue where rows with extra data in them (rows with more columns that a header) were not synchronised correctly
+- fix: fixed the issue where queries with lowercase SELECT would not work in certain cases.
 
 # 0.14.0
 Added support for inline code blocks. Create a codeblock (backtick `) and use prefix S> to indicate it's SQLSeal query.
