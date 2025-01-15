@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "Obsidian SQLSeal"
   # text: "Plugin enabling full SQL capabilities in Obsidian"
-  tagline: "Plugin enabling full SQL capabilities in Obsidian"
+  tagline: "Query your vault using SQL"
   actions:
     - theme: brand
       text: Get Started
@@ -18,5 +18,7 @@ features:
     details: With SQLite under the hood, you can use all functionality of the database
   - title: Query your files and tags
     details: Use SQL to filter files in your vault
+  - title: Add your own data
+    details: Operate on your CSV files using SQL to process them on the go
 ---
 

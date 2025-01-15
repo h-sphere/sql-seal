@@ -17,6 +17,7 @@ export default defineConfig({
         text: 'Documentation',
         items: [
           { text: 'Quick Start', link: '/quick-start' },
+          { text: 'Demo Vault', link: '/demo-vault' },
           { text: 'Changing Render Methods', link: '/changing-render-method'},
           { text: 'Using properties', link: '/using-properties' },
           { text: 'Query Vault Content', link: '/query-vault-content' },
@@ -26,11 +27,29 @@ export default defineConfig({
           { text: 'Troubleshooting', link: '/troubleshooting' },
           { text: 'Future Plans', link: '/future-plans' },
         ]
+      },
+      {
+        text: 'FAQ',
+        items: [
+          { text: 'Comparison with Dataview', link: '/faq/comparison-with-dataview' }
+        ]
+      },
+      {
+        text: 'Contributing',
+        items: [
+          { text: 'Contributing', link: '/contributing/get-started' },
+          { text: 'Reporting a bug', link: '/contributing/reporting-bugs' },
+          { text: 'Project Architecture', link: '/contributing/project-architecture' }
+
+
+        ]
       }
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' }
+      { icon: 'github', link: 'https://github.com/h-sphere/sql-seal' },
+      { icon: 'discord', link: 'https://discord.gg/ZMRnFeAWXb' },
+      { icon: 'bluesky', link: 'https://bsky.app/profile/hypersphereblog.bsky.social' }
     ],
     footer: {
       message: '',
