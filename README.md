@@ -1,6 +1,8 @@
 # Obsidian SQLSeal
 
-SQLSeal allows to transform your CSV files located in your vault into fully-fledged SQL database. You can use SQL statements to query this data however you like.
+SQLSeal allow you to query for files, tags and tasks in your vault using familar SQL syntax.
+It also enables you to preview any CSV file in your vault as a database.
+It brings fully featured database into your vault!
 
 ## Installation
 
