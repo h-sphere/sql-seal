@@ -2,6 +2,7 @@
 - fix: fix issue with local links not being clickable
 - fix: query is now less case sensitive. You can use keywords like `TABLE`, `HTML`, `MARKDOWN` in any casing you want
 - fix: improved SQL parser - now more complex syntax like recursive CTE, window functions, etc. should work properly. Migrated from `node-sql-parser` to `sql-parser-cst`
+- fix: codeblocks now observe only the tables that are relevant to them instead of all. This should fix some tables refresh too often
 
 # 0.14.1
 - fix: fixed the issue where rows with extra data in them (rows with more columns that a header) were not synchronised correctly
