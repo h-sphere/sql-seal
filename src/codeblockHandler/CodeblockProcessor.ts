@@ -5,6 +5,7 @@ import { Sync } from "src/datamodel/sync";
 import { parseLanguage, Table } from "src/grammar/newParser";
 import { RendererRegistry, RenderReturn } from "src/renderer/rendererRegistry";
 import { transformQuery } from "src/sql/sqlTransformer";
+import { registerObservers } from "src/utils/registerObservers";
 import { displayError, displayNotice } from "src/utils/ui";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
@@ -59,15 +60,11 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         const res = transformQuery(this.query, registeredTablesForContext)
         const transformedQuery = res.sql
 
-        this.registrator.offAll()
-        Object.values(registeredTablesForContext).forEach(v => {
-            this.registrator.on(`change::${v}`, () => {
-                this.render()
-            })
-            this.registrator.on('file::change::'+this.ctx.sourcePath, () => {
-                sleep(250).then(() => this.render())
-
-            })
+        registerObservers({
+            bus: this.registrator,
+            callback: () => this.render(),
+            fileName: this.ctx.sourcePath,
+            tables: res.mappedTables
         })
 
 

@@ -4,6 +4,7 @@ import { SqlSealDatabase } from "src/database/database";
 import { Sync } from "src/datamodel/sync";
 import { RenderReturn } from "src/renderer/rendererRegistry";
 import { transformQuery } from "src/sql/sqlTransformer";
+import { registerObservers } from "src/utils/registerObservers";
 import { displayError } from "src/utils/ui";
 
 export class InlineProcessor extends MarkdownRenderChild {
@@ -39,16 +40,12 @@ export class InlineProcessor extends MarkdownRenderChild {
             const registeredTablesForContext = await this.sync.getTablesMappingForContext(this.sourcePath);
             const transformedQuery = transformQuery(this.query, registeredTablesForContext);
 
-            this.registrator.offAll();
-            Object.values(registeredTablesForContext).forEach(v => {
-                this.registrator.on(`change::${v}`, () => {
-                    this.render();
-                });
-            });
-
-            this.registrator.on('file::change::' + this.sourcePath, () => {
-                setTimeout(() => this.render(), 250);
-            });
+            registerObservers({
+                bus: this.registrator,
+                tables: transformedQuery.mappedTables,
+                callback: () => this.render(),
+                fileName: this.sourcePath
+            })
 
             const file = this.app.vault.getFileByPath(this.sourcePath);
             if (!file) {
