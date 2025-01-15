@@ -2,9 +2,9 @@ import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
 import { SqlSealDatabase } from "src/database/database";
 import { Sync } from "src/datamodel/sync";
-import { transformQuery } from "src/sql/transformer";
 import { parseLanguage, Table } from "src/grammar/newParser";
 import { RendererRegistry, RenderReturn } from "src/renderer/rendererRegistry";
+import { transformQuery } from "src/sql/sqlTransformer";
 import { displayError, displayNotice } from "src/utils/ui";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
@@ -55,7 +55,9 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         try {
 
         const registeredTablesForContext = await this.sync.getTablesMappingForContext(this.ctx.sourcePath)
-        const tranformedQuery = transformQuery(this.query, registeredTablesForContext)
+
+        const res = transformQuery(this.query, registeredTablesForContext)
+        const transformedQuery = res.sql
 
         this.registrator.offAll()
         Object.values(registeredTablesForContext).forEach(v => {
@@ -74,7 +76,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             return
         }
         const fileCache = this.app.metadataCache.getFileCache(file)
-            const { data, columns } = await this.db.select(tranformedQuery, fileCache?.frontmatter ?? {})
+            const { data, columns } = await this.db.select(transformedQuery, fileCache?.frontmatter ?? {})
             this.renderer.render({ data, columns })
        } catch (e) {
            this.renderer.error(e.toString())
