@@ -1,4 +1,3 @@
-import { describe, it, expect } from '@jest/globals'
 import { parseLanguage } from './newParser'
 
 
@@ -73,6 +72,14 @@ select * from files`)).toEqual({
             "queryPart": "select * from files",
             "tables": [],
         })
+
+        expect(parseLanguage(`
+            html
+            select * from files`)).toEqual({
+                        "intermediateContent": "html",
+                        "queryPart": "select * from files",
+                        "tables": [],
+                    })
     })
 
     it('should properly parse query where SELECT is in sPoNgeBoB-cAsE', () => {
@@ -101,6 +108,21 @@ sElEcT * fRoM files`)).toEqual({
                 {
                     tableName: 'x',
                     fileName: 'a.csv'
+                }
+            ]
+        })
+    })
+
+    it('should properly parse query with just table and sql syntax', () => {
+        const q = `table x = file(aaa.csv)
+select * from x`
+        expect(parseLanguage(q)).toEqual({
+            queryPart: 'select * from x',
+            intermediateContent: '',
+            tables: [
+                {
+                    tableName: 'x',
+                    fileName: 'aaa.csv'
                 }
             ]
         })
