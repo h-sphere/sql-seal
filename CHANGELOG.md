@@ -1,4 +1,5 @@
-# UNRELEASED
+# 0.15.0
+This version brings plenty of the bugfixes
 - fix: fix issue with local links not being clickable
 - fix: query is now less case sensitive. You can use keywords like `TABLE`, `HTML`, `MARKDOWN` in any casing you want
 - fix: improved SQL parser - now more complex syntax like recursive CTE, window functions, etc. should work properly. Migrated from `node-sql-parser` to `sql-parser-cst`
