@@ -2,9 +2,10 @@ import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownPostProcessorContext, MarkdownRenderChild, TFile } from "obsidian";
 import { SqlSealDatabase } from "src/database/database";
 import { Sync } from "src/datamodel/sync";
-import { transformQuery } from "src/sql/transformer";
 import { parseLanguage, Table } from "src/grammar/newParser";
 import { RendererRegistry, RenderReturn } from "src/renderer/rendererRegistry";
+import { transformQuery } from "src/sql/sqlTransformer";
+import { registerObservers } from "src/utils/registerObservers";
 import { displayError, displayNotice } from "src/utils/ui";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
@@ -55,17 +56,15 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         try {
 
         const registeredTablesForContext = await this.sync.getTablesMappingForContext(this.ctx.sourcePath)
-        const tranformedQuery = transformQuery(this.query, registeredTablesForContext)
 
-        this.registrator.offAll()
-        Object.values(registeredTablesForContext).forEach(v => {
-            this.registrator.on(`change::${v}`, () => {
-                this.render()
-            })
-            this.registrator.on('file::change::'+this.ctx.sourcePath, () => {
-                sleep(250).then(() => this.render())
+        const res = transformQuery(this.query, registeredTablesForContext)
+        const transformedQuery = res.sql
 
-            })
+        registerObservers({
+            bus: this.registrator,
+            callback: () => this.render(),
+            fileName: this.ctx.sourcePath,
+            tables: res.mappedTables
         })
 
 
@@ -74,7 +73,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             return
         }
         const fileCache = this.app.metadataCache.getFileCache(file)
-            const { data, columns } = await this.db.select(tranformedQuery, fileCache?.frontmatter ?? {})
+            const { data, columns } = await this.db.select(transformedQuery, fileCache?.frontmatter ?? {})
             this.renderer.render({ data, columns })
        } catch (e) {
            this.renderer.error(e.toString())

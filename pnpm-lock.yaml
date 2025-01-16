@@ -38,12 +38,12 @@ importers:
       markdown-table-ts:
         specifier: ^1.0.3
         version: 1.0.3
-      node-sql-parser:
-        specifier: ^5.3.4
-        version: 5.3.4
       papaparse:
         specifier: ^5.4.1
         version: 5.4.1
+      sql-parser-cst:
+        specifier: ^0.32.0
+        version: 0.32.0
       util:
         specifier: ^0.12.5
         version: 0.12.5
@@ -51,9 +51,6 @@ importers:
         specifier: ^11.0.4
         version: 11.0.4
     devDependencies:
-      '@jest/globals':
-        specifier: ^29.7.0
-        version: 29.7.0
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -1058,9 +1055,6 @@ packages:
   '@types/papaparse@5.3.15':
     resolution: {integrity: sha512-JHe6vF6x/8Z85nCX4yFdDslN11d+1pr12E526X8WAfhadOeaOTx5AuIkvDKIBopfvlzpzkdMx4YyvSKCM9oqtw==}
 
-  '@types/pegjs@0.10.6':
-    resolution: {integrity: sha512-eLYXDbZWXh2uxf+w8sXS8d6KSoXTswfps6fvCUuVAGN8eRpfe7h9eSRydxiSJvo9Bf+GzifsDOr9TMQlmJdmkw==}
-
   '@types/responselike@1.0.3':
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
 
@@ -1357,10 +1351,6 @@ packages:
 
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
-
-  big-integer@1.6.52:
-    resolution: {integrity: sha512-QxD8cf2eVqJOOz63z6JIN9BzvVs/dlySa5HGSBH5xtR8dPteIRQnBxxKqkNTiT6jbDTF6jAfrd4oMcND9RGbQg==}
-    engines: {node: '>=0.6'}
 
   birpc@0.2.19:
     resolution: {integrity: sha512-5WeXXAvTmitV1RqJFppT5QtUiz2p1mRSYU000Jkft5ZUCLJIk4uQriYNO50HknxKwM6jd8utNc66K1qGIwwWBQ==}
@@ -2465,10 +2455,6 @@ packages:
   node-releases@2.0.18:
     resolution: {integrity: sha512-d9VeXT4SJ7ZeOqGX6R5EM022wpL+eWPooLI+5UpWn2jCT1aosUQEhQP214x33Wkwx3JQMvIm+tIoVOdodFS40g==}
 
-  node-sql-parser@5.3.4:
-    resolution: {integrity: sha512-uOgTAADMc4pMjKGkSPELkQUoYAlQBz+JqC9zw/MFs7/wr0fkYoxkexB3sNjslnPttlJlxiaseHFQ36xsXhmnUQ==}
-    engines: {node: '>=8'}
-
   nopt@6.0.0:
     resolution: {integrity: sha512-ZwLpbTgdhuZUnZzjd7nb1ZV+4DoiC6/sfiVKok72ym/4Tlf+DFdlHYmT2JPmcNNWV6Pi3SDf1kT+A4r9RTuT9g==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
@@ -2809,6 +2795,9 @@ packages:
 
   sprintf-js@1.1.3:
     resolution: {integrity: sha512-Oo+0REFV59/rz3gfJNKQiBlwfHaSESl1pcGyABQsnnIfWOFt6JNj5gCog2U6MLZ//IGYD+nA8nI+mTShREReaA==}
+
+  sql-parser-cst@0.32.0:
+    resolution: {integrity: sha512-J/8IeKGBGftFbssmWlE7NnIOnkH0EW8FwJoctcgZB9cY0aeCb1QFp/rl9uYPX87SY38PwCKiPUJO8+fssqg5vQ==}
 
   ssri@9.0.1:
     resolution: {integrity: sha512-o57Wcn66jMQvfHG1FlYbWeZWW/dHZhJXjpIcTfXldXEk5nz5lStPo3mK0OJQfGR3RbZUlbISexbljkJzuEj/8Q==}
@@ -4076,8 +4065,6 @@ snapshots:
     dependencies:
       '@types/node': 22.9.3
 
-  '@types/pegjs@0.10.6': {}
-
   '@types/responselike@1.0.3':
     dependencies:
       '@types/node': 22.9.3
@@ -4444,8 +4431,6 @@ snapshots:
   balanced-match@1.0.2: {}
 
   base64-js@1.5.1: {}
-
-  big-integer@1.6.52: {}
 
   birpc@0.2.19: {}
 
@@ -5824,11 +5809,6 @@ snapshots:
 
   node-releases@2.0.18: {}
 
-  node-sql-parser@5.3.4:
-    dependencies:
-      '@types/pegjs': 0.10.6
-      big-integer: 1.6.52
-
   nopt@6.0.0:
     dependencies:
       abbrev: 1.1.1
@@ -6157,6 +6137,8 @@ snapshots:
   sprintf-js@1.0.3: {}
 
   sprintf-js@1.1.3: {}
+
+  sql-parser-cst@0.32.0: {}
 
   ssri@9.0.1:
     dependencies:

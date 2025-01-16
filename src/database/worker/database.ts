@@ -139,7 +139,7 @@ export class WorkerDatabase {
 
     async insertData(tableName: string, data: Record<string, unknown>[]) {
         data.forEach(d => {
-            const columns = Object.keys(d)
+            const columns = Object.keys(d).filter(c => c !== '__parsed_extra')
             const insertStatement = this.db.prepare(`INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${columns.map((key: string) => '@' + key).join(', ')})`);
             insertStatement.run(recordToBindParams(formatData(d)))
         })

@@ -1,4 +1,3 @@
-import { describe, it, expect } from '@jest/globals'
 import { predictJson, predictType } from './typePredictions'
 
 describe('Utils', () => {

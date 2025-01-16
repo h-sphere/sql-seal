@@ -11,8 +11,10 @@
     "importHelpers": false,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "types": [],
-	"strictNullChecks": true,
+    "types": [
+      "jest"
+    ],
+    "strictNullChecks": true,
     "lib": [
       "DOM",
       "ES5",

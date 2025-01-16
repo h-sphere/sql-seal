@@ -9,6 +9,10 @@ import { FilepathHasher } from "../utils/hasher";
 import { Omnibus } from "@hypersphere/omnibus";
 import { TableRegistration } from "./types";
 import { SyncStrategyFactory } from "./syncStrategy/SyncStrategyFactory";
+import { ConfigurationRepository } from "./repository/configuration";
+
+
+const SQLSEAL_DATABASE_VERSION = 1;
 
 export class Sync {
     private fileLog: FileLogRepository;
@@ -35,11 +39,29 @@ export class Sync {
 
     async init() {
         await this.db.connect()
+
+        // Configuration
+        const config = new ConfigurationRepository(this.db)
+        let version
+        try {
+            version = await config.getConfig('version') as number
+        } catch (e) {
+            version = 0
+        }
+
+        if (version < SQLSEAL_DATABASE_VERSION) {
+            await this.db.recreateDatabase()
+        }
+
+        await config.init()
+
         this.fileLog = new FileLogRepository(this.db)
         await this.fileLog.init()
 
         this.tableMapLog = new TableMapLogRepository(this.db)
         await this.tableMapLog.init()
+
+        await config.setConfig('version', SQLSEAL_DATABASE_VERSION)
 
         const fileLogs = await this.fileLog.getAll()
         for (const log of fileLogs) {
