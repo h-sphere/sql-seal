@@ -21,6 +21,7 @@ export default defineConfig({
           { text: 'Changing Render Methods', link: '/changing-render-method'},
           { text: 'Using properties', link: '/using-properties' },
           { text: 'Query Vault Content', link: '/query-vault-content' },
+          { text: 'Query Markdown Tables', link: '/query-markdown-tables'},
           { text: 'Inline codeblocks', link: '/inline-codeblocks' },
           { text: 'Links and Images', link: '/links-and-images' },
           { text: 'CSV Viewer', link: '/csv-viewer'},

@@ -1,19 +1,15 @@
 import { SqlSealDatabase } from "src/database/database";
 import { FileLog, FileLogRepository } from "./repository/fileLog";
 import { TableMapLogRepository } from "./repository/tableMapLog";
-import { TAbstractFile, TFile, Vault } from "obsidian";
-import { parse } from "papaparse";
-import { sanitise } from "src/utils/sanitiseColumn";
-import { FieldTypes, toTypeStatements } from "src/utils/typePredictions";
+import { App, TAbstractFile, TFile, Vault } from "obsidian";
 import { FilepathHasher } from "../utils/hasher";
 import { Omnibus } from "@hypersphere/omnibus";
+import { TableRegistration } from "./types";
+import { SyncStrategyFactory } from "./syncStrategy/SyncStrategyFactory";
+import { ConfigurationRepository } from "./repository/configuration";
 
 
-interface TableRegistration {
-    fileName: string;
-    aliasName: string;
-    sourceFile: string;
-}
+const SQLSEAL_DATABASE_VERSION = 1;
 
 export class Sync {
     private fileLog: FileLogRepository;
@@ -24,7 +20,8 @@ export class Sync {
 
     constructor(
         private readonly db: SqlSealDatabase,
-        private readonly vault: Vault
+        private readonly vault: Vault,
+        private readonly app: App
     ) {
 
     }
@@ -39,11 +36,29 @@ export class Sync {
 
     async init() {
         await this.db.connect()
+
+        // Configuration
+        const config = new ConfigurationRepository(this.db)
+        let version
+        try {
+            version = await config.getConfig('version') as number
+        } catch (e) {
+            version = 0
+        }
+
+        if (version < SQLSEAL_DATABASE_VERSION) {
+            await this.db.recreateDatabase()
+        }
+
+        await config.init()
+
         this.fileLog = new FileLogRepository(this.db)
         await this.fileLog.init()
 
         this.tableMapLog = new TableMapLogRepository(this.db)
         await this.tableMapLog.init()
+
+        await config.setConfig('version', SQLSEAL_DATABASE_VERSION)
 
         const fileLogs = await this.fileLog.getAll()
         for (const log of fileLogs) {
@@ -65,31 +80,21 @@ export class Sync {
     }
 
     async syncFile(file: TFile) {
-        if (!this.tableMaps.has(file.path)) {
-            this.bus.trigger('file::change::'+file.path)
-            return;
-        }
+        this.bus.trigger('file::change::'+file.path)
 
-        const entry = this.tableMaps.get(file.path)!
+
+        const entry = this.tableMaps.get(file.path)
+        if (!entry) {
+            return
+        }
         if (entry.file_hash !== file.stat.mtime.toString()) {
-            const data = await this.vault.cachedRead(file)
-            // TODO: PROBABLY SHOULD BE EXTRACTED SOMEWHERE FROM HERE later.
-            const parsed = parse<Record<string, string>>(data, {
-                header: true,
-                dynamicTyping: false,
-                skipEmptyLines: true,
-                transformHeader: sanitise
-            })
-            console.log('PARSED', parsed)
-            const typeStatements = toTypeStatements(parsed.meta.fields ?? [], parsed.data)
-            const columns = Object.entries(typeStatements.types).map(([key, value]) => ({
-                name: key,
-                type: value as FieldTypes
-            }));
-            console.log('COLUMNZ', columns)
+            const syncObject = SyncStrategyFactory.getStrategyByFileLog(entry, this.app)
+
+            const { data, columns } = await syncObject.returnData()
+
             const tableName = entry.table_name
             await this.db.createTableClean(tableName, columns)
-            await this.db.insertData(tableName, typeStatements.data)
+            await this.db.insertData(tableName, data)
             await this.fileLog.updateHash(tableName, file.stat.mtime.toString())
             this.bus.trigger('change::' + tableName)
 
@@ -132,13 +137,16 @@ export class Sync {
     async registerTable(reg: TableRegistration) {
         const existingFileLog = await this.fileLog.getByFilename(reg.fileName)
         let fileTableName: string;
+        const syncObject = SyncStrategyFactory.getStrategy(reg, this.app)
         if (!existingFileLog) {
             // We need to create new one.
-            const tableName = await this.generateTableName(reg.fileName)
+            const tableName = await syncObject.tableName()
             await this.registerFile({
                 file_name: reg.fileName,
                 table_name: tableName,
-                file_hash: ''
+                file_hash: '',
+                type: reg.type,
+                extras: reg.extras
             })
             fileTableName = tableName
             // INITIAL SYNC

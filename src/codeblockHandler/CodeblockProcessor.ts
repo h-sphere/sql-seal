@@ -1,5 +1,5 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
-import { App, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
+import { App, MarkdownPostProcessorContext, MarkdownRenderChild, TFile } from "obsidian";
 import { SqlSealDatabase } from "src/database/database";
 import { Sync } from "src/datamodel/sync";
 import { parseLanguage, Table } from "src/grammar/newParser";
@@ -29,7 +29,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
     async onload() {
         try {
-            const results = parseLanguage(this.source)
+            const results = parseLanguage(this.source, this.ctx.sourcePath)
             if (results.tables) {
                 await this.registerTables(results.tables)
                 if (!results.queryPart) {
@@ -82,14 +82,26 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
     async registerTables(tables: Table[]) {
         await Promise.all(tables.map((table) => {
-            const path = this.app.metadataCache.getFirstLinkpathDest(table.fileName, this.ctx.sourcePath)
+            let path: TFile | null = null
+            let extras = {}
+            if (table.type !== 'table') {
+                path = this.app.metadataCache.getFirstLinkpathDest(table.fileName, this.ctx.sourcePath)
+                
+            } else {
+                path = this.app.vault.getFileByPath(this.ctx.sourcePath)
+                extras = table?.extras ?? {}
+            }
+
             if (!path) {
                 throw new Error(`File does not exist: ${table.fileName} (for ${table.tableName}).`)
             }
+
             return this.sync.registerTable({
                 aliasName: table.tableName,
+                type: table.type,
                 fileName: path.path,
-                sourceFile: this.ctx.sourcePath
+                sourceFile: this.ctx.sourcePath,
+                extras
             })
         }))
     }

@@ -1,6 +1,13 @@
+import { SyncStrategyFactory } from "../datamodel/syncStrategy/SyncStrategyFactory";
+import { TableDefinitionConfig } from "../datamodel/syncStrategy/types";
+
+export type SourceType = 'file' | 'table'
+
 export interface Table {
     tableName: string;
+    type: SourceType,
     fileName: string;
+    extras?: Record<string, string | number>
 }
 
 export interface TableWithParentPath extends Table {
@@ -14,7 +21,7 @@ interface ParsedLanguage {
 }
 
 // TODO: this should be retwitten to use proper grammar but this seems to work, at least for now :)
-export function parseLanguage(input: string): ParsedLanguage {
+export function parseLanguage(input: string, sourceFile: string = ''): ParsedLanguage {
     const lines = input.split('\n');
     const result: ParsedLanguage = {
         tables: [],
@@ -41,14 +48,22 @@ export function parseLanguage(input: string): ParsedLanguage {
 
         // Parse TABLE declaration
         // Format: TABLE tableName = file(filename.csv)
-        const tableMatch = line.match(/TABLE\s+(\w+)\s*=\s*file\(([^)]+)\)/i);
+        const tableMatch = line.match(/TABLE\s+(\w+)\s*=\s*(file|table)\(([^)]+)\)/i);
         if (tableMatch) {
-            result.tables.push({
-                tableName: tableMatch[1],
-                fileName: tableMatch[2]
-            });
+            const config = {
+                alias: tableMatch[1],
+                type: tableMatch[2].toLowerCase(),
+                arguments: tableMatch[3],
+                sourceFile: sourceFile
+            } satisfies TableDefinitionConfig
+            const definition = SyncStrategyFactory
+                .getStaticStrategyReference(config.type)
+                ?.processTableDefinition(config)
+            if (!definition) {
+                throw new Error(`Cannot process table for: ${line}`)
+            }
+            result.tables.push(definition);
         }
-
         currentPosition++;
     }
 

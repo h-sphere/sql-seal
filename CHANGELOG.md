@@ -1,3 +1,6 @@
+# 0.16.0
+Now you can query tables in your note and use them as data source! [Check more information in the documentation](http://hypersphere.blog/sql-seal/query-markdown-tables.html).
+
 # 0.15.0
 This version brings plenty of the bugfixes
 - fix: fix issue with local links not being clickable
