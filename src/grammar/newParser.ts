@@ -52,7 +52,7 @@ export function parseLanguage(input: string, sourceFile: string = ''): ParsedLan
         if (tableMatch) {
             const config = {
                 alias: tableMatch[1],
-                type: tableMatch[2],
+                type: tableMatch[2].toLowerCase(),
                 arguments: tableMatch[3],
                 sourceFile: sourceFile
             } satisfies TableDefinitionConfig

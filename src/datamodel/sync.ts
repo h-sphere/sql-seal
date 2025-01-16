@@ -86,7 +86,10 @@ export class Sync {
         this.bus.trigger('file::change::'+file.path)
 
 
-        const entry = this.tableMaps.get(file.path)!
+        const entry = this.tableMaps.get(file.path)
+        if (!entry) {
+            return
+        }
         if (entry.file_hash !== file.stat.mtime.toString()) {
             const syncObject = SyncStrategyFactory.getStrategyByFileLog(entry, this.app)
 

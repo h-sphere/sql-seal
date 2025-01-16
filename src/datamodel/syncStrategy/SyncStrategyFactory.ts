@@ -40,7 +40,7 @@ export class SyncStrategyFactory {
 
     static getStaticStrategyReference(type: string) {
         switch (type) {
-            case 'csv-file':
+            case 'file':
                 return CsvFileSyncStrategy
             case 'table':
                 return MarkdownTableSyncStrategy
