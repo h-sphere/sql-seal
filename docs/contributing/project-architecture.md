@@ -38,3 +38,16 @@ I want to allow external plugins to register their data sources: i.e. plugin tha
 > Current Stage: Development
 
 Other plugins could extend SQLSeal's TABLE syntax so it can operate on more data types (i.e. JSON, XLSX).
+
+## Query lifecycle
+Queries have the following lifecycle:
+![Query Lifecycle](./query-lifecycle.png)
+
+| Stage                             | Description                                                                                                                                                                                                          |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Query Recieved                    | Query is either created as a codeblock or it gets refreshed                                                                                                                                                          |
+| SQLSeal Parser                    | Initial parsing that separates table queries, renderers (and any other potential options) and select statement                                                                                                       |
+| Transform tables inside the query | Many files can define tables with the same name.<br>To make it work, we transform name (like `data` user could define)<br>into internal name like `table_093fjd9sffc329`                                             |
+| Executes Query                    | Query sent to SQLite                                                                                                                                                                                                 |
+| Renders using chosen renderer     | Renderer is determined based<br>on intermediateContent value. For now can be either `HTML`, `MARKDOWN` or `GRID` but more are planned for the future (also will add posibility to register them from other plugins). |
+| Watches for file changes          | Using Omnibus library to register eventListeners. On change refreshes the query. The change can modify table statements, renderers, etc so whole pipeline needs to be revaluated.                                    |

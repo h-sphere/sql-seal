@@ -24,7 +24,7 @@ export default defineConfig({
           { text: 'Query Markdown Tables', link: '/query-markdown-tables'},
           { text: 'Inline codeblocks', link: '/inline-codeblocks' },
           { text: 'Links and Images', link: '/links-and-images' },
-          { text: 'CSV Viewer', link: '/csv-viewer'},
+          { text: 'CSV Viewer', link: '/csv-viewer' },
           { text: 'Troubleshooting', link: '/troubleshooting' },
           { text: 'Future Plans', link: '/future-plans' },
         ]
@@ -40,7 +40,10 @@ export default defineConfig({
         items: [
           { text: 'Contributing', link: '/contributing/get-started' },
           { text: 'Reporting a bug', link: '/contributing/reporting-bugs' },
-          { text: 'Project Architecture', link: '/contributing/project-architecture' }
+          { text: 'Project Architecture', link: '/contributing/project-architecture' },
+          { text: 'Project Setup', link: '/contributing/project-setup' },
+          { text: 'Troubleshooting', link: '/contributing/troubleshooting' }
+
 
 
         ]
