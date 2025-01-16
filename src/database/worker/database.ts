@@ -6,6 +6,7 @@ import IndexedDBBackend from '../../../node_modules/absurd-sql/dist/indexeddb-ba
 import type { BindParams, Database, Statement } from "sql.js";
 import { sanitise } from "../../utils/sanitiseColumn";
 import { FieldTypes } from "../../utils/typePredictions";
+import { uniq } from "lodash";
 
 
 function toObjectArray(stmt: Statement) {
@@ -112,6 +113,16 @@ export class WorkerDatabase {
         })
     }
 
+    async recreateDatabase() {
+        this.db.exec(`
+            PRAGMA writable_schema = 1;
+            DELETE FROM sqlite_master;
+            PRAGMA writable_schema = 0;
+            VACUUM;
+            PRAGMA integrity_check;
+`)
+    }
+
     async createTable(tableName: string, fields:  Record<string, FieldTypes>, noDrop: boolean = false) {
         const transformedFiels = Object.entries(fields).map(([key, type]) => [sanitise(key), type])
         const uniqueFields = [...new Map(transformedFiels.map(item =>
@@ -130,6 +141,16 @@ export class WorkerDatabase {
             await this.clearTable(tableName)
         }
         // Dropping data.
+    }
+
+    /* Types are optional in SQLite, we can take advantage of that */
+    async createTableNoTypes(tableName: string, columns: string[], noDrop: boolean = false) {
+        const fields = uniq(columns.map(f => sanitise(f)))
+        if (!noDrop) {
+            await this.dropTable(tableName)
+        }
+        const createStmt = `CREATE TABLE IF NOT EXISTS ${tableName}(${fields.join(',')})`
+        this.db.prepare(createStmt).run()
     }
 
     async clearTable(tableName: string) {

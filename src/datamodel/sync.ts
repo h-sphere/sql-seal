@@ -91,7 +91,6 @@ export class Sync {
             const syncObject = SyncStrategyFactory.getStrategyByFileLog(entry, this.app)
 
             const { data, columns } = await syncObject.returnData()
-            console.log('GOT NEW DATA FOR', entry, data, columns)
 
             const tableName = entry.table_name
             await this.db.createTableClean(tableName, columns)

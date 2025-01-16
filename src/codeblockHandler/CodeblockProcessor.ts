@@ -29,7 +29,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
     async onload() {
         try {
-            const results = parseLanguage(this.source)
+            const results = parseLanguage(this.source, this.ctx.sourcePath)
             if (results.tables) {
                 await this.registerTables(results.tables)
                 if (!results.queryPart) {
@@ -89,9 +89,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 
             } else {
                 path = this.app.vault.getFileByPath(this.ctx.sourcePath)
-                extras = {
-                    tableNo: table.fileName // FIXME: this should be returned under better name.
-                }
+                extras = table?.extras ?? {}
             }
 
             if (!path) {

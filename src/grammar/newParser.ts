@@ -7,6 +7,7 @@ export interface Table {
     tableName: string;
     type: SourceType,
     fileName: string;
+    extras?: Record<string, string | number>
 }
 
 export interface TableWithParentPath extends Table {

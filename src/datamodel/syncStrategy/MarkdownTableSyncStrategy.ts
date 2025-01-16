@@ -1,8 +1,10 @@
 import { FilepathHasher } from "src/utils/hasher";
 import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
-import { App, MarkdownRenderer, TFile } from "obsidian";
+import { App, Component, MarkdownRenderer, TFile } from "obsidian";
 import { FieldTypes, toTypeStatements } from "src/utils/typePredictions";
+import { TableDefinitionConfig } from "./types";
+import { SourceType } from "src/grammar/newParser";
 
 
 interface TableData {
@@ -10,9 +12,20 @@ interface TableData {
     data: Array<Record<string, string>>;
 }
 
-export class TableSyncStrategy implements ISyncStrategy {
+export class MarkdownTableSyncStrategy implements ISyncStrategy {
     constructor(private reg: TableRegistration, private app: App) {
 
+    }
+
+    static processTableDefinition(config: TableDefinitionConfig) {
+        return {
+            tableName: config.alias,
+            type: config.type as SourceType,
+            fileName: config.sourceFile, //+ '?table=' + config.arguments
+            extras: {
+                tableNo: parseInt(config.arguments, 10) ?? 0
+            }
+        }
     }
 
     async tableName() {
@@ -24,16 +37,16 @@ export class TableSyncStrategy implements ISyncStrategy {
     async returnData() {
 
         const tableIndex = this.reg.extras.tableNo
-        console.log('TABLE INDEX', tableIndex)
         const file = this.app.vault.getFileByPath(this.reg.sourceFile)!
-        // Get the file content
         const content = await this.app.vault.read(file);
 
         // Create a temporary div to render the markdown
         const tempDiv = document.createElement('div');
 
         // Use Obsidian's MarkdownRenderer to parse the content
-        await MarkdownRenderer.renderMarkdown(content, tempDiv, file.path, null);
+        const component = new Component()
+
+        await MarkdownRenderer.render(this.app, content, tempDiv, file.path, component)
 
         // Find all tables in the rendered content
         const tables = tempDiv.querySelectorAll('table');

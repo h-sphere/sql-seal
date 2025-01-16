@@ -2,8 +2,8 @@ import { App } from "obsidian";
 import { FileLog } from "../repository/fileLog";
 import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
-import { FileSyncStrategy } from "./FileSyncStrategy";
-import { TableSyncStrategy } from "./TableSyncStrategy";
+import { CsvFileSyncStrategy } from "./CsvFileSyncStrategy";
+import { MarkdownTableSyncStrategy } from "./MarkdownTableSyncStrategy";
 
 const fileLogToTableRegistration = (log: FileLog): TableRegistration => {
     return {
@@ -15,13 +15,35 @@ const fileLogToTableRegistration = (log: FileLog): TableRegistration => {
     }
 }
 
+const resolveFileStrategy = (filename: string) => {
+    const parts = filename.split('.')
+    const extension = parts[parts.length - 1].toLowerCase()
+
+    switch (extension) {
+        case 'csv':
+            return CsvFileSyncStrategy
+        default:
+            throw new Error(`No file processor for extension ${extension}`)
+    }
+}
+
 export class SyncStrategyFactory {
     static getStrategy(reg: TableRegistration, app: App): ISyncStrategy {
         switch (reg.type) {
             case 'file':
-                return new FileSyncStrategy(reg, app)
+                const Cls = resolveFileStrategy(reg.fileName)
+                return new Cls(reg, app)
             case 'table':
-                return new TableSyncStrategy(reg, app)
+                return new MarkdownTableSyncStrategy(reg, app)
+        }
+    }
+
+    static getStaticStrategyReference(type: string) {
+        switch (type) {
+            case 'csv-file':
+                return CsvFileSyncStrategy
+            case 'table':
+                return MarkdownTableSyncStrategy
         }
     }
 

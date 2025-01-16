@@ -1,12 +1,14 @@
-import { App } from "obsidian";
+import { App, Component } from "obsidian";
 import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
 import { sanitise } from "src/utils/sanitiseColumn";
 import { parse } from "papaparse";
 import { FieldTypes, toTypeStatements } from "src/utils/typePredictions";
 import { FilepathHasher } from "src/utils/hasher";
+import { TableDefinitionConfig } from "./types";
+import { SourceType } from "src/grammar/newParser";
 
-export class FileSyncStrategy implements ISyncStrategy {
+export class CsvFileSyncStrategy implements ISyncStrategy {
     constructor(private reg: TableRegistration, private app: App) {
 
     }
@@ -15,6 +17,14 @@ export class FileSyncStrategy implements ISyncStrategy {
         const hash = await FilepathHasher.sha256(`${this.reg.sourceFile}`) // FILENAME is in this case 
         return `file_${hash}`
     }
+
+    static processTableDefinition(config: TableDefinitionConfig) {
+            return {
+                tableName: config.alias,
+                type: config.type as SourceType,
+                fileName: config.arguments
+            }
+        }
 
     async returnData() {
         const file = this.app.vault.getFileByPath(this.reg.sourceFile)!

@@ -84,6 +84,10 @@ export class SqlSealDatabase {
         this.isConnected = false
     }
 
+    async recreateDatabase() {
+        await this.db.recreateDatabase()
+    }
+
     async createTableWithData(name: string, data: Array<Record<string, unknown>>) {
         const schema = await this.getSchema(data)
         await this.createTable(name, schema)
@@ -119,6 +123,11 @@ export class SqlSealDatabase {
     async createTable(name: string, fields: Record<string, FieldTypes>, noDrop?: boolean) {
         await this.db.createTable(name, fields, noDrop)
     }
+
+    async createTableNoTypes(name: string, columns: string[], noDrop?: boolean) {
+        await this.db.createTableNoTypes(name, columns, noDrop)
+    }
+
     async getSchema(data: Array<Record<string, unknown>>) {
         const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
         const { types } = toTypeStatements(fields, data as Array<Record<string, string>>); // Call the toTypeStatements function with the correct arguments
