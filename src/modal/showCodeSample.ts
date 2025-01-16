@@ -1,5 +1,5 @@
 import { App, Modal, Notice, Setting, TFile } from "obsidian";
-import { sanitise } from "src/utils/sanitiseColumn";
+import { sanitise } from "../utils/sanitiseColumn";
 
 export class CodeSampleModal extends Modal {
     constructor(app: App, private file: TFile) {

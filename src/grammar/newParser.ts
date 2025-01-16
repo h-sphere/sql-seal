@@ -1,5 +1,5 @@
-import { SyncStrategyFactory } from "src/datamodel/syncStrategy/SyncStrategyFactory";
-import { TableDefinitionConfig } from "src/datamodel/syncStrategy/types";
+import { SyncStrategyFactory } from "../datamodel/syncStrategy/SyncStrategyFactory";
+import { TableDefinitionConfig } from "../datamodel/syncStrategy/types";
 
 export type SourceType = 'file' | 'table'
 

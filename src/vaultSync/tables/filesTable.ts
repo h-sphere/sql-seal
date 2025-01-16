@@ -1,8 +1,8 @@
 import { App, Plugin, TAbstractFile, TFile } from "obsidian";
 import { AFileSyncTable } from "./abstractFileSyncTable";
-import { sanitise } from "src/utils/sanitiseColumn";
-import { SqlSealDatabase } from "src/database/database";
-import { predictType } from "src/utils/typePredictions";
+import { sanitise } from "../../utils/sanitiseColumn";
+import { SqlSealDatabase } from "../../database/database";
+import { predictType } from "../../utils/typePredictions";
 
 
 const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {

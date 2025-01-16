@@ -1,6 +1,6 @@
 import { App, Plugin, TFile } from "obsidian";
-import { FieldTypes } from "src/utils/typePredictions";
-import { sanitise } from "src/utils/sanitiseColumn";
+import { FieldTypes } from "../utils/typePredictions";
+import { sanitise } from "../utils/sanitiseColumn";
 import { AFileSyncTable } from "./tables/abstractFileSyncTable";
 
 const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {

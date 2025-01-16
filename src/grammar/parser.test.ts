@@ -1,5 +1,5 @@
 import { parseLanguage } from './newParser'
-
+jest.mock('../datamodel/syncStrategy/MarkdownTableSyncStrategy')
 
 describe('Parser', () => {
     it('should properly parse select only', () => {
@@ -15,7 +15,8 @@ describe('Parser', () => {
 SELECT * FROM files`)).toEqual({
             tables: [{
                 tableName: 'x',
-                fileName: 'a.csv'
+                fileName: 'a.csv',
+                type: 'file'
             }],
             queryPart: 'SELECT * FROM files',
             intermediateContent: ''
@@ -28,11 +29,13 @@ TABLE y = file(very-long-name.csv)
 SELECT * FROM a JOIN y ON a.id=y.id`)).toEqual({
             tables: [{
                 tableName: 'x',
-                fileName: 'a.csv'
+                fileName: 'a.csv',
+                type: 'file'
             },
             {
                 tableName: 'y',
-                fileName: 'very-long-name.csv'
+                fileName: 'very-long-name.csv',
+                type: 'file'
             }],
             queryPart: 'SELECT * FROM a JOIN y ON a.id=y.id',
             intermediateContent: ''
@@ -50,11 +53,13 @@ PLOT {
 SELECT * FROM a JOIN y ON a.id=y.id`)).toEqual({
             tables: [{
                 tableName: 'x',
-                fileName: 'a.csv'
+                fileName: 'a.csv',
+                type: 'file'
             },
             {
                 tableName: 'y',
-                fileName: 'very-long-name.csv'
+                fileName: 'very-long-name.csv',
+                type: 'file'
             }],
             queryPart: 'SELECT * FROM a JOIN y ON a.id=y.id',
             intermediateContent: `PLOT {
@@ -107,7 +112,8 @@ sElEcT * fRoM files`)).toEqual({
             tables: [
                 {
                     tableName: 'x',
-                    fileName: 'a.csv'
+                    fileName: 'a.csv',
+                    type: 'file'
                 }
             ]
         })
@@ -122,7 +128,8 @@ select * from x`
             tables: [
                 {
                     tableName: 'x',
-                    fileName: 'aaa.csv'
+                    fileName: 'aaa.csv',
+                    type: 'file'
                 }
             ]
         })

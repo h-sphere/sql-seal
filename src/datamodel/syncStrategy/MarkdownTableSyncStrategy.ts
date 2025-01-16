@@ -1,10 +1,11 @@
-import { FilepathHasher } from "src/utils/hasher";
+import { FilepathHasher } from "../../utils/hasher";
 import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
-import { App, Component, MarkdownRenderer, TFile } from "obsidian";
-import { FieldTypes, toTypeStatements } from "src/utils/typePredictions";
+import type { App } from "obsidian";
+import { Component, MarkdownRenderer } from "obsidian";
+import { FieldTypes, toTypeStatements } from "../../utils/typePredictions";
 import { TableDefinitionConfig } from "./types";
-import { SourceType } from "src/grammar/newParser";
+import { SourceType } from "../../grammar/newParser";
 
 
 interface TableData {

@@ -1,12 +1,12 @@
-import { App, Component } from "obsidian";
+import { App } from "obsidian";
 import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
-import { sanitise } from "src/utils/sanitiseColumn";
+import { sanitise } from "../../utils/sanitiseColumn";
 import { parse } from "papaparse";
-import { FieldTypes, toTypeStatements } from "src/utils/typePredictions";
-import { FilepathHasher } from "src/utils/hasher";
+import { FieldTypes, toTypeStatements } from "../../utils/typePredictions";
+import { FilepathHasher } from "../../utils/hasher";
 import { TableDefinitionConfig } from "./types";
-import { SourceType } from "src/grammar/newParser";
+import { SourceType } from "../../grammar/newParser";
 
 export class CsvFileSyncStrategy implements ISyncStrategy {
     constructor(private reg: TableRegistration, private app: App) {
@@ -19,12 +19,12 @@ export class CsvFileSyncStrategy implements ISyncStrategy {
     }
 
     static processTableDefinition(config: TableDefinitionConfig) {
-            return {
-                tableName: config.alias,
-                type: config.type as SourceType,
-                fileName: config.arguments
-            }
+        return {
+            tableName: config.alias,
+            type: config.type as SourceType,
+            fileName: config.arguments
         }
+    }
 
     async returnData() {
         const file = this.app.vault.getFileByPath(this.reg.sourceFile)!
