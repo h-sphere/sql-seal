@@ -1,3 +1,6 @@
+# 0.16.1
+Fixed issue with variables causing error. Now you can pass variables from your frontmatter with no problem.
+
 # 0.16.0
 Now you can query tables in your note and use them as data source! [Check more information in the documentation](http://hypersphere.blog/sql-seal/query-markdown-tables.html).
 

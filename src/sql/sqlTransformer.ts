@@ -12,7 +12,8 @@ export const transformQuery = (query: string, tableNames: Record<string, string>
     dialect: 'sqlite',
     includeSpaces: true,
     includeComments: true,
-    includeNewlines: true
+    includeNewlines: true,
+    paramTypes: ['@name']
   })
 
   const watchTables: string[] = []
