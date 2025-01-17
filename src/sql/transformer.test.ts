@@ -47,4 +47,16 @@ numbers`
             mappedTables: []
         })
     })
+
+    it('should properly transform query with parameters', () => {
+        const input = `WITH data(a) AS (
+	VALUES(1),(2),(3),(5),(6),(7)
+)
+SELECT * FROM data WHERE a >= @test`
+
+        expect(transformQuery(input, { files: 'files' })).toEqual({
+            sql: input,
+            mappedTables: []
+        })
+    })
 })
