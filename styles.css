@@ -122,3 +122,15 @@
     color: var(--text-error);
     font-style: italic;
 }
+
+.sqlseal-list-element-single .sqlseal-column-name {
+    display: none;
+}
+
+.sqlseal-list-element-single .sqlseal-column-name::after {
+    content: ': ';
+}
+
+.sqlseal-list.show-column-names .sqlseal-list-element-single .sqlseal-column-name {
+    display: inline;
+}

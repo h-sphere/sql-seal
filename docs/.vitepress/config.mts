@@ -30,6 +30,15 @@ export default defineConfig({
         ]
       },
       {
+        text: 'Renderers',
+        items: [
+          { text: 'Grid', link: '/renderers/grid' },
+          { text: 'HTML', link: '/renderers/html' },
+          { text: 'List', link: '/renderers/list' },
+          { text: 'Markdown', link: '/renderers/markdown' },
+        ]
+      },
+      {
         text: 'FAQ',
         items: [
           { text: 'Comparison with Dataview', link: '/faq/comparison-with-dataview' }

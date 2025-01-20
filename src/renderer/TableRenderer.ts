@@ -3,6 +3,10 @@ import { App } from "obsidian";
 import { RendererConfig } from "src/renderer/rendererRegistry";
 import { displayError, parseCell } from "src/utils/ui";
 
+interface HTMLRendererConfig {
+    classNames: string[]
+}
+
 export class TableRenderer implements RendererConfig {
 
     constructor(private readonly app: App) { }
@@ -11,22 +15,35 @@ export class TableRenderer implements RendererConfig {
         return 'html'
     }
 
-    validateConfig(config: string) {
-        return {}
+    validateConfig(config: string): HTMLRendererConfig {
+        if (!config) {
+            return {
+                classNames: []
+            }
+        }
+        const classNames = config.split('.').filter(x => !!x).map(t => t.trim())
+        return {
+            classNames
+        }
     }
 
-    render(config: Record<string, any>, el: HTMLElement) {
+    render(config: HTMLRendererConfig, el: HTMLElement) {
         return {
             render: ({ columns, data }: any) => {
                 el.empty()
                 const container = el.createDiv({
-                    cls: 'sqlseal-table-container'
+                    cls: ['sqlseal-table-container', ...config.classNames]
                 })
-                const table = container.createEl("table")
+
+                let tableClasses = ['sqlseal']
+
+                const table = container.createEl("table", {
+                    cls: tableClasses
+                })
 
                 // HEADER
                 const header = table.createEl("thead").createEl("tr")
-                columns.forEach(c => {
+                columns.forEach((c: string) => {
                     header.createEl("th", { text: c })
                 })
 
@@ -34,7 +51,7 @@ export class TableRenderer implements RendererConfig {
                 data.forEach((d: any) => {
                     const row = body.createEl("tr")
                     columns.forEach((c: any) => {
-                        row.createEl("td", { text: parseCell(d[c], this.app) })                        
+                        row.createEl("td", { text: parseCell(d[c], this.app) as string })                        
 
                     })
                 })
