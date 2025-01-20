@@ -27,6 +27,7 @@ export default defineConfig({
           { text: 'CSV Viewer', link: '/csv-viewer' },
           { text: 'Troubleshooting', link: '/troubleshooting' },
           { text: 'Future Plans', link: '/future-plans' },
+          { text: 'Changelog', link: '/changelog' }
         ]
       },
       {
