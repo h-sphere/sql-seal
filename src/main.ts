@@ -11,6 +11,7 @@ import { TagsFileSyncTable } from 'src/vaultSync/tables/tagsTable';
 import { TasksFileSyncTable } from 'src/vaultSync/tables/tasksTable';
 import { CSV_VIEW_TYPE, CSVView } from 'src/view/CSVView';
 import { createSqlSealEditorExtension } from './editorExtension/inlineCodeBlock';
+import { ListRenderer } from './renderer/ListRenderer';
 
 const GLOBAL_KEY = 'sqlSealApi'
 
@@ -35,6 +36,7 @@ export default class SqlSealPlugin extends Plugin {
 		this.rendererRegistry.register('sql-seal-internal-table', new TableRenderer(this.app))
 		this.rendererRegistry.register('sql-seal-internal-grid', new GridRenderer(this.app))
 		this.rendererRegistry.register('sql-seal-internal-markdown', new MarkdownRenderer(this.app))
+		this.rendererRegistry.register('sql-seal-internal-list', new ListRenderer(this.app))
 
 		this.registerGlobalApi();
 		const sqlSeal = new SqlSeal(this.app, false, this.rendererRegistry) // FIXME: set verbose based on the env.
