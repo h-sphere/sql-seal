@@ -5,7 +5,8 @@ import { RenameColumnModal } from 'src/modal/renameColumnModal';
 import { CodeSampleModal } from 'src/modal/showCodeSample';
 import { GridRenderer } from 'src/renderer/GridRenderer';
 
-export const CSV_VIEW_TYPE = "csv-viewer";
+export const CSV_VIEW_TYPE = "csv-viewer" as const;
+export const CSV_VIEW_EXTENSIONS = ['csv'];
 
 export class CSVView extends TextFileView {
     private content: string;

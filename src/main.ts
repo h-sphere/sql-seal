@@ -9,9 +9,10 @@ import { SealFileSync } from 'src/vaultSync/SealFileSync';
 import { FilesFileSyncTable } from 'src/vaultSync/tables/filesTable';
 import { TagsFileSyncTable } from 'src/vaultSync/tables/tagsTable';
 import { TasksFileSyncTable } from 'src/vaultSync/tables/tasksTable';
-import { CSV_VIEW_TYPE, CSVView } from 'src/view/CSVView';
+import { CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE, CSVView } from 'src/view/CSVView';
 import { createSqlSealEditorExtension } from './editorExtension/inlineCodeBlock';
 import { ListRenderer } from './renderer/ListRenderer';
+import { JSON_VIEW_EXTENSIONS, JSON_VIEW_TYPE, JsonView } from './view/JsonView';
 
 const GLOBAL_KEY = 'sqlSealApi'
 
@@ -25,14 +26,15 @@ export default class SqlSealPlugin extends Plugin {
 		await this.loadSettings();
 		const settingsTab = new SQLSealSettingsTab(this.app, this, this.settings)
 		this.addSettingTab(settingsTab);
-		settingsTab.onChange(settings => {
+		settingsTab.onChange(async settings => {
 			this.settings = settings
 			// FIXME: check how to unregister the view
-			this.unregisterCSVView()
-			this.registerCsvView()
+			await this.unregisterSQLSealExtensions()
+			await this.registerSQLSealExtensions()
 		})
 
-		await this.registerCsvView();
+		await this.registerViews();
+		await this.registerSQLSealExtensions()
 		this.rendererRegistry.register('sql-seal-internal-table', new TableRenderer(this.app))
 		this.rendererRegistry.register('sql-seal-internal-grid', new GridRenderer(this.app))
 		this.rendererRegistry.register('sql-seal-internal-markdown', new MarkdownRenderer(this.app))
@@ -61,10 +63,10 @@ export default class SqlSealPlugin extends Plugin {
 		})
 
 		this.registerEvent(
-            this.app.workspace.on('file-menu', (menu: Menu, file: TAbstractFile) => {
-                this.addCSVCreatorMenuItem(menu, file);
-            })
-        );
+			this.app.workspace.on('file-menu', (menu: Menu, file: TAbstractFile) => {
+				this.addCSVCreatorMenuItem(menu, file);
+			})
+		);
 	}
 
 	private registerInlineCodeblocks() {
@@ -96,16 +98,16 @@ export default class SqlSealPlugin extends Plugin {
 
 	private addCSVCreatorMenuItem(menu: Menu, file: TAbstractFile) {
 		menu.addItem((item) => {
-		item
-			.setTitle('New CSV file')
-			.setIcon('table')
-			.onClick(async () => {
-				try {
-					await this.createNewCSVFile(file)
-				} catch (error) {
-					console.error('Failed to create CSV file:', error)
-				}
-			});
+			item
+				.setTitle('New CSV file')
+				.setIcon('table')
+				.onClick(async () => {
+					try {
+						await this.createNewCSVFile(file)
+					} catch (error) {
+						console.error('Failed to create CSV file:', error)
+					}
+				});
 		});
 	}
 
@@ -133,25 +135,44 @@ export default class SqlSealPlugin extends Plugin {
 			await leaf.openFile(newFile);
 
 			const fileExplorer = this.app.workspace.getLeavesOfType('file-explorer')[0]?.view;
-            if (fileExplorer) {
-                await (fileExplorer as any).revealInFolder(newFile);
-            }
+			if (fileExplorer) {
+				await (fileExplorer as any).revealInFolder(newFile);
+			}
 		} catch (error) {
 			console.error('Error creating CSV file:', error);
 			throw error;
 		}
 	}
 
-	async registerCsvView() {
+	async registerSQLSealExtensions() {
 		if (this.settings.enableViewer) {
-			this.registerView(
-				CSV_VIEW_TYPE,
-				(leaf) => new CSVView(leaf, this.settings.enableEditing)
-			);
-
-			// Register the view with the workspace for .csv files
-			this.registerExtensions(['csv'], CSV_VIEW_TYPE);
+			this.registerExtensions(CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE);
 		}
+		if (this.settings.enableJSONViewer) {
+			this.registerExtensions(JSON_VIEW_EXTENSIONS, JSON_VIEW_TYPE)
+		}
+
+	}
+
+	async unregisterSQLSealExtensions() {
+		this.app.workspace.detachLeavesOfType(CSV_VIEW_TYPE);
+		this.app.workspace.detachLeavesOfType(JSON_VIEW_TYPE);
+
+		(this.app as any).viewRegistry.unregisterExtensions([
+			...CSV_VIEW_EXTENSIONS,
+			...JSON_VIEW_EXTENSIONS
+		])
+	}
+
+	async registerViews() {
+		this.registerView(
+			CSV_VIEW_TYPE,
+			(leaf) => new CSVView(leaf, this.settings.enableEditing)
+		);
+		this.registerView(
+			JSON_VIEW_TYPE,
+			(leaf) => new JsonView(leaf)
+		)
 	}
 
 	registerGlobalApi() {
@@ -170,18 +191,9 @@ export default class SqlSealPlugin extends Plugin {
 		(window as any)[GLOBAL_KEY] = undefined
 	}
 
-	unregisterCSVView() {
-		this.app.workspace.detachLeavesOfType(CSV_VIEW_TYPE);
-
-		// TODO: figure out why viewRegistry is not being 
-		(this.app as any).viewRegistry.unregisterExtensions(['csv'])
-		(this.app as any).viewRegistry.unregisterView(CSV_VIEW_TYPE)
-
-	}
-
 	onunload() {
 		this.sqlSeal.db.disconect();
-		this.unregisterCSVView();
+		this.unregisterSQLSealExtensions();
 		this.unregisterGlobalApi();
 	}
 

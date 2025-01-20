@@ -4,6 +4,7 @@ import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
 import { CsvFileSyncStrategy } from "./CsvFileSyncStrategy";
 import { MarkdownTableSyncStrategy } from "./MarkdownTableSyncStrategy";
+import { JsonFileSyncStrategy } from "./JSONFileSyncStrategy";
 
 const fileLogToTableRegistration = (log: FileLog): TableRegistration => {
     return {
@@ -22,6 +23,9 @@ const resolveFileStrategy = (filename: string) => {
     switch (extension) {
         case 'csv':
             return CsvFileSyncStrategy
+        case 'json':
+        case 'json5':
+            return JsonFileSyncStrategy
         default:
             throw new Error(`No file processor for extension ${extension}`)
     }
