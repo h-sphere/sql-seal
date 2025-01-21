@@ -20,16 +20,7 @@ export class FileLogRepository extends Repository {
     }
 
     private async createTable() {
-        await this.db.createTable('file_log', {
-            'id': 'TEXT',
-            'table_name': 'TEXT',
-            'file_name': 'TEXT',
-            'created_at': 'TEXT',
-            'updated_at': 'TEXT',
-            'file_hash': 'TEXT',
-            'type': 'TEXT',
-            extras: 'TEXT'
-        }, true)
+        await this.db.createTableNoTypes('file_log', ['id', 'table_name', 'file_name','created_at','updated_at','file_hash','type','extras'], true)
     }
 
     async insert(log: Omit<FileLog, 'id' | 'created_at' | 'updated_at'>) {

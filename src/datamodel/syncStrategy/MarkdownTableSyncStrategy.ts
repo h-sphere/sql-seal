@@ -3,7 +3,6 @@ import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
 import type { App } from "obsidian";
 import { Component, MarkdownRenderer } from "obsidian";
-import { FieldTypes, toTypeStatements } from "../../utils/typePredictions";
 import { TableDefinitionConfig } from "./types";
 import { SourceType } from "../../grammar/newParser";
 
@@ -54,7 +53,7 @@ export class MarkdownTableSyncStrategy implements ISyncStrategy {
 
         // Check if the requested table exists
         if (tableIndex >= tables.length) {
-            return null;
+            return { data: [], columns: [] };
         }
 
         const targetTable = tables[tableIndex];
@@ -75,15 +74,9 @@ export class MarkdownTableSyncStrategy implements ISyncStrategy {
             }, {} as Record<string, string>);
         });
 
-        const typeStatements = toTypeStatements(headers ?? [], data)
-        const columns = Object.entries(typeStatements.types).map(([key, value]) => ({
-            name: key,
-            type: value as FieldTypes
-        }));
-
         return {
-            columns,
-            data
+            data,
+            columns: headers ?? []
         };
     }
 }

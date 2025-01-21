@@ -32,9 +32,6 @@ export class TagsFileSyncTable extends AFileSyncTable {
 
 
     async onInit(): Promise<void> {
-        await this.db.createTable('tags', {
-            'tag': 'TEXT',
-            'fileId': 'TEXT'
-        })
+        await this.db.createTableNoTypes('tags', ['tag', 'fileId'])
     }
 }

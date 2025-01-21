@@ -22,14 +22,9 @@ export class TableMapLogRepository extends Repository {
 
     private async createTable() {
         // FIXME: add autoincrement index here to make it easier to manage.
-        await this.db.createTable('table_map_log', {
-            'id': 'TEXT',
-            'table_name': 'TEXT',
-            'alias_name': 'TEXT',
-            'source_file_name': 'TEXT',
-            'created_at': 'TEXT',
-            'updated_at': 'TEXT'
-        }, true)
+        await this.db.createTableNoTypes('table_map_log',[
+            'id', 'table_name', 'alias_name', 'source_file_name', 'created_at', 'updated_at'
+        ], true)
     }
 
     async insert(log: Omit<TableMapLog, 'id' | 'created_at' | 'updated_at'>) {

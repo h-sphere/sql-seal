@@ -3,7 +3,6 @@ import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
 import { sanitise } from "../../utils/sanitiseColumn";
 import { parse } from "papaparse";
-import { FieldTypes, toTypeStatements } from "../../utils/typePredictions";
 import { FilepathHasher } from "../../utils/hasher";
 import { TableDefinitionConfig } from "./types";
 import { SourceType } from "../../grammar/newParser";
@@ -29,19 +28,20 @@ export class CsvFileSyncStrategy implements ISyncStrategy {
     async returnData() {
         const file = this.app.vault.getFileByPath(this.reg.sourceFile)!
         const data = await this.app.vault.cachedRead(file)
+
         // TODO: PROBABLY SHOULD BE EXTRACTED SOMEWHERE FROM HERE later.
         const parsed = parse<Record<string, string>>(data, {
             header: true,
-            dynamicTyping: false,
+            dynamicTyping: true,
             skipEmptyLines: true,
             transformHeader: sanitise
         })
-        const typeStatements = toTypeStatements(parsed.meta.fields ?? [], parsed.data)
-        const columns = Object.entries(typeStatements.types).map(([key, value]) => ({
-            name: key,
-            type: value as FieldTypes
-        }));
+        // const typeStatements = toTypeStatements(parsed.meta.fields ?? [], parsed.data)
+        // const columns = Object.entries(typeStatements.types).map(([key, value]) => ({
+        //     name: key,
+        //     type: value as FieldTypes
+        // }));
 
-        return { columns, data: parsed.data }
+        return { data: parsed.data, columns: parsed.meta.fields ?? [] }
     }
 }

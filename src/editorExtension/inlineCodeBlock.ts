@@ -3,7 +3,6 @@ import { RangeSetBuilder } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import { App } from "obsidian";
 import { SqlSealDatabase } from "../database/database";
-import { RendererRegistry } from "../renderer/rendererRegistry";
 import { Sync } from "../datamodel/sync";
 import { SqlSealInlineHandler } from "src/codeblockHandler/inline/InlineCodeHandler";
 import { InlineProcessor } from "src/codeblockHandler/inline/InlineProcessor";
