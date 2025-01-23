@@ -48,7 +48,6 @@ export class ListRenderer implements RendererConfig {
                             cls: ['sqlseal-list-element-single']
                         })
                         const val = parseCell(d[c], this.app)
-                        console.log('VAL', val)
                         el.append(val)
                         el.dataset.sqlsealColumn = c
                     })

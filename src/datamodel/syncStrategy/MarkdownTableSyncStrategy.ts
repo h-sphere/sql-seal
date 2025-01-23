@@ -1,43 +1,32 @@
 import { FilepathHasher } from "../../utils/hasher";
-import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
 import type { App } from "obsidian";
 import { Component, MarkdownRenderer } from "obsidian";
-import { TableDefinitionConfig } from "./types";
-import { SourceType } from "../../grammar/newParser";
+import { ParserTableDefinition } from "./types";
+
+const DEFAULT_FILE_HASH = ''
 
 
-interface TableData {
-    columns: string[];
-    data: Array<Record<string, string>>;
-}
+export class MarkdownTableSyncStrategy extends ISyncStrategy {
 
-export class MarkdownTableSyncStrategy implements ISyncStrategy {
-    constructor(private reg: TableRegistration, private app: App) {
-
-    }
-
-    static processTableDefinition(config: TableDefinitionConfig) {
-        return {
-            tableName: config.alias,
-            type: config.type as SourceType,
-            fileName: config.sourceFile, //+ '?table=' + config.arguments
-            extras: {
-                tableNo: parseInt(config.arguments, 10) ?? 0
-            }
-        }
-    }
-
-    async tableName() {
-        const hash = await FilepathHasher.sha256(`${this.reg.sourceFile}__${this.reg.fileName}`) // FILENAME is in this case 
-
-        return `mdtable_${hash}`
+    static async fromParser(def: ParserTableDefinition, app: App): Promise<MarkdownTableSyncStrategy> {
+        const index = def.arguments[0]
+        const hash = await FilepathHasher.sha256(`${def.sourceFile}`) // FILENAME is in this case
+        const tableName = `mdtable_${hash}_${index}`
+        return new MarkdownTableSyncStrategy({
+            arguments: def.arguments,
+            file_hash: DEFAULT_FILE_HASH,
+            refresh_id: tableName,
+            source_file: def.sourceFile,
+            table_name: tableName,
+            type: def.type
+        }, app)
     }
 
     async returnData() {
 
-        const tableIndex = this.reg.extras.tableNo
-        const file = this.app.vault.getFileByPath(this.reg.sourceFile)!
+        const tableIndex = parseInt(this.def.arguments[0], 10)
+        const file = this.app.vault.getFileByPath(this.def.source_file)!
         const content = await this.app.vault.read(file);
 
         // Create a temporary div to render the markdown
@@ -59,7 +48,7 @@ export class MarkdownTableSyncStrategy implements ISyncStrategy {
         const targetTable = tables[tableIndex];
 
         // Extract headers
-        const headers = Array.from(targetTable.querySelectorAll('th')).map(th => th.textContent?.trim() || '');
+        const headers = Array.from(targetTable.querySelectorAll('th')).map(th => th.textContent?.trim() || '').filter(x => !!x);
 
         // Extract rows
         const rows = Array.from(targetTable.querySelectorAll('tr')).slice(1); // Skip header row

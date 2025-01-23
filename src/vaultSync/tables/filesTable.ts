@@ -49,14 +49,12 @@ export class FilesFileSyncTable extends AFileSyncTable {
     async updateColumnsIfNeeded(newSetOfColumns: string[]) {
         const newColumns = difference(newSetOfColumns, this.columns)
         if (newColumns.length) {
-            console.log('ADDING COLUMNS', newColumns)
             await this.db.addColumns(FILES_TABLE_NAME, newColumns)
             this.columns = await this.db.getColumns(FILES_TABLE_NAME)
         }
     }
 
     async onFileCreate(file: TFile): Promise<void> {
-        console.log('--- PROCESSING', file.name)
         const frontmatter = extractFrontmatterFromFile(file, this.plugin)
         const frontmatterWithFileData = fileData(file, frontmatter)
         const columns = Object.keys(frontmatterWithFileData)

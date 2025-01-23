@@ -12,11 +12,12 @@ describe('Parser', () => {
 
     it('should parse properly table and select', () => {
         expect(parseLanguage(`TABLE x = file(a.csv)
-SELECT * FROM files`)).toEqual({
+SELECT * FROM files`, "source.md")).toEqual({
             tables: [{
-                tableName: 'x',
-                fileName: 'a.csv',
-                type: 'file'
+                tableAlias: 'x',
+                arguments: ['a.csv'],
+                type: 'file',
+                sourceFile: "source.md"
             }],
             queryPart: 'SELECT * FROM files',
             intermediateContent: ''
@@ -26,16 +27,18 @@ SELECT * FROM files`)).toEqual({
     it('should parse properly multiple tables in the same file', () => {
         expect(parseLanguage(`TABLE x = file(a.csv)
 TABLE y = file(very-long-name.csv)
-SELECT * FROM a JOIN y ON a.id=y.id`)).toEqual({
+SELECT * FROM a JOIN y ON a.id=y.id`, 's.md')).toEqual({
             tables: [{
-                tableName: 'x',
-                fileName: 'a.csv',
-                type: 'file'
+                tableAlias: 'x',
+                arguments: ['a.csv'],
+                type: 'file',
+                sourceFile: 's.md'
             },
             {
-                tableName: 'y',
-                fileName: 'very-long-name.csv',
-                type: 'file'
+                tableAlias: 'y',
+                arguments: ['very-long-name.csv'],
+                type: 'file',
+                sourceFile: 's.md'
             }],
             queryPart: 'SELECT * FROM a JOIN y ON a.id=y.id',
             intermediateContent: ''
@@ -44,22 +47,24 @@ SELECT * FROM a JOIN y ON a.id=y.id`)).toEqual({
 
     it('should parse properly multiple tables in the same file', () => {
         expect(parseLanguage(`TABLE x = file(a.csv)
-TABLE y = file(very-long-name.csv)
+TABLE y = file(      very-long-name.csv       )
 
 PLOT {
     x: 5,
     y: 654
 }
-SELECT * FROM a JOIN y ON a.id=y.id`)).toEqual({
+SELECT * FROM a JOIN y ON a.id=y.id`, 'source.md')).toEqual({
             tables: [{
-                tableName: 'x',
-                fileName: 'a.csv',
-                type: 'file'
+                tableAlias: 'x',
+                arguments: ['a.csv'],
+                type: 'file',
+                sourceFile: 'source.md'
             },
             {
-                tableName: 'y',
-                fileName: 'very-long-name.csv',
-                type: 'file'
+                tableAlias: 'y',
+                arguments: ['very-long-name.csv'],
+                type: 'file',
+                sourceFile: 'source.md'
             }],
             queryPart: 'SELECT * FROM a JOIN y ON a.id=y.id',
             intermediateContent: `PLOT {
@@ -106,14 +111,15 @@ sElEcT * fRoM files`)).toEqual({
 
             select * from files
             
-            `)).toEqual({
+            `, 'src.md')).toEqual({
             'intermediateContent': 'html',
             'queryPart': 'select * from files',
             tables: [
                 {
-                    tableName: 'x',
-                    fileName: 'a.csv',
-                    type: 'file'
+                    tableAlias: 'x',
+                    arguments: ['a.csv'],
+                    type: 'file',
+                    sourceFile: 'src.md'
                 }
             ]
         })
@@ -122,14 +128,32 @@ sElEcT * fRoM files`)).toEqual({
     it('should properly parse query with just table and sql syntax', () => {
         const q = `table x = file(aaa.csv)
 select * from x`
-        expect(parseLanguage(q)).toEqual({
+        expect(parseLanguage(q, '2025-01-01.md')).toEqual({
             queryPart: 'select * from x',
             intermediateContent: '',
             tables: [
                 {
-                    tableName: 'x',
-                    fileName: 'aaa.csv',
-                    type: 'file'
+                    tableAlias: 'x',
+                    arguments: ['aaa.csv'],
+                    type: 'file',
+                    sourceFile: '2025-01-01.md'
+                }
+            ]
+        })
+    })
+
+    it('should properly parse query with table definition with multiple arguments', () => {
+        const q = `table x = file(aaa.csv, secondArg,         third argument)
+select * from x`
+        expect(parseLanguage(q, '2025-01-01.md')).toEqual({
+            queryPart: 'select * from x',
+            intermediateContent: '',
+            tables: [
+                {
+                    tableAlias: 'x',
+                    arguments: ['aaa.csv', 'secondArg', 'third argument'],
+                    type: 'file',
+                    sourceFile: '2025-01-01.md'
                 }
             ]
         })
