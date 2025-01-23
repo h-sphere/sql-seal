@@ -2,6 +2,9 @@ import { getAllTags, TFile } from "obsidian";
 import { AFileSyncTable } from "./abstractFileSyncTable";
 
 export class TagsFileSyncTable extends AFileSyncTable {
+    get tableName() {
+        return 'tags'
+    }
     async onFileModify(file: TFile): Promise<void> {
         await this.onFileDelete(file.path)
         await this.onFileCreate(file)
