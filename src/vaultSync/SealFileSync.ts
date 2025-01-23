@@ -1,21 +1,12 @@
 import { App, Plugin, TFile } from "obsidian";
-import { sanitise } from "../utils/sanitiseColumn";
 import { AFileSyncTable } from "./tables/abstractFileSyncTable";
-
-const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {
-    const frontmatter = plugin.app.metadataCache.getFileCache(file)?.frontmatter || {}
-
-    return Object.fromEntries(
-        Object.entries(frontmatter)
-            .map(([v, s]) => ([sanitise(v), s]))
-    )
-}
 
 export class SealFileSync {
     private tablePlugins: Array<AFileSyncTable> = []
     constructor(
         public readonly app: App,
         private readonly plugin: Plugin,
+        private readonly triggerGlobalChange: (name: string) => void
     ) {
         plugin.registerEvent(this.app.vault.on('modify', async (file) => {
             if (!(file instanceof TFile)) {
@@ -24,7 +15,7 @@ export class SealFileSync {
             await sleep(100) // FIXME: check if this is actually needed.
 
             await Promise.all(this.tablePlugins.map(p => p.onFileModify(file)))
-
+            this.triggerChange()
         }))
 
         plugin.registerEvent(this.app.vault.on('create', async (file) => {
@@ -32,6 +23,7 @@ export class SealFileSync {
                 return
             }
             await Promise.all(this.tablePlugins.map(p => p.onFileCreate(file)))
+            this.triggerChange()
 
         }))
         
@@ -41,6 +33,7 @@ export class SealFileSync {
             }
 
             await Promise.all(this.tablePlugins.map(p => p.onFileDelete(file.path)))
+            this.triggerChange()
         }))
 
         plugin.registerEvent(this.app.vault.on('rename', async (file, oldPath) => {
@@ -52,6 +45,7 @@ export class SealFileSync {
 
             await sleep(1000)
             await Promise.all(this.tablePlugins.map(p => p.onFileCreate(file)))
+            this.triggerChange()
         }))
 
         // add Obsidian command to reload SQLSeal file database
@@ -81,6 +75,17 @@ export class SealFileSync {
         await Promise.all(files.map(file =>
             Promise.all(nonBulkPlugins.map(p => p.onFileCreate(file))))
         )
+        this.triggerChange()
 
+    }
+
+    get globalTables() {
+        return this.tablePlugins.map(t => t.tableName)
+    }
+
+    triggerChange() {
+        this.globalTables.forEach(tableName => {
+            this.triggerGlobalChange(tableName)
+        })
     }
 }

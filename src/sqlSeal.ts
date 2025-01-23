@@ -1,16 +1,21 @@
 import { SqlSealDatabase } from "./database/database";
-import { App } from "obsidian";
+import { App, Plugin } from "obsidian";
 import { SqlSealCodeblockHandler } from "./codeblockHandler/SqlSealCodeblockHandler";
 import { Logger } from "./utils/logger";
 import { RendererRegistry } from "./renderer/rendererRegistry";
 import { Sync } from "./datamodel/sync";
 import { SqlSealInlineHandler } from "./codeblockHandler/inline/InlineCodeHandler";
+import { SealFileSync } from "./vaultSync/SealFileSync";
+import { FilesFileSyncTable } from "./vaultSync/tables/filesTable";
+import { TagsFileSyncTable } from "./vaultSync/tables/tagsTable";
+import { TasksFileSyncTable } from "./vaultSync/tables/tasksTable";
 
 export class SqlSeal {
     public db: SqlSealDatabase
     private codeBlockHandler: SqlSealCodeblockHandler
     private inlineCodeBlock: SqlSealInlineHandler
     public sync: Sync
+    public fileSync: SealFileSync
     constructor(private readonly app: App, verbose = false, rendererRegistry: RendererRegistry) {
         this.db = new SqlSealDatabase(app, verbose)
         const logger = new Logger(verbose)
@@ -28,5 +33,15 @@ export class SqlSeal {
 
     getInlineHandler() {
         return this.inlineCodeBlock.getHandler()
+    }
+
+    async startFileSync(plugin: Plugin) {
+        this.fileSync = new SealFileSync(this.app, plugin, (name) => this.sync.triggerGlobalTableChange(name))
+
+        this.fileSync.addTablePlugin(new FilesFileSyncTable(this.db, this.app, plugin))
+        this.fileSync.addTablePlugin(new TagsFileSyncTable(this.db, this.app))
+        this.fileSync.addTablePlugin(new TasksFileSyncTable(this.db, this.app))
+
+        await this.fileSync.init()
     }
 }
