@@ -1,50 +1,48 @@
 import { App } from "obsidian";
-import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
-import { sanitise } from "../../utils/sanitiseColumn";
 import { FilepathHasher } from "../../utils/hasher";
-import { TableDefinitionConfig } from "./types";
-import { SourceType } from "../../grammar/newParser";
-import { parse } from 'JSON5'
+import { ParserTableDefinition } from "./types";
+import { parse } from 'JSON5';
 import { uniq } from "lodash";
-import { FieldTypes, toTypeStatements } from "src/utils/typePredictions";
 
-export class JsonFileSyncStrategy implements ISyncStrategy {
-    constructor(private reg: TableRegistration, private app: App) {
+const DEFAULT_FILE_HASH = ''
 
-    }
+export class JsonFileSyncStrategy extends ISyncStrategy {
 
-    async tableName() {
-        const hash = await FilepathHasher.sha256(`${this.reg.sourceFile}`) // FILENAME is in this case 
-        return `file_${hash}`
-    }
-
-    static processTableDefinition(config: TableDefinitionConfig) {
-        return {
-            tableName: config.alias,
-            type: config.type as SourceType,
-            fileName: config.arguments
+    static async fromParser(def: ParserTableDefinition, app: App): Promise<JsonFileSyncStrategy> {
+    
+            const tableSourceFile = def.arguments[0]
+    
+            const path = app.metadataCache.getFirstLinkpathDest(tableSourceFile, def.sourceFile)
+            if (!path) {
+                throw new Error(`File not found: ${tableSourceFile}`)
+            }
+            const sourcePath = path.path
+            const hash = await FilepathHasher.sha256(`${sourcePath}`) // FILENAME is in this case
+            const tableName = `file_${hash}`
+    
+            return new JsonFileSyncStrategy({
+                arguments: def.arguments,
+                file_hash: DEFAULT_FILE_HASH,
+                refresh_id: tableName,
+                source_file: sourcePath,
+                table_name: tableName,
+                type: def.type
+            }, app)
         }
-    }
 
     async returnData() {
-        const file = this.app.vault.getFileByPath(this.reg.sourceFile)!
+        const file = this.app.vault.getFileByPath(this.def.source_file)!
         const fileData = await this.app.vault.cachedRead(file)
 
-        // HERE IS WHERE THE PARSING BEGINS
         const data = parse(fileData)
 
         if(!Array.isArray(data)) {
             throw new Error('Resulting data is not an array')
         }
 
-        const columnsFlat = uniq(data.map(d => Object.keys(d)).flat())
+        const columns = uniq(data.map(d => Object.keys(d)).flat())
 
-        const typeStatements = toTypeStatements(columnsFlat, data)
-        const columns = Object.entries(typeStatements.types).map(([key, value]) => ({
-                    name: key,
-                    type: value as FieldTypes
-                }));
         return { columns, data: data }
     }
 }
