@@ -1,22 +1,21 @@
 import { SqlSealDatabase } from "src/database/database";
-import { FileLog, FileLogRepository } from "./repository/fileLog";
-import { TableMapLogRepository } from "./repository/tableMapLog";
+import { TableAliasesRepository } from "./repository/tableAliases";
 import { App, TAbstractFile, TFile, Vault } from "obsidian";
 import { FilepathHasher } from "../utils/hasher";
 import { Omnibus } from "@hypersphere/omnibus";
-import { TableRegistration } from "./types";
 import { SyncStrategyFactory } from "./syncStrategy/SyncStrategyFactory";
 import { ConfigurationRepository } from "./repository/configuration";
+import { TableDefinitionsRepository, TableDefinition } from "./repository/tableDefinitions";
+import { ParserTableDefinition } from "./syncStrategy/types";
+import { uniq } from "lodash";
 
 
-const SQLSEAL_DATABASE_VERSION = 1;
+const SQLSEAL_DATABASE_VERSION = 2;
 
 export class Sync {
-    private fileLog: FileLogRepository;
-    private tableMapLog: TableMapLogRepository;
+    private tableDefinitionsRepo: TableDefinitionsRepository;
+    private tableMapLog: TableAliasesRepository;
     private bus = new Omnibus()
-
-    private tableMaps = new Map<string, FileLog>()
 
     constructor(
         private readonly db: SqlSealDatabase,
@@ -24,14 +23,6 @@ export class Sync {
         private readonly app: App
     ) {
 
-    }
-
-    async updateTableMaps() {
-        const data = await this.fileLog.getAll()
-        this.tableMaps.clear()
-        data.forEach(log => {
-            this.tableMaps.set(log.file_name, log)
-        })
     }
 
     async init() {
@@ -52,20 +43,19 @@ export class Sync {
 
         await config.init()
 
-        this.fileLog = new FileLogRepository(this.db)
-        await this.fileLog.init()
+        this.tableDefinitionsRepo = new TableDefinitionsRepository(this.db)
+        await this.tableDefinitionsRepo.init()
 
-        this.tableMapLog = new TableMapLogRepository(this.db)
+        this.tableMapLog = new TableAliasesRepository(this.db)
         await this.tableMapLog.init()
 
         await config.setConfig('version', SQLSEAL_DATABASE_VERSION)
 
-        const fileLogs = await this.fileLog.getAll()
-        for (const log of fileLogs) {
-            await this.syncFileByName(log.file_name)
+        const fileLogs = await this.tableDefinitionsRepo.getAll()
+        const uniquePaths = uniq(fileLogs.map(l => l.source_file))
+        for (const path of uniquePaths) {
+            await this.syncFileByName(path)
         }
-
-        await this.updateTableMaps()
 
         // START SYNCING
         this.startSync()
@@ -82,22 +72,28 @@ export class Sync {
     async syncFile(file: TFile) {
         this.bus.trigger('file::change::'+file.path)
 
+        const maps = await this.tableDefinitionsRepo.getBySourceFile(file.path)
 
-        const entry = this.tableMaps.get(file.path)
-        if (!entry) {
+        if (!maps) {
             return
         }
-        if (entry.file_hash !== file.stat.mtime.toString()) {
-            const syncObject = SyncStrategyFactory.getStrategyByFileLog(entry, this.app)
 
-            const { data, columns } = await syncObject.returnData()
-
-            const tableName = entry.table_name
-            await this.db.createTableClean(tableName, columns)
-            await this.db.insertData(tableName, data)
-            await this.fileLog.updateHash(tableName, file.stat.mtime.toString())
-            this.bus.trigger('change::' + tableName)
-
+        for (const entry of maps) {
+            if (!entry) {
+                return
+            }
+            if (entry.file_hash !== file.stat.mtime.toString()) {
+                const syncObject = SyncStrategyFactory.getStrategy(entry, this.app)
+    
+                const { data, columns } = await syncObject.returnData()
+    
+                const tableName = entry.table_name
+                await this.db.createTableNoTypes(tableName, columns)
+                await this.db.insertData(tableName, data)
+                await this.tableDefinitionsRepo.update(entry.id, { file_hash: file.stat.mtime.toString() })
+                this.bus.trigger('change::' + tableName)
+    
+            }
         }
     }
 
@@ -109,9 +105,8 @@ export class Sync {
         })
     }
 
-    async registerFile(log: Omit<FileLog, 'id' | 'created_at' | 'updated_at'>) {
-        await this.fileLog.insert(log)
-        await this.updateTableMaps()
+    async registerFile(log: Omit<TableDefinition, 'id' | 'created_at' | 'updated_at'>) {
+        await this.tableDefinitionsRepo.insert(log)
     }
 
     async getTablesMappingForContext(sourceFileName: string) {
@@ -134,43 +129,42 @@ export class Sync {
         return `file_${hash}`
     }
 
-    async registerTable(reg: TableRegistration) {
-        const existingFileLog = await this.fileLog.getByFilename(reg.fileName)
-        let fileTableName: string;
-        const syncObject = SyncStrategyFactory.getStrategy(reg, this.app)
-        if (!existingFileLog) {
-            // We need to create new one.
-            const tableName = await syncObject.tableName()
-            await this.registerFile({
-                file_name: reg.fileName,
-                table_name: tableName,
-                file_hash: '',
-                type: reg.type,
-                extras: reg.extras
-            })
-            fileTableName = tableName
-            // INITIAL SYNC
-            await this.syncFileByName(reg.fileName)
+    async registerTable(reg: ParserTableDefinition) {
+        const syncObject = await SyncStrategyFactory.getStrategyFromParser(reg, this.app)
+
+        const definition = syncObject.tableDefinition
+
+        const existingDefinition = await this.tableDefinitionsRepo.getByRefreshId(definition.refresh_id) // FIXME: probably can be by table name too.
+
+        let tableName: string;
+
+        if (!existingDefinition) {
+            // This one is not registered yet, registering
+            await this.registerFile(definition)
+            await this.syncFileByName(definition.source_file)
+            tableName = definition.table_name
         } else {
-            fileTableName = existingFileLog.table_name
+            tableName = existingDefinition.table_name
         }
 
-        const existingTableLog = await this.tableMapLog.getByAlias(reg.sourceFile, reg.aliasName)
+        // TODO: THIS PART SHOULD BE REWRITTEN SOONish
+        const existingTableLog = await this.tableMapLog.getByAlias(reg.sourceFile, reg.tableAlias)
         if (!existingTableLog) {
+            // console.log(`Registering new mapping ${reg.sourceFile} :: ${reg.tableAlias} -> ${tableName}`)
             // Create new one
             await this.tableMapLog.insert({
-                alias_name: reg.aliasName,
+                alias_name: reg.tableAlias,
                 source_file_name: reg.sourceFile,
-                table_name: fileTableName,
+                table_name: tableName,
             })
         } else {
-            // Already exists, doing nothing.
             // Check if it is the same mapping
-            if (existingTableLog.table_name != fileTableName) {
-                await this.tableMapLog.deleteMapping(existingTableLog.id) // FIXME: might need to remove event too
+            if (existingTableLog.table_name !== tableName) {
+                // console.log(`Alias ${reg.sourceFile} :: ${reg.tableAlias} changed table, now it should refer to ${tableName})`)
+                await this.tableMapLog.deleteMapping(existingTableLog.id)
                 await this.tableMapLog.insert({
-                    alias_name: reg.aliasName,
-                    table_name: fileTableName,
+                    alias_name: reg.tableAlias,
+                    table_name: tableName,
                     source_file_name: reg.sourceFile
                 })
             }
@@ -188,22 +182,4 @@ export class Sync {
         }
         return `change::${log.table_name}`
     }
-
-    // async onFileChange(file: TFile) {
-    //     const path = file.path
-    //     const hash = file.stat.mtime
-    //     // Checking if the file is registered
-    //     const reg = await this.fileLog.getByFilename(path)
-    //     if (reg) {
-    //         // Need to syncronise it.
-    //         // Need to save update in the database.
-    //         // Need to trigger all related files.
-    //         const allRelated = this.tableMapLog.getByTableName(reg.tableName)
-    //         for (const related of allRelated) {
-    //             this.bus.bus.trigger('')
-    //         }
-    //     }
-
-    //     // Checking if the file file is in the map.
-    // }
 }

@@ -46,7 +46,7 @@ const generateLink = (config: SqlSealAnchorElement, app: App) => {
         if (fileHref.endsWith('.md')) {
             fileHref = fileHref.slice(0, -3)
         }
-        const vaultName = encodeURIComponent(app.appId);
+        const vaultName = encodeURIComponent((app as any).appId);
         const encodedPath = encodeURIComponent(fileHref);
         href = `obsidian://open?vault=${vaultName}&file=${encodedPath}`;
     }

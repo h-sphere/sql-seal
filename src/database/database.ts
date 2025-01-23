@@ -1,40 +1,7 @@
 import { App } from "obsidian"
-import { FieldTypes, toTypeStatements } from "../utils/typePredictions"
 import * as Comlink from 'comlink'
 import workerCode from 'virtual:worker-code'
 import { WorkerDatabase } from "./worker/database";
-
-export interface FieldDefinition {
-    name: string;
-    type: FieldTypes
-}
-
-const formatData = (data: Record<string, any>) => {
-    return Object.keys(data).reduce((ret, key) => {
-        if (typeof data[key] === 'boolean') {
-            return {
-                ...ret,
-                [key]: data[key] ? 1 : 0
-            }
-        }
-        if (!data[key]) {
-            return {
-                ...ret,
-                [key]: null
-            }
-        }
-        if (typeof data[key] === 'object' || Array.isArray(data[key])) {
-            return {
-                ...ret,
-                [key]: JSON.stringify(data[key])
-            }
-        }
-        return {
-            ...ret,
-            [key]: data[key]
-        }
-    }, {})
-}
 
 export class SqlSealDatabase {
     db: Comlink.Remote<WorkerDatabase>
@@ -88,14 +55,6 @@ export class SqlSealDatabase {
         await this.db.recreateDatabase()
     }
 
-    async createTableWithData(name: string, data: Array<Record<string, unknown>>) {
-        const schema = await this.getSchema(data)
-        await this.createTable(name, schema)
-        await this.insertData(name, data)
-
-        return schema
-    }
-
     async updateData(name: string, data: Array<Record<string, unknown>>) {
         return this.db.updateData(name, data)
     }
@@ -112,26 +71,16 @@ export class SqlSealDatabase {
         return this.db.dropTable(name)
     }
 
-    async createTableClean(name: string, fields: Array<FieldDefinition>) {
-        const fieldsToRecord = fields.reduce((acc, f) => ({
-            ...acc,
-            [f.name]: f.type
-        }), {} as Record<string, FieldTypes>) as Record<string, FieldTypes>
-        await this.createTable(name, fieldsToRecord)
-    }
-
-    async createTable(name: string, fields: Record<string, FieldTypes>, noDrop?: boolean) {
-        await this.db.createTable(name, fields, noDrop)
-    }
-
     async createTableNoTypes(name: string, columns: string[], noDrop?: boolean) {
         await this.db.createTableNoTypes(name, columns, noDrop)
     }
 
-    async getSchema(data: Array<Record<string, unknown>>) {
-        const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
-        const { types } = toTypeStatements(fields, data as Array<Record<string, string>>); // Call the toTypeStatements function with the correct arguments
-        return types;
+    async getColumns(tableName: string) {
+        return this.db.getColumns(tableName)
+    }
+
+    async addColumns(tableName: string, newColumns: string[]) {
+        return this.db.addColumns(tableName, newColumns)
     }
 
     async select(statement: string, frontmatter: Record<string, unknown>) {
