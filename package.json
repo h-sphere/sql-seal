@@ -1,6 +1,6 @@
 {
   "name": "sqlseal",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "description": "A plugin for Obsidian that allows you to run SQL queries on your notes.",
   "main": "main.js",
   "scripts": {

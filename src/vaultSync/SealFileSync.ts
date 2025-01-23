@@ -1,5 +1,4 @@
 import { App, Plugin, TFile } from "obsidian";
-import { FieldTypes } from "../utils/typePredictions";
 import { sanitise } from "../utils/sanitiseColumn";
 import { AFileSyncTable } from "./tables/abstractFileSyncTable";
 
@@ -13,7 +12,6 @@ const extractFrontmatterFromFile = async (file: TFile, plugin: Plugin) => {
 }
 
 export class SealFileSync {
-    private currentSchema: Record<string, FieldTypes> = {}
     private tablePlugins: Array<AFileSyncTable> = []
     constructor(
         public readonly app: App,
@@ -23,14 +21,7 @@ export class SealFileSync {
             if (!(file instanceof TFile)) {
                 return
             }
-            await sleep(100)
-            const frontmatter = await extractFrontmatterFromFile(file, plugin)
-
-            if (this.hasNewColumns(frontmatter)) {
-                await sleep(1000)
-                await this.init()
-                return
-            }
+            await sleep(100) // FIXME: check if this is actually needed.
 
             await Promise.all(this.tablePlugins.map(p => p.onFileModify(file)))
 
@@ -38,15 +29,6 @@ export class SealFileSync {
 
         plugin.registerEvent(this.app.vault.on('create', async (file) => {
             if (!(file instanceof TFile)) {
-                return
-            }
-            const frontmatter = await extractFrontmatterFromFile(file, plugin)
-
-
-            if (this.hasNewColumns(frontmatter)) {
-                await sleep(1000)
-                await this.init()
-
                 return
             }
             await Promise.all(this.tablePlugins.map(p => p.onFileCreate(file)))
@@ -100,12 +82,5 @@ export class SealFileSync {
             Promise.all(nonBulkPlugins.map(p => p.onFileCreate(file))))
         )
 
-    }
-
-    hasNewColumns(newFrontmatter: Record<string, any>) {
-        const currentFields = Object.keys(this.currentSchema)
-        const newFields = Object.keys(newFrontmatter).filter(f => !currentFields.includes(f))
-
-        return newFields.length > 0
     }
 }

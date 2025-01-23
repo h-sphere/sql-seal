@@ -1,21 +1,7 @@
-import { SyncStrategyFactory } from "../datamodel/syncStrategy/SyncStrategyFactory";
-import { TableDefinitionConfig } from "../datamodel/syncStrategy/types";
-
-export type SourceType = 'file' | 'table'
-
-export interface Table {
-    tableName: string;
-    type: SourceType,
-    fileName: string;
-    extras?: Record<string, string | number>
-}
-
-export interface TableWithParentPath extends Table {
-    parentPath: string;
-}
+import { ParserTableDefinition } from "../datamodel/syncStrategy/types";
 
 interface ParsedLanguage {
-    tables: Table[];
+    tables: ParserTableDefinition[];
     queryPart: string;
     intermediateContent: string;
 }
@@ -48,21 +34,15 @@ export function parseLanguage(input: string, sourceFile: string = ''): ParsedLan
 
         // Parse TABLE declaration
         // Format: TABLE tableName = file(filename.csv)
-        const tableMatch = line.match(/TABLE\s+(\w+)\s*=\s*(file|table)\(([^)]+)\)/i);
+        const tableMatch = line.match(/TABLE\s+(\w+)\s*=\s*(\w+)\(([^)]+)\)/i);
         if (tableMatch) {
             const config = {
-                alias: tableMatch[1],
+                tableAlias: tableMatch[1],
                 type: tableMatch[2].toLowerCase(),
-                arguments: tableMatch[3],
+                arguments: tableMatch[3].split(',').map(t => t.trim()),
                 sourceFile: sourceFile
-            } satisfies TableDefinitionConfig
-            const definition = SyncStrategyFactory
-                .getStaticStrategyReference(config.type)
-                ?.processTableDefinition(config)
-            if (!definition) {
-                throw new Error(`Cannot process table for: ${line}`)
-            }
-            result.tables.push(definition);
+            } satisfies ParserTableDefinition
+            result.tables.push(config);
         }
         currentPosition++;
     }

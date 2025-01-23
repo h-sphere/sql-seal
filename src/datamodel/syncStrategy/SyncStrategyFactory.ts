@@ -1,24 +1,25 @@
 import { App } from "obsidian";
-import { FileLog } from "../repository/fileLog";
-import { TableRegistration } from "../types";
 import { ISyncStrategy } from "./abstractSyncStrategy";
 import { CsvFileSyncStrategy } from "./CsvFileSyncStrategy";
 import { MarkdownTableSyncStrategy } from "./MarkdownTableSyncStrategy";
 import { JsonFileSyncStrategy } from "./JSONFileSyncStrategy";
+import { ParserTableDefinition } from "./types";
+import { TableDefinitionExternal } from "../repository/tableDefinitions";
 
-const fileLogToTableRegistration = (log: FileLog): TableRegistration => {
-    return {
-        aliasName: log.table_name,
-        extras: log.extras,
-        fileName: log.file_name,
-        sourceFile: log.file_name, // ???? probably not needed here
-        type: log.type
-    }
+function getFileExtension(pathname: string): string | null {
+
+
+    // FIXME: splitting for now
+    return pathname.split('.')[1].toLowerCase()
+
+    // const url = new URL(pathname);
+    // const filePath = url.pathname;
+    // const fileName = path.basename(filePath);
+    // return path.extname(fileName);
 }
 
 const resolveFileStrategy = (filename: string) => {
-    const parts = filename.split('.')
-    const extension = parts[parts.length - 1].toLowerCase()
+    const extension = getFileExtension(filename)
 
     switch (extension) {
         case 'csv':
@@ -31,27 +32,25 @@ const resolveFileStrategy = (filename: string) => {
     }
 }
 
+const resolveClass = (type: string, filename: string) => {
+    switch (type) {
+        case 'file':
+            return resolveFileStrategy(filename)
+        case 'table':
+            return MarkdownTableSyncStrategy
+        default:
+            throw new Error(`Undefined strategy for type ${type}`)
+    }
+}
+
 export class SyncStrategyFactory {
-    static getStrategy(reg: TableRegistration, app: App): ISyncStrategy {
-        switch (reg.type) {
-            case 'file':
-                const Cls = resolveFileStrategy(reg.fileName)
-                return new Cls(reg, app)
-            case 'table':
-                return new MarkdownTableSyncStrategy(reg, app)
-        }
+    static async getStrategyFromParser(def: ParserTableDefinition, app: App): Promise<ISyncStrategy> {
+        const Cls = resolveClass(def.type, def.arguments[0])
+        return Cls.fromParser(def, app)
     }
 
-    static getStaticStrategyReference(type: string) {
-        switch (type) {
-            case 'file':
-                return CsvFileSyncStrategy
-            case 'table':
-                return MarkdownTableSyncStrategy
-        }
-    }
-
-    static getStrategyByFileLog(log: FileLog, app: App) {
-        return SyncStrategyFactory.getStrategy(fileLogToTableRegistration(log), app)
+    static getStrategy(def: TableDefinitionExternal, app: App): ISyncStrategy {
+        const Cls = resolveClass(def.type, def.source_file)
+        return new Cls(def, app)
     }
 }

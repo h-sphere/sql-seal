@@ -1,3 +1,7 @@
+# 0.18.0 (2025-01-23)
+Synchronisation code has been greatly refactored. Thanks to that many common issue with files not being refreshed or pointing to the wrong file occasionally should be fixed.
+Also fixed many instances of potential memory leaks. Now plugin should be more stable and reliable.
+
 # 0.17.0 (2025-01-20)
 Adding support for `LIST` view. You can now set custom classes for `HTML` (table) view.
 

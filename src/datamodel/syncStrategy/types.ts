@@ -1,6 +1,6 @@
-export interface TableDefinitionConfig {
+export interface ParserTableDefinition {
     type: string;
-    alias: string;
-    arguments: string;
+    tableAlias: string;
+    arguments: string[];
     sourceFile: string;
 }

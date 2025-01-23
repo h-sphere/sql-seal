@@ -2,7 +2,8 @@ import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownPostProcessorContext, MarkdownRenderChild, TFile } from "obsidian";
 import { SqlSealDatabase } from "src/database/database";
 import { Sync } from "src/datamodel/sync";
-import { parseLanguage, Table } from "src/grammar/newParser";
+import { ParserTableDefinition } from "src/datamodel/syncStrategy/types";
+import { parseLanguage } from "src/grammar/newParser";
 import { RendererRegistry, RenderReturn } from "src/renderer/rendererRegistry";
 import { transformQuery } from "src/sql/sqlTransformer";
 import { registerObservers } from "src/utils/registerObservers";
@@ -33,7 +34,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             if (results.tables) {
                 await this.registerTables(results.tables)
                 if (!results.queryPart) {
-                    displayNotice(this.el, `Creating tables: ${results.tables.map(t => t.tableName).join(', ')}`)
+                    displayNotice(this.el, `Creating tables: ${results.tables.map(t => t.tableAlias).join(', ')}`)
                     return
                 }
             }
@@ -80,29 +81,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
        }
     }
 
-    async registerTables(tables: Table[]) {
-        await Promise.all(tables.map((table) => {
-            let path: TFile | null = null
-            let extras = {}
-            if (table.type !== 'table') {
-                path = this.app.metadataCache.getFirstLinkpathDest(table.fileName, this.ctx.sourcePath)
-                
-            } else {
-                path = this.app.vault.getFileByPath(this.ctx.sourcePath)
-                extras = table?.extras ?? {}
-            }
-
-            if (!path) {
-                throw new Error(`File does not exist: ${table.fileName} (for ${table.tableName}).`)
-            }
-
-            return this.sync.registerTable({
-                aliasName: table.tableName,
-                type: table.type,
-                fileName: path.path,
-                sourceFile: this.ctx.sourcePath,
-                extras
-            })
-        }))
+    async registerTables(tables: ParserTableDefinition[]) {
+        await Promise.all(tables.map((table) =>  this.sync.registerTable(table)))
     }
 }

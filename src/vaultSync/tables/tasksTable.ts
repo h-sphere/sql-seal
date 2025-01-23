@@ -45,10 +45,6 @@ export class TasksFileSyncTable extends AFileSyncTable {
     }
 
     async onInit(): Promise<void> {
-        await this.db.createTable('tasks', {
-            'task': 'TEXT',
-            'completed': 'INTEGER',
-            'filePath': 'TEXT'
-        })
+        await this.db.createTableNoTypes('tasks', ['task', 'completed', 'filePath'])
     }
 }

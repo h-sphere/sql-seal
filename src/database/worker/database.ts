@@ -5,7 +5,6 @@ import { SQLiteFS } from 'absurd-sql';
 import IndexedDBBackend from '../../../node_modules/absurd-sql/dist/indexeddb-backend.js';
 import type { BindParams, Database, Statement } from "sql.js";
 import { sanitise } from "../../utils/sanitiseColumn";
-import { FieldTypes } from "../../utils/typePredictions";
 import { uniq } from "lodash";
 
 
@@ -114,7 +113,7 @@ export class WorkerDatabase {
     }
 
     async recreateDatabase() {
-        this.db.exec(`
+        this.db.run(`
             PRAGMA writable_schema = 1;
             DELETE FROM sqlite_master;
             PRAGMA writable_schema = 0;
@@ -123,24 +122,20 @@ export class WorkerDatabase {
 `)
     }
 
-    async createTable(tableName: string, fields:  Record<string, FieldTypes>, noDrop: boolean = false) {
-        const transformedFiels = Object.entries(fields).map(([key, type]) => [sanitise(key), type])
-        const uniqueFields = [...new Map(transformedFiels.map(item =>
-            [item[0], item])).values()]
-        const sqlFields = uniqueFields.map(([key, type]) => `${key} ${type}`)
-        // FIXME: probably use schema generator, for now create with hardcoded fields
-        if (!noDrop) {
-            await this.dropTable(tableName)
-        }
-        const createSQL = `CREATE TABLE IF NOT EXISTS ${tableName} (
-                    ${sqlFields.join(', ')}
-                );`
+    run(query: string, params?: BindParams) {
+        this.db.run(query, params)
+    }
 
-        this.db.prepare(createSQL).run()
-        if (!noDrop) {
-            await this.clearTable(tableName)
+    getColumns(tableName: string) {
+        const [data] = this.db.exec('select name from pragma_table_info(@tableName)', { '@tableName': tableName })
+        return data.values.map(d => d[0] as unknown as string)
+    }
+
+    addColumns(tableName: string, newColumns: string[]) {
+        for (const columnName of newColumns) {
+            const stmt = `ALTER TABLE ${tableName} ADD COLUMN ${columnName}`
+            this.db.run(stmt)
         }
-        // Dropping data.
     }
 
     /* Types are optional in SQLite, we can take advantage of that */
@@ -150,11 +145,11 @@ export class WorkerDatabase {
             await this.dropTable(tableName)
         }
         const createStmt = `CREATE TABLE IF NOT EXISTS ${tableName}(${fields.join(',')})`
-        this.db.prepare(createStmt).run()
+        this.db.run(createStmt)
     }
 
     async clearTable(tableName: string) {
-        this.db.prepare(`DELETE FROM ${tableName}`).run()
+        this.db.run(`DELETE FROM ${tableName}`)
 
     }
 
@@ -163,6 +158,7 @@ export class WorkerDatabase {
             const columns = Object.keys(d).filter(c => c !== '__parsed_extra')
             const insertStatement = this.db.prepare(`INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${columns.map((key: string) => '@' + key).join(', ')})`);
             insertStatement.run(recordToBindParams(formatData(d)))
+            insertStatement.free()
         })
     }
 
@@ -172,10 +168,11 @@ export class WorkerDatabase {
 
     async select(query: string, params: Record<string, unknown>) {
         const stmt = this.db.prepare(query, recordToBindParams(params))
-        return {
-            data: toObjectArray(stmt),
-            columns: stmt.getColumnNames()
-        }
+        const data = toObjectArray(stmt)
+        const columns = stmt.getColumnNames()
+        stmt.free()
+
+        return { data, columns }
     }
 
     async updateData(tableName: string, data: Array<Record<string, unknown>>, matchKey: string = 'id') {
@@ -183,6 +180,7 @@ export class WorkerDatabase {
         data.forEach((d: Record<string, unknown>) => {
             const stmt = this.db.prepare(`UPDATE ${tableName} SET ${fields.map((key: string) => `${key} = @${key}`).join(', ')} WHERE ${matchKey} = @${matchKey}`)
             stmt.run(recordToBindParams(d))
+            stmt.free()
         })
     }
 
@@ -192,6 +190,7 @@ export class WorkerDatabase {
             stmt.run({
                 [`@${key}`]: d[key]
             } as BindParams)
+            stmt.free()
         })
     }
 
