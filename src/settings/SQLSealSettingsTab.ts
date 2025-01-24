@@ -3,11 +3,13 @@ import { App, PluginSettingTab, Setting, Plugin } from 'obsidian';
 export interface SQLSealSettings {
     enableViewer: boolean;
     enableEditing: boolean;
+    enableJSONViewer: boolean;
 }
 
 export const DEFAULT_SETTINGS: SQLSealSettings = {
     enableViewer: true,
-    enableEditing: true
+    enableEditing: true,
+    enableJSONViewer: true
 };
 
 
@@ -25,6 +27,8 @@ export class SQLSealSettingsTab extends PluginSettingTab {
     display(): void {
         const {containerEl} = this;
         containerEl.empty();
+
+        containerEl.createEl('h2', { text: 'CSV File Viewer' });
 
         new Setting(containerEl)
             .setName('Enable CSV Viewer')
@@ -52,6 +56,23 @@ export class SQLSealSettingsTab extends PluginSettingTab {
                     await this.plugin.saveData(this.settings);
                     this.callChanges()
                 }));
+
+        containerEl.createEl('h3', { text: 'JSON File Viewer' });
+        new Setting(containerEl)
+            .setName('Enable JSON Viewer')
+            .setDesc('Enables JSON and JSON5 files in your files explorer and allows to preview them.')
+            .addToggle(toggle => toggle
+                .setValue(this.settings.enableJSONViewer)
+                .onChange(async (value) => {
+                    this.settings.enableJSONViewer = value;
+                    if (!value) {
+                        this.settings.enableJSONViewer = false;
+                    }
+                    await this.plugin.saveData(this.settings);
+                    this.display();
+                    this.callChanges()
+                }));
+        
     }
 
     private callChanges() {

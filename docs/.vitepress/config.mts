@@ -31,6 +31,15 @@ export default defineConfig({
         ]
       },
       {
+        text: 'Data Sources',
+        items: [
+          { text: 'Vault Data', link: '/data-sources/vault-data' },
+          { text: 'CSV', link: '/data-sources/csv' },
+          { text: 'JSON and JSON5', link: '/data-sources/json-and-json5' },
+          { text: 'Markdown Tables', link: '/data-sources/markdown-tables' },
+        ]
+      },
+      {
         text: 'Renderers',
         items: [
           { text: 'Grid', link: '/renderers/grid' },

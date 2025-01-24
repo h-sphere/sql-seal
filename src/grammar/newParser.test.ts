@@ -49,7 +49,7 @@ SELECT * FROM a JOIN y ON a.id=y.id`, 's.md')).toEqual({
         expect(parseLanguage(`TABLE x = file(a.csv)
 TABLE y = file(      very-long-name.csv       )
 
-PLOT {
+CHART {
     x: 5,
     y: 654
 }
@@ -67,7 +67,7 @@ SELECT * FROM a JOIN y ON a.id=y.id`, 'source.md')).toEqual({
                 sourceFile: 'source.md'
             }],
             queryPart: 'SELECT * FROM a JOIN y ON a.id=y.id',
-            intermediateContent: `PLOT {
+            intermediateContent: `CHART {
     x: 5,
     y: 654
 }`

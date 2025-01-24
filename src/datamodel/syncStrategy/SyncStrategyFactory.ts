@@ -2,8 +2,8 @@ import { App } from "obsidian";
 import { ISyncStrategy } from "./abstractSyncStrategy";
 import { CsvFileSyncStrategy } from "./CsvFileSyncStrategy";
 import { MarkdownTableSyncStrategy } from "./MarkdownTableSyncStrategy";
+import { JsonFileSyncStrategy } from "./JSONFileSyncStrategy";
 import { ParserTableDefinition } from "./types";
-import path from "path";
 import { TableDefinitionExternal } from "../repository/tableDefinitions";
 
 function getFileExtension(pathname: string): string | null {
@@ -24,6 +24,9 @@ const resolveFileStrategy = (filename: string) => {
     switch (extension) {
         case 'csv':
             return CsvFileSyncStrategy
+        case 'json':
+        case 'json5':
+            return JsonFileSyncStrategy
         default:
             throw new Error(`No file processor for extension ${extension}`)
     }
