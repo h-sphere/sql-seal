@@ -11,6 +11,9 @@ export default defineConfig({
       { text: 'Home', link: '/' },
       { text: 'Quick Start', link: '/quick-start' }
     ],
+    search: {
+      provider: 'local'
+    },
 
     sidebar: [
       {
