@@ -1,3 +1,7 @@
+# 0.18.1 (2025-01-23)
+Adding created_at, modified_at and file_size field to files table.
+Also added documentation and fixed issue with files not refreshing already visible views.
+
 # 0.18.0 (2025-01-23)
 Synchronisation code has been greatly refactored. Thanks to that many common issue with files not being refreshed or pointing to the wrong file occasionally should be fixed.
 Also fixed many instances of potential memory leaks. Now plugin should be more stable and reliable.

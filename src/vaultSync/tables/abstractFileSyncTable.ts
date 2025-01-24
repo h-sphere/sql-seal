@@ -9,6 +9,7 @@ export abstract class AFileSyncTable {
     }
 
     shouldPerformBulkInsert: boolean = false
+    abstract get tableName(): string;
 
     abstract onFileModify(file: TFile): Promise<void>;
     abstract onFileDelete(path: string): Promise<void>;

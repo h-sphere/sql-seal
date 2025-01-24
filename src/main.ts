@@ -47,19 +47,10 @@ export default class SqlSealPlugin extends Plugin {
 		await this.sqlSeal.db.connect()
 
 		// start syncing when files are loaded
-		this.app.workspace.onLayoutReady(() => {
-			sqlSeal.db.connect().then(async () => {
-
-				this.fileSync = new SealFileSync(this.app, this)
-
-				this.fileSync.addTablePlugin(new FilesFileSyncTable(sqlSeal.db, this.app, this))
-				this.fileSync.addTablePlugin(new TagsFileSyncTable(sqlSeal.db, this.app))
-				this.fileSync.addTablePlugin(new TasksFileSyncTable(sqlSeal.db, this.app))
-
-				await this.fileSync.init()
-				this.registerMarkdownCodeBlockProcessor("sqlseal", sqlSeal.getHandler())
-				this.registerInlineCodeblocks()
-			})
+		this.app.workspace.onLayoutReady(async () => {
+			await this.sqlSeal.startFileSync(this)
+			this.registerMarkdownCodeBlockProcessor("sqlseal", sqlSeal.getHandler())
+			this.registerInlineCodeblocks()
 		})
 
 		this.registerEvent(

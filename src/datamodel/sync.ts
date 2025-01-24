@@ -25,6 +25,10 @@ export class Sync {
 
     }
 
+    triggerGlobalTableChange(name: string) {
+        this.bus.trigger('change::' + name)
+    }
+
     async init() {
         await this.db.connect()
 

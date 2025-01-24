@@ -2,6 +2,9 @@ import { TFile } from "obsidian";
 import { AFileSyncTable } from "./abstractFileSyncTable";
 
 export class TasksFileSyncTable extends AFileSyncTable {
+    get tableName() {
+        return 'tasks'
+    }
     async onFileModify(file: TFile): Promise<void> {
         await this.onFileDelete(file.path)
         await this.onFileCreate(file)

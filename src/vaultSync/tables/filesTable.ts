@@ -1,4 +1,4 @@
-import { App, Plugin, TAbstractFile, TFile } from "obsidian";
+import { App, Plugin, TFile } from "obsidian";
 import { AFileSyncTable } from "./abstractFileSyncTable";
 import { sanitise } from "../../utils/sanitiseColumn";
 import { SqlSealDatabase } from "../../database/database";
@@ -17,29 +17,36 @@ const extractFrontmatterFromFile = (file: TFile, plugin: Plugin): Record<string,
     )
 }
 
-function fileData(file: TAbstractFile, { tags: _tags, ...frontmatter }: Record<string, any>) {
+function fileData(file: TFile, { tags: _tags, ...frontmatter }: Record<string, any>) {
     return {
         ...frontmatter,
+        id: file.path,
         path: file.path,
         name: file.name.replace(/\.[^/.]+$/, ""),
-        id: file.path
+        created_at: file.stat.ctime,
+        modified_at: file.stat.mtime,
+        file_size: file.stat.size
     }
 }
 
 export class FilesFileSyncTable extends AFileSyncTable {
+    get tableName() {
+        return FILES_TABLE_NAME
+    }
     private columns: string[] = []
     shouldPerformBulkInsert = true;
     constructor(db: SqlSealDatabase, app: App, private readonly plugin: Plugin) {
         super(db, app)
     }
     async onFileModify(file: TFile): Promise<void> {
+        console.log('ON FILE MODIFY', file.name)
         // we need to update the row
         const frontmatter = extractFrontmatterFromFile(file, this.plugin)
         const frontmatterWithFileData = fileData(file, frontmatter)
         const columns = Object.keys(frontmatterWithFileData)
         await this.updateColumnsIfNeeded(columns)
 
-        await this.db.updateData(FILES_TABLE_NAME, [])
+        await this.db.updateData(FILES_TABLE_NAME, [frontmatterWithFileData])
         await sleep(1000) // TO DELAY OTHER PLUGINS, UGLY BUT WORKS.
     }
     async onFileDelete(path: string): Promise<void> {
@@ -74,7 +81,7 @@ export class FilesFileSyncTable extends AFileSyncTable {
 
 
     async onInit(): Promise<void> {
-        this.db.createTableNoTypes(FILES_TABLE_NAME, ['id', 'name', 'path'], true)
+        this.db.createTableNoTypes(FILES_TABLE_NAME, ['id', 'name', 'path', 'created_at', 'modified_at', 'file_size'])
         this.columns = await this.db.getColumns(FILES_TABLE_NAME)
     }
 }
