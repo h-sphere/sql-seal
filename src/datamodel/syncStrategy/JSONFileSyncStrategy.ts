@@ -2,7 +2,7 @@ import { App } from "obsidian";
 import { ISyncStrategy } from "./abstractSyncStrategy";
 import { FilepathHasher } from "../../utils/hasher";
 import { ParserTableDefinition } from "./types";
-import { parse } from 'JSON5';
+import { parse } from 'json5';
 import { uniq } from "lodash";
 import * as jsonpath from 'jsonpath'
 
