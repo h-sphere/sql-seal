@@ -1,4 +1,6 @@
 # Data Source: JSON and JSON5
+> [!NOTE] Compatibility
+> Introduced in version 0.19.0. Make sure you are using up to date version.
 
 You can query JSON and JSON5 files. To link to your file:
 
