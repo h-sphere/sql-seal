@@ -6,6 +6,7 @@ import IndexedDBBackend from '../../../node_modules/absurd-sql/dist/indexeddb-ba
 import type { BindParams, Database, Statement } from "sql.js";
 import { sanitise } from "../../utils/sanitiseColumn";
 import { uniq } from "lodash";
+import { createLoggingArrayProxy } from "src/utils/logArrayProxy";
 
 
 function toObjectArray(stmt: Statement) {
@@ -172,7 +173,7 @@ export class WorkerDatabase {
         const columns = stmt.getColumnNames()
         stmt.free()
 
-        return { data, columns }
+        return { data: data, columns }
     }
 
     async updateData(tableName: string, data: Array<Record<string, unknown>>, matchKey: string = 'id') {

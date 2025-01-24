@@ -1,3 +1,4 @@
+import { parseCSVLine } from "../utils/parseLine";
 import { ParserTableDefinition } from "../datamodel/syncStrategy/types";
 
 interface ParsedLanguage {
@@ -36,10 +37,11 @@ export function parseLanguage(input: string, sourceFile: string = ''): ParsedLan
         // Format: TABLE tableName = file(filename.csv)
         const tableMatch = line.match(/TABLE\s+(\w+)\s*=\s*(\w+)\(([^)]+)\)/i);
         if (tableMatch) {
+            const args = parseCSVLine(tableMatch[3] ?? '')
             const config = {
                 tableAlias: tableMatch[1],
                 type: tableMatch[2].toLowerCase(),
-                arguments: tableMatch[3].split(',').map(t => t.trim()),
+                arguments: args,
                 sourceFile: sourceFile
             } satisfies ParserTableDefinition
             result.tables.push(config);
