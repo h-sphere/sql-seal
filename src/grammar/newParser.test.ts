@@ -158,4 +158,22 @@ select * from x`
             ]
         })
     })
+
+    it('should properly parse query with dot in their name', () => {
+        const q = `table x = file(3.Resources/data/file.csv)
+        select * from x
+        `
+        expect(parseLanguage(q, '2025-01-01.md')).toEqual({
+            queryPart: 'select * from x',
+            intermediateContent: '',
+            tables: [
+                {
+                    tableAlias: 'x',
+                    arguments: ['3.Resources/data/file.csv'],
+                    type: 'file',
+                    sourceFile: '2025-01-01.md'
+                }
+            ]
+        })
+    })
 })

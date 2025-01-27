@@ -5,18 +5,8 @@ import { MarkdownTableSyncStrategy } from "./MarkdownTableSyncStrategy";
 import { JsonFileSyncStrategy } from "./JSONFileSyncStrategy";
 import { ParserTableDefinition } from "./types";
 import { TableDefinitionExternal } from "../repository/tableDefinitions";
+import { getFileExtension } from "src/utils/extractExtension";
 
-function getFileExtension(pathname: string): string | null {
-
-
-    // FIXME: splitting for now
-    return pathname.split('.')[1].toLowerCase()
-
-    // const url = new URL(pathname);
-    // const filePath = url.pathname;
-    // const fileName = path.basename(filePath);
-    // return path.extname(fileName);
-}
 
 const resolveFileStrategy = (filename: string) => {
     const extension = getFileExtension(filename)
