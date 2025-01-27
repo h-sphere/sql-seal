@@ -5,7 +5,7 @@ import { MarkdownTableSyncStrategy } from "./MarkdownTableSyncStrategy";
 import { JsonFileSyncStrategy } from "./JSONFileSyncStrategy";
 import { ParserTableDefinition } from "./types";
 import { TableDefinitionExternal } from "../repository/tableDefinitions";
-import { getFileExtension } from "src/utils/extractExtension";
+import { getFileExtension } from "../../utils/extractExtension";
 
 
 const resolveFileStrategy = (filename: string) => {
