@@ -134,3 +134,10 @@
 .sqlseal-list.show-column-names .sqlseal-list-element-single .sqlseal-column-name {
     display: inline;
 }
+
+.sqlseal-parse-error {
+    background: #b80f0f;
+    color: #FFF;
+    padding: 0.2em;
+    border-radius: 2px;
+}

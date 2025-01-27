@@ -11,11 +11,19 @@ export  const displayError= (el: HTMLElement, text: string) => {
 }
 
 export const parseCell = (data: string, app: App) => {
-    if (data && typeof data === 'string' && data.startsWith('SQLSEALCUSTOM')) {
-        const parsedData = JSON.parse(data.slice('SQLSEALCUSTOM('.length, -1))
-        return renderSqlSealCustomElement(parsedData, app)
-    }
-    return data
+    try {
+        if (data && typeof data === 'string' && data.startsWith('SQLSEALCUSTOM')) {
+            const parsedData = JSON.parse(data.slice('SQLSEALCUSTOM('.length, -1))
+            return renderSqlSealCustomElement(parsedData, app)
+        }
+        return data
+    } catch (e) {
+        console.error('Error parsing cell with data:', data, e)
+        return createDiv({
+            text: 'Parsing error',
+            cls: 'sqlseal-parse-error'
+        })
+    }        
 }
 
 type SqlSealAnchorElement = {
