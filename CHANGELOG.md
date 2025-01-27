@@ -1,3 +1,6 @@
+# 0.19.2 (2025-01-27)
+Fixed issue with files and folders containing dots in them.
+
 # 0.19.1 (2025-01-27)
 Added logging for unprocessable data to help reporting.
 
