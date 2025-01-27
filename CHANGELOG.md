@@ -1,3 +1,6 @@
+# 0.19.1 (2025-01-27)
+Added logging for unprocessable data to help reporting.
+
 # 0.19.0 (2025-01-24)
 Adding support for JSON and JSON5 files. You can now query these data types and create tables based on them. You can use JSONPath to traverse the JSON files and extract data from it. [See more in the documentation](http://hypersphere.blog/sql-seal/data-sources/json-and-json5.html).
 
