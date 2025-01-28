@@ -68,8 +68,8 @@ SELECT * FROM a JOIN y ON a.id=y.id`, 'source.md')).toEqual({
             }],
             queryPart: 'SELECT * FROM a JOIN y ON a.id=y.id',
             intermediateContent: `CHART {
-    x: 5,
-    y: 654
+x: 5,
+y: 654
 }`
         })
     })
@@ -166,6 +166,38 @@ select * from x`
         expect(parseLanguage(q, '2025-01-01.md')).toEqual({
             queryPart: 'select * from x',
             intermediateContent: '',
+            tables: [
+                {
+                    tableAlias: 'x',
+                    arguments: ['3.Resources/data/file.csv'],
+                    type: 'file',
+                    sourceFile: '2025-01-01.md'
+                }
+            ]
+        })
+    })
+
+    it('should properly parse query with dot in their name', () => {
+        const q = `
+        -- comment above table
+        table x = file(3.Resources/data/file.csv)
+
+        -- comment in between
+        GRID
+
+        --comment after grid
+-- comment without indentation
+
+        select * -- inline comment in query
+        -- inline comment in between lines in query
+        from x
+
+        -- comment after select
+        `
+        expect(parseLanguage(q, '2025-01-01.md')).toEqual({
+            queryPart: `select * -- inline comment in query
+from x`,
+            intermediateContent: 'GRID',
             tables: [
                 {
                     tableAlias: 'x',

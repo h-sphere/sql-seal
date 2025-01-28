@@ -7,6 +7,8 @@ interface ParsedLanguage {
     intermediateContent: string;
 }
 
+const COMMENT_START = '--'
+
 // TODO: this should be retwitten to use proper grammar but this seems to work, at least for now :)
 export function parseLanguage(input: string, sourceFile: string = ''): ParsedLanguage {
     const lines = input.split('\n');
@@ -23,7 +25,7 @@ export function parseLanguage(input: string, sourceFile: string = ''): ParsedLan
         const line = lines[currentPosition].trim();
 
         // Skip empty lines at the beginning
-        if (line === '') {
+        if (line === '' || line.startsWith(COMMENT_START)) {
             currentPosition++;
             continue;
         }
@@ -63,6 +65,7 @@ export function parseLanguage(input: string, sourceFile: string = ''): ParsedLan
     if (selectPosition > currentPosition) {
         result.intermediateContent = lines
             .slice(currentPosition, selectPosition)
+            .map(line => line.trim()).filter(line => !line.startsWith(COMMENT_START))
             .join('\n')
             .trim();
     }
@@ -71,12 +74,14 @@ export function parseLanguage(input: string, sourceFile: string = ''): ParsedLan
     if (selectPosition !== -1) {
         result.queryPart = lines
             .slice(selectPosition)
+            .map(line => line.trim()).filter(line => !line.startsWith(COMMENT_START))
             .join('\n')
             .trim();
     } else {
         // If no SELECT found, assume the entire remaining content is a SQL query
         result.queryPart = lines
             .slice(currentPosition)
+            .map(line => line.trim()).filter(line => !line.startsWith(COMMENT_START))
             .join('\n')
             .trim();
     }
