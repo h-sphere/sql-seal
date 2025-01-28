@@ -9,6 +9,7 @@ import { SealFileSync } from "./vaultSync/SealFileSync";
 import { FilesFileSyncTable } from "./vaultSync/tables/filesTable";
 import { TagsFileSyncTable } from "./vaultSync/tables/tagsTable";
 import { TasksFileSyncTable } from "./vaultSync/tables/tasksTable";
+import { LinksFileSyncTable } from "./vaultSync/tables/linksTable";
 
 export class SqlSeal {
     public db: SqlSealDatabase
@@ -41,6 +42,7 @@ export class SqlSeal {
         this.fileSync.addTablePlugin(new FilesFileSyncTable(this.db, this.app, plugin))
         this.fileSync.addTablePlugin(new TagsFileSyncTable(this.db, this.app))
         this.fileSync.addTablePlugin(new TasksFileSyncTable(this.db, this.app))
+        this.fileSync.addTablePlugin(new LinksFileSyncTable(this.db, this.app))
 
         await this.fileSync.init()
     }
