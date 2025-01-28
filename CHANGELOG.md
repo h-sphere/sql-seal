@@ -1,3 +1,6 @@
+# Unreleased
+- minor: added ability to add comments `--` accross the whole sqlseal command.
+
 # 0.20.0 (2025-01-28)
 Added `links` table containing all the references between files. [Read more about the file structure in our documentation](https://hypersphere.blog/sql-seal/data-sources/vault-data.html#links-table)
 
