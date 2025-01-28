@@ -1,3 +1,6 @@
+# 0.20.0 (2025-01-28)
+Added `links` table containing all the references between files. [Read more about the file structure in our documentation](https://hypersphere.blog/sql-seal/data-sources/vault-data.html#links-table)
+
 # 0.19.2 (2025-01-27)
 Fixed issue with files and folders containing dots in them.
 

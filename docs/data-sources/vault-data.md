@@ -14,7 +14,7 @@ LIMIT 10
 ### `files` table
 Files table consists of the following columns:
 | Column              | Description                                                                                                                                                                      | Introduced In |
-|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | `id`                | File Path                                                                                                                                                                        |               |
 | `path`              | Same as `id`, file path                                                                                                                                                          |               |
 | `name`              | Name of the file, without path and extension                                                                                                                                     |               |
@@ -26,14 +26,27 @@ Files table consists of the following columns:
 ### `tags` table
 Tags table consists of the following columns:
 | Column   | Description                                         | Introduced In |
-|----------|-----------------------------------------------------|---------------|
+| -------- | --------------------------------------------------- | ------------- |
 | `tag`    | Full tag, including `#` symbol. For example `#todo` |               |
 | `fileId` | Full path of the file the tag belongs to            |               |
 
 ### `tasks` table
 Tasks table consists of the following columns:
-| Column      | Description                              | Introduced In |
-|-------------|------------------------------------------|---------------|
-| `task`      | Content of the task (text)               |               |
-| `completed` | 0 if not completed, 1 if completed       |               |
-| `filePath`  | Full path of the file the tag belongs to |               |
+| Column      | Description                              |
+| ----------- | ---------------------------------------- |
+| `task`      | Content of the task (text)               |
+| `completed` | 0 if not completed, 1 if completed       |
+| `filePath`  | Full path of the file the tag belongs to |
+
+### `links` table
+Table containing all the links between files.
+
+Introduced in 0.20.0
+
+| Column          | Description                                                        |
+| --------------- | ------------------------------------------------------------------ |
+| `path`          | Full path of the source of the link                                |
+| `target`        | Full path of the target of the link                                |
+| `position`      | JSON object containing information about location of the link      |
+| `display_text`  | Text displayed on the page for that link                           |
+| `target_exists` | information if the target file exists. 1 if it exists, 0 otherwise |
