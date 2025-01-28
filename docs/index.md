@@ -6,6 +6,9 @@ hero:
   name: "Obsidian SQLSeal"
   # text: "Plugin enabling full SQL capabilities in Obsidian"
   tagline: "Query your vault using SQL"
+  image:
+    src: /logo.svg
+    alt: SQLSeal
   actions:
     - theme: brand
       text: Get Started

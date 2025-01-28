@@ -14,6 +14,7 @@ export default defineConfig({
     search: {
       provider: 'local'
     },
+    logo: '/logo.svg',
 
     sidebar: [
       {
@@ -79,7 +80,7 @@ export default defineConfig({
     ],
     footer: {
       message: '',
-      copyright: 'By <a href="https://hypersphere.blog">hypersphere</a>. Ko-Fi: <a href="https://ko-fi.com/hypersphere">hypersphere</a>'
+      copyright: 'By <a href="https://hypersphere.blog">hypersphere</a>.<br/>Sponsor Me: <a href="https://ko-fi.com/hypersphere">Ko-Fi</a>'
     }
   }
 })
