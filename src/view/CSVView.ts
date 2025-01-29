@@ -1,9 +1,10 @@
 import { WorkspaceLeaf, TextFileView, Menu } from 'obsidian';
 import { parse, unparse } from 'papaparse';
-import { DeleteConfirmationModal } from 'src/modal/deleteConfirmationModal';
-import { RenameColumnModal } from 'src/modal/renameColumnModal';
-import { CodeSampleModal } from 'src/modal/showCodeSample';
-import { GridRenderer } from 'src/renderer/GridRenderer';
+import { DeleteConfirmationModal } from '../modal/deleteConfirmationModal';
+import { RenameColumnModal } from '../modal/renameColumnModal';
+import { CodeSampleModal } from '../modal/showCodeSample';
+import { GridRenderer } from '../renderer/GridRenderer';
+import { CellParser } from '../cellParser';
 
 export const CSV_VIEW_TYPE = "csv-viewer" as const;
 export const CSV_VIEW_EXTENSIONS = ['csv'];
@@ -12,7 +13,11 @@ export class CSVView extends TextFileView {
     private content: string;
     private table: HTMLTableElement;
 
-    constructor(leaf: WorkspaceLeaf, private enableEditing: boolean) {
+    constructor(
+        leaf: WorkspaceLeaf,
+        private enableEditing: boolean,
+        private cellParser: CellParser
+    ) {
         super(leaf);
     }
 
@@ -161,7 +166,7 @@ export class CSVView extends TextFileView {
         })
 
 
-        const grid = new GridRenderer(this.app)
+        const grid = new GridRenderer(this.app, this.cellParser)
         const csvView = this;
         const api = grid.render({
             defaultColDef: {

@@ -5,8 +5,8 @@ export const JSON_VIEW_TYPE = "sqlseal-json-viewer";
 export const JSON_VIEW_EXTENSIONS = ['json', 'json5'];
 
 export class JsonView extends TextFileView {
-    private content: string;
-    private table: HTMLTableElement;
+    private content: string = '';
+    private table: HTMLTableElement | undefined = undefined;
 
     constructor(leaf: WorkspaceLeaf) {
         super(leaf);
@@ -44,7 +44,7 @@ export class JsonView extends TextFileView {
 
     clear(): void {
         this.content = '';
-        this.table.empty();
+        this.table?.empty();
     }
 
     api: any = null;

@@ -41,9 +41,13 @@
   },
   "dependencies": {
     "@ag-grid-community/theming": "^32.3.3",
+    "@codemirror/language": "^6.10.8",
+    "@codemirror/state": "^6.5.1",
+    "@codemirror/view": "^6.36.2",
     "@hypersphere/omnibus": "^0.1.6",
     "@jlongster/sql.js": "^1.6.7",
     "@types/jsonpath": "^0.2.4",
+    "@vanakat/plugin-api": "^0.2.1",
     "absurd-sql": "^0.0.54",
     "ag-grid-community": "^32.3.3",
     "comlink": "^4.4.2",

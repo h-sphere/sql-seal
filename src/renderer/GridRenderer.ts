@@ -1,9 +1,9 @@
 import { createGrid, GridApi, GridOptions, themeQuartz } from "ag-grid-community";
 import { merge } from "lodash";
 import { App } from "obsidian";
-import { RendererConfig } from "src/renderer/rendererRegistry";
+import { RendererConfig } from "./rendererRegistry";
 import { parse } from 'json5'
-import { parseCell } from "src/utils/ui";
+import { CellParser } from "../cellParser";
 
 const getCurrentTheme = () => {
     return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
@@ -24,7 +24,12 @@ const getAgGridTheme = (theme: 'dark' | 'light') => {
 }
 
 class GridRendererCommunicator {
-    constructor(private el: HTMLElement, private config: Partial<GridOptions>, private app: App) {
+    constructor(
+        private el: HTMLElement,
+        private config: Partial<GridOptions>,
+        private app: App,
+        private cellParser: CellParser
+    ) {
         this.initialize()
     }
 
@@ -62,7 +67,7 @@ class GridRendererCommunicator {
                 resizable: false,
                 cellRendererSelector: () => {
                     return {
-                        component: ({ value }: { value: string }) => parseCell(value, this.app)
+                        component: ({ value }: { value: string }) => this.cellParser.render(value)
                     }
                 },
                 autoHeight: true
@@ -109,7 +114,7 @@ class GridRendererCommunicator {
 }
 
 export class GridRenderer implements RendererConfig {
-    constructor(private app: App) { }
+    constructor(private app: App, private readonly cellParser: CellParser) { }
     get rendererKey() {
         return 'grid'
     }
@@ -125,7 +130,7 @@ export class GridRenderer implements RendererConfig {
 
 
     render(config: Partial<GridOptions>, el: HTMLElement) {
-        const communicator = new GridRendererCommunicator(el, config, this.app)
+        const communicator = new GridRendererCommunicator(el, config, this.app, this.cellParser)
         return {
             render: (data: any) => {
                 // FIXME: we need to update that.

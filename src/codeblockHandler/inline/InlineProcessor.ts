@@ -1,11 +1,11 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownRenderChild } from "obsidian";
-import { SqlSealDatabase } from "src/database/database";
-import { Sync } from "src/datamodel/sync";
-import { RenderReturn } from "src/renderer/rendererRegistry";
-import { transformQuery } from "src/sql/sqlTransformer";
-import { registerObservers } from "src/utils/registerObservers";
-import { displayError } from "src/utils/ui";
+import { SqlSealDatabase } from "../../database/database";
+import { Sync } from "../../datamodel/sync";
+import { RenderReturn } from "../../renderer/rendererRegistry";
+import { transformQuery } from "../../sql/sqlTransformer";
+import { registerObservers } from "../../utils/registerObservers";
+import { displayError } from "../../utils/ui";
 
 export class InlineProcessor extends MarkdownRenderChild {
     private registrator: OmnibusRegistrator;

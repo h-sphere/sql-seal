@@ -1,56 +1,37 @@
 import { App } from "obsidian"
+import { CellParserRegistar } from "src/cellParser"
 
 export  const displayNotice = (el: HTMLElement, text: string) => {
     el.empty()
     el.createDiv({ text: text, cls: 'sqlseal-notice' })
 }
 
-export  const displayError= (el: HTMLElement, text: string) => {
+export  const displayError = (el: HTMLElement, text: string) => {
     el.empty()
     el.createDiv({ text: text, cls: 'sqlseal-error' })
 }
 
-export const parseCell = (data: string, app: App) => {
-    try {
-        if (data && typeof data === 'string' && data.startsWith('SQLSEALCUSTOM')) {
-            const parsedData = JSON.parse(data.slice('SQLSEALCUSTOM('.length, -1))
-            return renderSqlSealCustomElement(parsedData, app)
-        }
-        return data
-    } catch (e) {
-        console.error('Error parsing cell with data:', data, e)
-        return createDiv({
-            text: 'Parsing error',
-            cls: 'sqlseal-parse-error'
-        })
-    }        
-}
-
-type SqlSealAnchorElement = {
-    type: 'link',
-    href: string,
-    name: string
-}
-
-type SQLSealImgElement = {
-    type: 'img',
-    path?: string,
-    href: string
-}
-
-type SQLSealCheckboxElement = {
-    type: 'checkbox',
-    value: number
-}
-
-type SqlSealCustomElement = SqlSealAnchorElement | SQLSealImgElement | SQLSealCheckboxElement;
-
 const isLinkLocal = (link: string) => !link?.trim().startsWith('http')
 
-const generateLink = (config: SqlSealAnchorElement, app: App) => {
-    let href = config.href
-    if (isLinkLocal(config.href)) {
-        let fileHref = config.href
+
+const renderCheckbox = (app: App) => ([value]: [string]) => {
+    const el = createEl('input', {
+        type: 'checkbox',
+        attr: {
+            disabled: true
+        },
+    })
+    if (!!value) {
+        el.checked = true
+    }
+    return el
+}
+const renderLink = (app: App) => ([name, href]: [string, string]) => {
+    if (!href) {
+        href = name
+    }
+    if (isLinkLocal(href)) {
+        let fileHref = href
         if (fileHref.endsWith('.md')) {
             fileHref = fileHref.slice(0, -3)
         }
@@ -58,41 +39,35 @@ const generateLink = (config: SqlSealAnchorElement, app: App) => {
         const encodedPath = encodeURIComponent(fileHref);
         href = `obsidian://open?vault=${vaultName}&file=${encodedPath}`;
     }
-    const el = createEl('a', { text: config.name, href: href })
+    const el = createEl('a', { text: name, href: href })
     return el
 }
 
-const renderSqlSealCustomElement = (customConfig: SqlSealCustomElement, app: App) => {
-    switch (customConfig.type) {
-        case 'link':
-            return generateLink(customConfig, app)
-        case 'img':
-            if (!isLinkLocal(customConfig.href)) {
-                return createEl('img', { attr: { src: customConfig.href } });
-            }
-            let href = (customConfig.href ?? '').trim()
-            if (href.startsWith('![[')) {
-                href = href.slice(3, -2)
-            }
-            let parentPath = ''
-            if (customConfig.path) {
-                const parent = app.vault.getFileByPath(customConfig.path)
-                if (parent) {
-                    parentPath = parent.parent?.path ?? ''
-                }
-            }
-            const path = (customConfig?.path ? parentPath + '/' : '') + href
-            const file = app.vault.getFileByPath(path);
-            if (!file) {
-                return 'File does not exist'
-            }
-            return createEl('img', { attr: { src: app.vault.getResourcePath(file) } });
-        case 'checkbox':
-            const el = createEl('input', { type: 'checkbox' })
-            el.checked = !!customConfig.value
-            el.disabled = true
-            return el
-        default:
-            return 'Invalid Custom Element'
+const renderImage = (app: App) => ([href, path]: [string, string]) => {
+    if (!isLinkLocal(href)) {
+        return createEl('img', { attr: { src: href } });
     }
+    href = (href ?? '').trim()
+    if (href.startsWith('![[')) {
+        href = href.slice(3, -2)
+    }
+    let parentPath = ''
+    if (path) {
+        const parent = app.vault.getFileByPath(path)
+        if (parent) {
+            parentPath = parent.parent?.path ?? ''
+        }
+    }
+    path = (path ? parentPath + '/' : '') + href
+    const file = app.vault.getFileByPath(path);
+    if (!file) {
+        return 'File does not exist'
+    }
+    return createEl('img', { attr: { src: app.vault.getResourcePath(file) } });
+}
+
+export const registerDefaultFunctions = (registar: CellParserRegistar, app: App) => {
+    registar.register('checkbox', renderCheckbox(app), 1)
+    registar.register('a', renderLink(app), 2)
+    registar.register('img', renderImage(app), 2)
 }

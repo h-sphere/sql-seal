@@ -1,13 +1,13 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownPostProcessorContext, MarkdownRenderChild, TFile } from "obsidian";
-import { SqlSealDatabase } from "src/database/database";
-import { Sync } from "src/datamodel/sync";
-import { ParserTableDefinition } from "src/datamodel/syncStrategy/types";
-import { parseLanguage } from "src/grammar/newParser";
-import { RendererRegistry, RenderReturn } from "src/renderer/rendererRegistry";
-import { transformQuery } from "src/sql/sqlTransformer";
-import { registerObservers } from "src/utils/registerObservers";
-import { displayError, displayNotice } from "src/utils/ui";
+import { SqlSealDatabase } from "../database/database";
+import { Sync } from "../datamodel/sync";
+import { ParserTableDefinition } from "../datamodel/syncStrategy/types";
+import { parseLanguage } from "../grammar/newParser";
+import { RendererRegistry, RenderReturn } from "../renderer/rendererRegistry";
+import { transformQuery } from "../sql/sqlTransformer";
+import { registerObservers } from "../utils/registerObservers";
+import { displayError, displayNotice } from "../utils/ui";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
 
