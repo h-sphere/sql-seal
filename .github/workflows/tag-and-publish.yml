@@ -73,6 +73,7 @@ jobs:
         if: steps.check-tag.outputs.EXISTS == 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Create and push tag
           git config user.name "GitHub Actions"
@@ -90,6 +91,7 @@ jobs:
         if: steps.check-tag.outputs.EXISTS == 'false' && success()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Get release URL using gh cli
           RELEASE_URL=$(gh release view "${{ steps.package-version.outputs.VERSION }}" --json url -q .url)
