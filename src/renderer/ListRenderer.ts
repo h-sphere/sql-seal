@@ -1,7 +1,8 @@
 // This is renderer for a very basic List view.
 import { App } from "obsidian";
-import { RendererConfig } from "src/renderer/rendererRegistry";
-import { displayError, parseCell } from "src/utils/ui";
+import { CellParser } from "../cellParser";
+import { RendererConfig } from "../renderer/rendererRegistry";
+import { displayError } from "../utils/ui";
 
 interface ListRendererConfig {
     classNames: string[]
@@ -9,7 +10,7 @@ interface ListRendererConfig {
 
 export class ListRenderer implements RendererConfig {
 
-    constructor(private readonly app: App) { }
+    constructor(private readonly app: App, private readonly cellParser: CellParser) { }
 
     get rendererKey() {
         return 'list'
@@ -47,7 +48,7 @@ export class ListRenderer implements RendererConfig {
                             text: createEl('span', { text: c, cls: 'sqlseal-column-name' }) as any, // FIXME: this should be properly typed
                             cls: ['sqlseal-list-element-single']
                         })
-                        const val = parseCell(d[c], this.app)
+                        const val = this.cellParser.render(d[c])
                         el.append(val)
                         el.dataset.sqlsealColumn = c
                     })

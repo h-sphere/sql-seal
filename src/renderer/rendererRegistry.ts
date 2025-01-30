@@ -1,3 +1,5 @@
+import { App } from "obsidian";
+
 export interface DataFormat {
     data: Record<string, any>[],
     columns: string[]

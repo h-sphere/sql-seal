@@ -1,7 +1,8 @@
 // This is renderer for a very basic Table view.
 import { App } from "obsidian";
-import { RendererConfig } from "src/renderer/rendererRegistry";
-import { displayError, parseCell } from "src/utils/ui";
+import { CellParser } from "../cellParser";
+import { RendererConfig } from "../renderer/rendererRegistry";
+import { displayError } from "../utils/ui";
 
 interface HTMLRendererConfig {
     classNames: string[]
@@ -9,7 +10,7 @@ interface HTMLRendererConfig {
 
 export class TableRenderer implements RendererConfig {
 
-    constructor(private readonly app: App) { }
+    constructor(private readonly app: App, private cellParser: CellParser) { }
 
     get rendererKey() {
         return 'html'
@@ -51,7 +52,7 @@ export class TableRenderer implements RendererConfig {
                 data.forEach((d: any) => {
                     const row = body.createEl("tr")
                     columns.forEach((c: any) => {
-                        row.createEl("td", { text: parseCell(d[c], this.app) as string })                        
+                        row.createEl("td", { text: this.cellParser.render(d[c]) as string })                        
 
                     })
                 })

@@ -39,7 +39,6 @@ export class FilesFileSyncTable extends AFileSyncTable {
         super(db, app)
     }
     async onFileModify(file: TFile): Promise<void> {
-        console.log('ON FILE MODIFY', file.name)
         // we need to update the row
         const frontmatter = extractFrontmatterFromFile(file, this.plugin)
         const frontmatterWithFileData = fileData(file, frontmatter)

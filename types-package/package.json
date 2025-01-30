@@ -1,0 +1,25 @@
+{
+  "name": "@hypersphere/sqlseal",
+  "version": "0.21.0",
+  "description": "",
+  "types": "dist/types-package/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

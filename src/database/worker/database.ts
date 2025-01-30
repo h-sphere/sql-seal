@@ -1,12 +1,12 @@
 import * as Comlink from "comlink"
 import initSqlJs from '@jlongster/sql.js';
+// @ts-ignore
 import wasmBinary from '../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm'
 import { SQLiteFS } from 'absurd-sql';
 import IndexedDBBackend from '../../../node_modules/absurd-sql/dist/indexeddb-backend.js';
 import type { BindParams, Database, Statement } from "sql.js";
 import { sanitise } from "../../utils/sanitiseColumn";
 import { uniq } from "lodash";
-import { createLoggingArrayProxy } from "src/utils/logArrayProxy";
 
 
 function toObjectArray(stmt: Statement) {
@@ -60,49 +60,28 @@ export class WorkerDatabase {
 
     }
 
-    defineCustomFunctions() {
-        this.db.create_function('a', (href: string, name: string) => {
-            const linkObject = {
-                type: 'link',
-                href: href,
-                name: name || href
-            };
-            return `SQLSEALCUSTOM(${JSON.stringify(linkObject)})`;
-        });
-
-        this.db.create_function('a', (href: string) => {
-            const linkObject = {
-                type: 'link',
-                href: href,
-                name: href
-            };
-            return `SQLSEALCUSTOM(${JSON.stringify(linkObject)})`;
-        });
-
-        this.db.create_function('img', (href: string) => {
-            const imgObject = {
-                type: 'img',
-                href: href
+    registerCustomFunction(name: string, argsCount = 1) {
+        const fn = (...arg: string[]) => {
+            const data = {
+                type: name,
+                values: arg
             }
-            return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
-        })
+            return `SQLSEALCUSTOM(${JSON.stringify(data)})`
+        }
 
-        this.db.create_function('img', (href: string, path: string) => {
-            const imgObject = {
-                type: 'img',
-                path,
-                href
-            }
-            return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
-        })
-
-        this.db.create_function('checkbox', (val: string) => {
-            const imgObject = {
-                type: 'checkbox',
-                value: val
-            }
-            return `SQLSEALCUSTOM(${JSON.stringify(imgObject)})`
-        })
+        // This is such a stupid solution but number of arguments needs to be static so SQLite understands which overload to use.
+        if (argsCount >= 1) {
+            this.db.create_function(name, (a: string) => fn(a))
+        }
+        if (argsCount >= 2) {
+            this.db.create_function(name, (a: string, b: string) => fn(a, b))
+        }
+        if (argsCount >= 3) {
+            this.db.create_function(name, (a: string, b: string, c: string) => fn(a, b, c))
+        }
+        if (argsCount >= 4) {
+            throw new Error('Too many arguments, only up to 3 arguments are supported at the moment.')
+        }
     }
 
     createTableText(tableName: string, fields: string[]) {
@@ -227,7 +206,6 @@ export class WorkerDatabase {
                 VACUUM;
             `);
             this.db = db
-            this.defineCustomFunctions()
             return
         } catch (e) {
             console.error('Error while setting up database', e);

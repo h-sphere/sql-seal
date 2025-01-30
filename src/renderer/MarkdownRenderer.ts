@@ -1,8 +1,8 @@
 // This is renderer for a very basic Table view.
 import { getMarkdownTable } from "markdown-table-ts";
 import { App } from "obsidian";
-import { RendererConfig } from "src/renderer/rendererRegistry";
-import { displayError, parseCell } from "src/utils/ui";
+import { RendererConfig } from "../renderer/rendererRegistry";
+import { displayError } from "../utils/ui";
 
 const mapDataFromHeaders = (columns: string[], data: Record<string, any>[]) => {
     return data.map(d => columns.map(c => String(d[c])))

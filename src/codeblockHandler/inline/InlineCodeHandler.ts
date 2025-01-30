@@ -1,7 +1,7 @@
 import { App, MarkdownPostProcessorContext } from "obsidian";
 import { InlineProcessor } from "./InlineProcessor";
-import { SqlSealDatabase } from "src/database/database";
-import { Sync } from "src/datamodel/sync";
+import { SqlSealDatabase } from "../../database/database";
+import { Sync } from "../../datamodel/sync";
 
 export class SqlSealInlineHandler {
     constructor(

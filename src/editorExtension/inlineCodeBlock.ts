@@ -4,8 +4,8 @@ import { syntaxTree } from "@codemirror/language";
 import { App } from "obsidian";
 import { SqlSealDatabase } from "../database/database";
 import { Sync } from "../datamodel/sync";
-import { SqlSealInlineHandler } from "src/codeblockHandler/inline/InlineCodeHandler";
-import { InlineProcessor } from "src/codeblockHandler/inline/InlineProcessor";
+import { SqlSealInlineHandler } from "../codeblockHandler/inline/InlineCodeHandler";
+import { InlineProcessor } from "../codeblockHandler/inline/InlineProcessor";
 
 export function createSqlSealEditorExtension(
     app: App,

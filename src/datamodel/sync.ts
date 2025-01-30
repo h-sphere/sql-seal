@@ -1,4 +1,4 @@
-import { SqlSealDatabase } from "src/database/database";
+import { SqlSealDatabase } from "../database/database";
 import { TableAliasesRepository } from "./repository/tableAliases";
 import { App, TAbstractFile, TFile, Vault } from "obsidian";
 import { FilepathHasher } from "../utils/hasher";

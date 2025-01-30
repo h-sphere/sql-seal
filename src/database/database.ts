@@ -1,5 +1,6 @@
 import { App } from "obsidian"
 import * as Comlink from 'comlink'
+// @ts-ignore
 import workerCode from 'virtual:worker-code'
 import { WorkerDatabase } from "./worker/database";
 
@@ -9,6 +10,10 @@ export class SqlSealDatabase {
     private connectingPromise: Promise<void>;
     constructor(private readonly app: App, private readonly verbose = false) {
 
+    }
+
+    registerCustomFunction(name: string, argsCount = 1) {
+        return this.db.registerCustomFunction(name, argsCount)
     }
 
     async connect() {

@@ -1,3 +1,8 @@
+# 0.21.0 (2025-01-30)
+- feat: other plugins can now register custom database functions
+- feat: improved API for other plugins
+- chore: added subproject to release types for other plugins to use. See [`@hypersphere/sqlseal` package in NPM](https://www.npmjs.com/package/@hypersphere/sqlseal) for more info.
+
 # 0.20.0 (2025-01-28)
 Added `links` table containing all the references between files. [Read more about the file structure in our documentation](https://hypersphere.blog/sql-seal/data-sources/vault-data.html#links-table)
 
