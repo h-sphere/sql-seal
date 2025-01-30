@@ -15,7 +15,7 @@
     "docs:preview": "vitepress preview docs",
     "test": "jest"
   },
-  "keywords": [],
+  "keywords": ["Obsidian", "SQLite", "note-taking", "TypeScript"],
   "author": "",
   "license": "MIT",
   "devDependencies": {
