@@ -14,6 +14,8 @@ import { CellParserRegistar } from './cellParser';
 import { registerAPI } from '@vanakat/plugin-api';
 import { SQLSealRegisterApi } from './pluginApi/sqlSealApi';
 import { registerDefaultFunctions } from './utils/ui';
+import { DatabaseTable } from './database/table';
+import { FilepathHasher } from './utils/hasher';
 
 export default class SqlSealPlugin extends Plugin {
 	settings: SQLSealSettings;
@@ -185,6 +187,15 @@ export default class SqlSealPlugin extends Plugin {
 
 	unregisterSQLSealFunction(name: string) {
 		this.cellParserRegistar.unregister(name)
+	}
+
+	async registerTable<const columns extends string[]>(plugin: Plugin, name: string, columns: columns) {
+		const hash = await FilepathHasher.sha256(`${plugin.manifest.name}`)
+		const tableName = `external_table_${hash}_name`
+		const newTable = new DatabaseTable(this.sqlSeal.db, tableName, columns)
+		await newTable.connect()
+		// FIXME: probably register this table in some type of map for the future use?
+		return newTable
 	}
 
 	registerGlobalApi() {
