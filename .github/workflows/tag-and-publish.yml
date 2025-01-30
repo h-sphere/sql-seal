@@ -96,13 +96,14 @@ jobs:
           # Get release URL using gh cli
           RELEASE_URL=$(gh release view "${{ steps.package-version.outputs.VERSION }}" --json url -q .url)
           
-          # Prepare the message content
-          MESSAGE="🎉 New release ${{ steps.package-version.outputs.VERSION }} is now available!\n\n"
-          MESSAGE+="📝 Changes:\n"
-          MESSAGE+="${{ steps.release-notes.outputs.NOTES }}\n"
-          MESSAGE+="\n🔗 Release: $RELEASE_URL"
+          # Create a JSON file with the message
+          cat > discord_payload.json << EOF
+          {
+            "content": "🎉 New release ${{ steps.package-version.outputs.VERSION }} is now available!\n\n📝 Changes:\n${{ steps.release-notes.outputs.NOTES }}\n\n🔗 Release: $RELEASE_URL"
+          }
+          EOF
           
           # Send to Discord using curl
           curl -H "Content-Type: application/json" \
-               -d "{\"content\": \"$MESSAGE\"}" \
+               -d @discord_payload.json \
                $DISCORD_WEBHOOK

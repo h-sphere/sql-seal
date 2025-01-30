@@ -4,12 +4,14 @@ export interface SQLSealSettings {
     enableViewer: boolean;
     enableEditing: boolean;
     enableJSONViewer: boolean;
+    enableDynamicUpdates: boolean;
 }
 
 export const DEFAULT_SETTINGS: SQLSealSettings = {
     enableViewer: true,
     enableEditing: true,
-    enableJSONViewer: true
+    enableJSONViewer: true,
+    enableDynamicUpdates: true,
 };
 
 
@@ -67,6 +69,22 @@ export class SQLSealSettingsTab extends PluginSettingTab {
                     this.settings.enableJSONViewer = value;
                     if (!value) {
                         this.settings.enableJSONViewer = false;
+                    }
+                    await this.plugin.saveData(this.settings);
+                    this.display();
+                    this.callChanges()
+                }));
+
+        containerEl.createEl('h3', { text: 'Behavior' });
+        new Setting(containerEl)
+            .setName('Enable Dynamic Updates')
+            .setDesc('SQLSeal will refresh your tables when underlying data changes.')
+            .addToggle(toggle => toggle
+                .setValue(this.settings.enableDynamicUpdates)
+                .onChange(async (value) => {
+                    this.settings.enableDynamicUpdates = value;
+                    if (!value) {
+                        this.settings.enableDynamicUpdates = false;
                     }
                     await this.plugin.saveData(this.settings);
                     this.display();

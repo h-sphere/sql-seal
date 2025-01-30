@@ -6,8 +6,9 @@ import { ParserTableDefinition } from "../datamodel/syncStrategy/types";
 import { parseLanguage } from "../grammar/newParser";
 import { RendererRegistry, RenderReturn } from "../renderer/rendererRegistry";
 import { transformQuery } from "../sql/sqlTransformer";
-import { registerObservers } from "../utils/registerObservers";
 import { displayError, displayNotice } from "../utils/ui";
+import SqlSealPlugin from "../main";
+import { registerObservers } from "../utils/registerObservers";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
 
@@ -20,6 +21,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         private ctx: MarkdownPostProcessorContext,
         private rendererRegistry: RendererRegistry,
         private db: SqlSealDatabase,
+        private plugin: SqlSealPlugin,
         private app: App,
         private sync: Sync) {
         super(el)
@@ -61,12 +63,14 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         const res = transformQuery(this.query, registeredTablesForContext)
         const transformedQuery = res.sql
 
-        registerObservers({
-            bus: this.registrator,
-            callback: () => this.render(),
-            fileName: this.ctx.sourcePath,
-            tables: res.mappedTables
-        })
+        if (this.plugin.settings.enableDynamicUpdates) {
+            registerObservers({
+                bus: this.registrator,
+                callback: () => this.render(),
+                fileName: this.ctx.sourcePath,
+                tables: res.mappedTables
+            })
+        }
 
 
         const file = this.app.vault.getFileByPath(this.ctx.sourcePath)
