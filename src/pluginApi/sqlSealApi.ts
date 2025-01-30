@@ -67,6 +67,10 @@ export class SQLSealApi {
         this.sqlSealPlugin.registerSQLSealFunction(name, fn, argumentsCount)
     }
 
+    registerTable<const columns extends string[]>(tableName: string, columns: columns) {
+        return this.sqlSealPlugin.registerTable(this.plugin, tableName, columns)
+    }
+
     unregister() {
         for(const view of this.views) {
             this.sqlSealPlugin.unregisterSQLSealView(view.name)

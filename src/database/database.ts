@@ -60,8 +60,8 @@ export class SqlSealDatabase {
         await this.db.recreateDatabase()
     }
 
-    async updateData(name: string, data: Array<Record<string, unknown>>) {
-        return this.db.updateData(name, data)
+    async updateData(name: string, data: Array<Record<string, unknown>>, key: string) {
+        return this.db.updateData(name, data, key)
     }
 
     async deleteData(name: string, data: Array<Record<string, unknown>>, key: string = 'id') {
