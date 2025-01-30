@@ -2,11 +2,13 @@ import { App, MarkdownPostProcessorContext } from "obsidian";
 import { InlineProcessor } from "./InlineProcessor";
 import { SqlSealDatabase } from "../../database/database";
 import { Sync } from "../../datamodel/sync";
+import SqlSealPlugin from "../../main";
 
 export class SqlSealInlineHandler {
     constructor(
         private readonly app: App,
         private readonly db: SqlSealDatabase,
+        private readonly plugin: SqlSealPlugin,
         private sync: Sync
     ) { }
 
@@ -23,6 +25,7 @@ export class SqlSealInlineHandler {
             query,
             sourcePath,
             this.db,
+            this.plugin,
             this.app,
             this.sync
         );

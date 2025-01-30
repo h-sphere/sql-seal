@@ -1,3 +1,6 @@
+# 0.21.2 (2025-01-30)
+- feat: now dynamic refreshing of the views can be disabled in the settings
+
 # 0.21.1 (2025-01-30)
 - feat: ability to register new tables from other plugins
 

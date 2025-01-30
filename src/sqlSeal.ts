@@ -10,6 +10,7 @@ import { FilesFileSyncTable } from "./vaultSync/tables/filesTable";
 import { TagsFileSyncTable } from "./vaultSync/tables/tagsTable";
 import { TasksFileSyncTable } from "./vaultSync/tables/tasksTable";
 import { LinksFileSyncTable } from "./vaultSync/tables/linksTable";
+import SqlSealPlugin from "./main";
 
 export class SqlSeal {
     public db: SqlSealDatabase
@@ -17,15 +18,15 @@ export class SqlSeal {
     private inlineCodeBlock: SqlSealInlineHandler
     public sync: Sync
     public fileSync: SealFileSync
-    constructor(private readonly app: App, verbose = false, rendererRegistry: RendererRegistry) {
+    constructor(private readonly app: App, verbose = false, rendererRegistry: RendererRegistry, plugin: SqlSealPlugin) {
         this.db = new SqlSealDatabase(app, verbose)
         const logger = new Logger(verbose)
 
         this.sync = new Sync(this.db, this.app.vault, this.app)
         this.sync.init()
 
-        this.codeBlockHandler = new SqlSealCodeblockHandler(app, this.db, this.sync, rendererRegistry)
-        this.inlineCodeBlock = new SqlSealInlineHandler(app, this.db, this.sync)
+        this.codeBlockHandler = new SqlSealCodeblockHandler(app, this.db, plugin, this.sync, rendererRegistry)
+        this.inlineCodeBlock = new SqlSealInlineHandler(app, this.db, plugin, this.sync)
     }
 
     getHandler() {

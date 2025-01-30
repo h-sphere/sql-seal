@@ -39,7 +39,7 @@ export default class SqlSealPlugin extends Plugin {
 		await this.registerSQLSealExtensions()
 
 		this.registerGlobalApi();
-		const sqlSeal = new SqlSeal(this.app, false, this.rendererRegistry) // FIXME: set verbose based on the env.
+		const sqlSeal = new SqlSeal(this.app, false, this.rendererRegistry, this) // FIXME: set verbose based on the env.
 		this.sqlSeal = sqlSeal
 
 		await this.sqlSeal.db.connect()
