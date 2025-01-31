@@ -2,7 +2,6 @@ import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownRenderChild } from "obsidian";
 import { SqlSealDatabase } from "../../database/database";
 import { Sync } from "../../datamodel/sync";
-import { RenderReturn } from "../../renderer/rendererRegistry";
 import { transformQuery } from "../../sql/sqlTransformer";
 import { registerObservers } from "../../utils/registerObservers";
 import { displayError } from "../../utils/ui";
@@ -10,7 +9,6 @@ import SqlSealPlugin from "../../main";
 
 export class InlineProcessor extends MarkdownRenderChild {
     private registrator: OmnibusRegistrator;
-    private renderer: RenderReturn;
 
     constructor(
         private el: HTMLElement,
@@ -63,7 +61,11 @@ export class InlineProcessor extends MarkdownRenderChild {
             );
 
             this.el.empty()
-            this.el.createSpan({ text: data[0][columns[0]] ?? '' })
+            let value = data[0][columns[0]] ?? ''
+            if (typeof value !== 'string') {
+                value = value?.toString()
+            }
+            this.el.createSpan({ text: value })
 
         } catch (e) {
             displayError(this.el, e.toString())
