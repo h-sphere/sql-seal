@@ -1,3 +1,6 @@
+# 0.21.3 (2025-01-31)
+- fix: fixed issue with inline queries breaking rendering
+
 # 0.21.2 (2025-01-30)
 - feat: now dynamic refreshing of the views can be disabled in the settings
 

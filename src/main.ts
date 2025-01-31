@@ -73,6 +73,7 @@ export default class SqlSealPlugin extends Plugin {
 		const editorExtension = createSqlSealEditorExtension(
 			this.app,
 			this.sqlSeal.db,
+			this,
 			this.sqlSeal.sync,
 		);
 		this.registerEditorExtension(editorExtension);

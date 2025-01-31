@@ -6,10 +6,12 @@ import { SqlSealDatabase } from "../database/database";
 import { Sync } from "../datamodel/sync";
 import { SqlSealInlineHandler } from "../codeblockHandler/inline/InlineCodeHandler";
 import { InlineProcessor } from "../codeblockHandler/inline/InlineProcessor";
+import SqlSealPlugin from "../main";
 
 export function createSqlSealEditorExtension(
     app: App,
     db: SqlSealDatabase,
+    plugin: SqlSealPlugin,
     sync: Sync,
 ) {
     return ViewPlugin.fromClass(
@@ -18,7 +20,7 @@ export function createSqlSealEditorExtension(
             inlineHandler: SqlSealInlineHandler;
 
             constructor(view: EditorView) {
-                this.inlineHandler = new SqlSealInlineHandler(app, db, sync);
+                this.inlineHandler = new SqlSealInlineHandler(app, db, plugin, sync);
                 this.decorations = this.buildDecorations(view);
             }
 

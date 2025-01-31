@@ -1,8 +1,11 @@
 import * as Comlink from "comlink"
+// @ts-ignore
 import initSqlJs from '@jlongster/sql.js';
 // @ts-ignore
 import wasmBinary from '../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm'
+// @ts-ignore
 import { SQLiteFS } from 'absurd-sql';
+// @ts-ignore
 import IndexedDBBackend from '../../../node_modules/absurd-sql/dist/indexeddb-backend.js';
 import type { BindParams, Database, Statement } from "sql.js";
 import { sanitise } from "../../utils/sanitiseColumn";
