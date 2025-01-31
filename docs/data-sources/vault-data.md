@@ -18,8 +18,8 @@ Files table consists of the following columns:
 | `id`                | File Path                                                                                                                                                                        |               |
 | `path`              | Same as `id`, file path                                                                                                                                                          |               |
 | `name`              | Name of the file, without path and extension                                                                                                                                     |               |
-| `created_at`        | Time of creation (unix timestamp). You can use it to order files by their creation date                                                                                          | 0.18.1        |
-| `modified_at`       | Time of last modification (unix timestamp). You can use it to odrer files by their modification                                                                                  | 0.18.1        |
+| `created_at`        | Time of creation (ISO 8601). You can use it to order files by their creation date. Before version 0.22.0 value was unixepoch * 1000 (JavaScript epoch)                           | 0.18.1        |
+| `modified_at`       | Time of last modification (ISO 8601). You can use it to odrer files by their modification. Before version 0.22.0 value was unixepoch * 1000 (JavaScript epoch)                   | 0.18.1        |
 | `file_size`         | Size of the file on disk (in bytes)                                                                                                                                              | 0.18.1        |
 | All file properties | All file properties are also added to the table. All the special characters will be transformed to underscores `_`, so for example `note type` will be accessible as `note_type` |               |
 

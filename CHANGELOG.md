@@ -1,3 +1,10 @@
+# 0.22.0 (2025-01-31)
+Breaking change: `created_at` and `modified_at` has been changed from JS unix epoch to ISO 8601 dates (human readable). Thanks to that many of date operations are now easier to perform.
+Example, extracting year from the creation date:
+Before: `strftime("%Y", datetime(ROUND(created_at / 1000), 'unixepoch'))`
+Now: `strftime("%Y", created_at)`
+
+
 # 0.21.3 (2025-01-31)
 - fix: fixed issue with inline queries breaking rendering
 

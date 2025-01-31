@@ -23,8 +23,8 @@ function fileData(file: TFile, { tags: _tags, ...frontmatter }: Record<string, a
         id: file.path,
         path: file.path,
         name: file.name.replace(/\.[^/.]+$/, ""),
-        created_at: file.stat.ctime,
-        modified_at: file.stat.mtime,
+        created_at: (new Date(file.stat.ctime)).toISOString(),
+        modified_at: (new Date(file.stat.mtime)).toISOString(),
         file_size: file.stat.size
     }
 }
