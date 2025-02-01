@@ -1,3 +1,6 @@
+# 0.22.1 (2025-02-01)
+- Added indexes to the `files`, `tags`, `links` and `tasks` tables. This should speed up a lot of common queries performed agains these tables.
+
 # 0.22.0 (2025-01-31)
 Breaking change: `created_at` and `modified_at` has been changed from JS unix epoch to ISO 8601 dates (human readable). Thanks to that many of date operations are now easier to perform.
 Example, extracting year from the creation date:

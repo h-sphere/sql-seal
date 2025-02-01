@@ -82,5 +82,11 @@ export class FilesFileSyncTable extends AFileSyncTable {
     async onInit(): Promise<void> {
         this.db.createTableNoTypes(FILES_TABLE_NAME, ['id', 'name', 'path', 'created_at', 'modified_at', 'file_size'])
         this.columns = await this.db.getColumns(FILES_TABLE_NAME)
+
+        // Indexes
+        const toIndex = ['id', 'name', 'path']
+        await Promise.all(toIndex.map(column =>
+            this.db.createIndex(`files_${column}_idx`, FILES_TABLE_NAME, [column])
+        ))
     }
 }
