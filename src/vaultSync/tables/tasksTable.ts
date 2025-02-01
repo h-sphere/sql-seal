@@ -49,5 +49,11 @@ export class TasksFileSyncTable extends AFileSyncTable {
 
     async onInit(): Promise<void> {
         await this.db.createTableNoTypes('tasks', ['task', 'completed', 'filePath'])
+
+         // Indexes
+         const toIndex = ['filePath']
+         await Promise.all(toIndex.map(column =>
+             this.db.createIndex(`tasks_${column}_idx`, this.tableName, [column])
+         ))
     }
 }

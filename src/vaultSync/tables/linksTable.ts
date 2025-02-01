@@ -51,5 +51,12 @@ export class LinksFileSyncTable extends AFileSyncTable {
 
     async onInit(): Promise<void> {
         await this.db.createTableNoTypes(this.tableName, ['path', 'target', 'position', 'display_text', 'target_exists'])
+
+
+        // Indexes
+        const toIndex = ['path', 'target']
+        await Promise.all(toIndex.map(column =>
+            this.db.createIndex(`links_${column}_idx`, this.tableName, [column])
+        ))
     }
 }

@@ -80,6 +80,10 @@ export class SqlSealDatabase {
         await this.db.createTableNoTypes(name, columns, noDrop)
     }
 
+    async createIndex(indexName: string, tableName: string, columns: string[]) {
+        await this.db.createIndex(indexName, tableName, columns)
+    }
+
     async getColumns(tableName: string) {
         return this.db.getColumns(tableName)
     }

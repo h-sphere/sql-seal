@@ -216,8 +216,23 @@ export class WorkerDatabase {
         }
     }
 
+    async explainQuery(query: string, params: Record<string, unknown>) {
+        const stmt = this.db.prepare(`EXPLAIN QUERY PLAN ${query}`, recordToBindParams(params))
+        const plan = []
+        while (stmt.step()) {
+            plan.push(stmt.getAsObject())
+        }
+        stmt.free()
+        return plan
+    }
+
     async disconnect() {
         // FIXME: implement.
+    }
+
+    async createIndex(indexName: string, tableName: string, columns: string[]) {
+        const query = `CREATE INDEX IF NOT EXISTS ${indexName} ON ${tableName} (${columns.join(', ')})`
+        this.db.run(query)
     }
 }
 
