@@ -37,7 +37,7 @@ export class TagsFileSyncTable extends AFileSyncTable {
     async onInit(): Promise<void> {
         await this.db.createTableNoTypes('tags', ['tag', 'fileId'])
          // Indexes
-         const toIndex = ['fileId']
+         const toIndex = ['tag', 'fileId']
          await Promise.all(toIndex.map(column =>
              this.db.createIndex(`tags_${column}_idx`, this.tableName, [column])
          ))

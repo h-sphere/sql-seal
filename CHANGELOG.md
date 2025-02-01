@@ -1,3 +1,6 @@
+# 0.22.2 (2025-02-01)
+- Added index to tags.tag which was missed in the last release
+
 # 0.22.1 (2025-02-01)
 - Added indexes to the `files`, `tags`, `links` and `tasks` tables. This should speed up a lot of common queries performed agains these tables.
 
