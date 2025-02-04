@@ -75,4 +75,21 @@ describe('Parse Intermediate Content', () => {
             rendererArguments: ''
         })
     })
+
+    it('should properly parse parameter to the function', () => {
+        expect(parseIntermediateContent(`
+            explain
+            no refresh
+            grid {
+            a: 5,
+            b: 7
+}`, {})).toEqual({
+    flags: { explain: true, refresh: false },
+    renderer: 'GRID',
+    rendererArguments: `{
+a: 5,
+b: 7
+}`
+})
+    })
 })
