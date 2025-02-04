@@ -9,11 +9,15 @@ import { transformQuery } from "../sql/sqlTransformer";
 import { displayError, displayNotice } from "../utils/ui";
 import SqlSealPlugin from "../main";
 import { registerObservers } from "../utils/registerObservers";
+import { IntermediateContent, parseIntermediateContent } from "src/grammar/parseIntermediateContent";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
 
     registrator: OmnibusRegistrator
     renderer: RenderReturn
+    private flags: IntermediateContent['flags']
+    private extrasEl: HTMLElement
+    private explainEl: HTMLElement
 
     constructor(
         private el: HTMLElement,
@@ -25,6 +29,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         private app: App,
         private sync: Sync) {
         super(el)
+
         this.registrator = this.sync.getRegistrator()
     }
 
@@ -41,7 +46,23 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 }
             }
 
-            this.renderer = this.rendererRegistry.prepareRender(results.intermediateContent)(this.el)
+            const { intermediateContent } = results
+            const config = parseIntermediateContent(intermediateContent, {
+                flags: {
+                    refresh: this.plugin.settings.enableDynamicUpdates,
+                    explain: false
+                }
+            })
+
+            this.flags = config.flags
+
+            this.extrasEl = this.el.createDiv({ cls: 'sqlseal-extras-container' })
+            if (config.flags.explain) { 
+                this.explainEl = this.extrasEl.createEl('pre', { cls: 'sqlseal-extras-explain-container' })
+            }
+            const rendererEl = this.el.createDiv({ cls: 'sqlseal-renderer-container' })
+
+            this.renderer = this.rendererRegistry.prepareRender(config.renderer.toLowerCase(), config.rendererArguments)(rendererEl)
             
             // FIXME: probably should save the one before transform and perform transform every time we execute it.
             this.query = results.queryPart
@@ -63,7 +84,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         const res = transformQuery(this.query, registeredTablesForContext)
         const transformedQuery = res.sql
 
-        if (this.plugin.settings.enableDynamicUpdates) {
+        if (this.flags.refresh) {
             registerObservers({
                 bus: this.registrator,
                 callback: () => this.render(),
@@ -78,6 +99,13 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             return
         }
         const fileCache = this.app.metadataCache.getFileCache(file)
+
+        if (this.flags.explain) {
+            // Rendering explain
+            const result = await this.db.explain(transformedQuery, fileCache?.frontmatter ?? { })
+            this.explainEl.textContent = result
+        }
+
             const { data, columns } = await this.db.select(transformedQuery, fileCache?.frontmatter ?? {})
             this.renderer.render({ data, columns })
        } catch (e) {

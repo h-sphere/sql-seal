@@ -1,3 +1,7 @@
+# 0.22.3 (2025-02-04)
+- Ability to enable / disable query refreshing individually for each query (REFRESH / NO REFRESH statement)
+- (Advanced) Added ability to show SQL execution plan for the query
+
 # 0.22.2 (2025-02-01)
 - Added index to tags.tag which was missed in the last release
 

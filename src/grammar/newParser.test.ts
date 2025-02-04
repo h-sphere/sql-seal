@@ -1,5 +1,4 @@
 import { parseLanguage } from './newParser'
-jest.mock('../datamodel/syncStrategy/MarkdownTableSyncStrategy')
 
 describe('Parser', () => {
     it('should properly parse select only', () => {

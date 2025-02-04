@@ -43,32 +43,11 @@ export class RendererRegistry {
         this.renderers.delete(uniqueName)
     }
 
-    splitConfig(config: string) {
-        if (config.length === 0) {
-            return {
-                type: this.default,
-                config: ''
-            }
-        }
-        const firstSpace = config.indexOf(" ")
-        if (firstSpace < 0) {
-            return {
-                type: config.toLowerCase(),
-                config: ''
-            }
-        }
-        return {
-            type: config.substring(0, firstSpace).toLowerCase(),
-            config: config.substring(firstSpace)
-        }
-    }
-
-    prepareRender(inputConfig: string) {
-        const { type, config } = this.splitConfig(inputConfig)
+    prepareRender(type: string, config: string) {
         if (!this.renderersByKey.has(type)) {
             throw new Error(`Renderer does not exist for ${type}`)
         }
-        const rendererConfig = this.renderersByKey.get(type)!
+        const rendererConfig = this.renderersByKey.get(type.toLowerCase())!
         const elConfig = rendererConfig.validateConfig(config)
         return (el: HTMLElement) => {
             return rendererConfig.render(elConfig, el)
