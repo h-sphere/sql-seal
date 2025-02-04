@@ -1,4 +1,4 @@
-import { App } from "obsidian"
+import { App, getLinkpath, parseLinktext } from "obsidian"
 import { CellParserRegistar } from "src/cellParser"
 
 export  const displayNotice = (el: HTMLElement, text: string) => {
@@ -12,6 +12,8 @@ export  const displayError = (el: HTMLElement, text: string) => {
 }
 
 const isLinkLocal = (link: string) => !link?.trim().startsWith('http')
+
+const isLinktext = (link: string) => link.startsWith('[[') && link.endsWith(']]')
 
 
 const renderCheckbox = (app: App) => ([value]: [string]) => {
@@ -30,16 +32,32 @@ const renderLink = (app: App) => ([name, href]: [string, string]) => {
     if (!href) {
         href = name
     }
-    if (isLinkLocal(href)) {
+    href = href.trim()
+    let cls = ''
+    if (isLinktext(href)) {
+        const [path, linkName] = href.slice(2, -2).split('|')
+        const link = app.metadataCache.getFirstLinkpathDest(path, '')
+
+        if (name.trim() === href) {
+            name = linkName ?? path
+        }
+
+        if (!link) {
+            href = path
+        } else {
+            href = link.path
+        }
+        cls = 'internal-link'
+
+    } else if (isLinkLocal(href)) {
         let fileHref = href
         if (fileHref.endsWith('.md')) {
             fileHref = fileHref.slice(0, -3)
         }
-        const vaultName = encodeURIComponent((app as any).appId);
-        const encodedPath = encodeURIComponent(fileHref);
-        href = `obsidian://open?vault=${vaultName}&file=${encodedPath}`;
+        href = href
+        cls = 'internal-link'
     }
-    const el = createEl('a', { text: name, href: href })
+    const el = createEl('a', { text: name, href, cls })
     return el
 }
 
