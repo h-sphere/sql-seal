@@ -5,6 +5,11 @@ export default defineConfig({
   title: "Obsidian SQLSeal",
   description: "Plugin enabling full SQL capabilities in Obsidian",
   base: '/sql-seal/',
+  head: [
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/sql-seal/favicon-32x32.png' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/sql-seal/favicon-16x16.png' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/sql-seal/apple-touch-icon.png' }],
+  ],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
