@@ -59,7 +59,7 @@ export class WorkerDatabase {
 
     private db: Database
 
-    constructor() {
+    constructor(private readonly dbName: string) {
 
     }
 
@@ -191,13 +191,16 @@ export class WorkerDatabase {
             SQL.FS.mkdir('/sql');
             SQL.FS.mount(sqlFS, {}, '/sql');
 
-            const path = 'sql/sqlseal.sqlite';
+            // Removing old database under the generic name
+            indexedDB.deleteDatabase('sqlseal.sqlite')
+
+            const path = `sql/sqlseal___${this.dbName}.sqlite3`
 
             let stream = SQL.FS.open(path, 'a+');
             await stream.node.contents.readIfFallback();
             SQL.FS.close(stream);
 
-            const db = new SQL.Database('sql/sqlseal.sqlite', { filename: true });
+            const db = new SQL.Database(path, { filename: true });
 
             let cacheSize = 0;
             let pageSize = 4096;
