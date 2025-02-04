@@ -41,14 +41,16 @@ The example below uses [Goodreads-books](https://www.kaggle.com/datasets/jealous
 TABLE books = file(books.csv)
 
 SELECT
-a('https://openlibrary.org/isbn/' || isbn13, title) as title,
-authors,
-isbn13,
-img('https://covers.openlibrary.org/b/isbn/' || isbn13 || '-L.jpg') as cover
-from books
-WHERE authors LIKE concat('%', @author, '%')
+	a(title, 'https://openlibrary.org/isbn/' || CAST(isbn13 as int)) as title,
+	authors,
+	img('https://covers.openlibrary.org/b/isbn/' || CAST(isbn13 as INT) || '-L.jpg') as cover FROM books
+WHERE authors
+	LIKE '%' || @author || '%'
 LIMIT 10
 ```
+
+> [!NOTE] Type Casting
+> In the example above we need to cast isbn13 (which is the number) to integer so SQLite properly uses it. Without casting it would behave like a REAL number and would have `.0` added in the end. SQLite (which we use as an engine) [treats types quite loosely](https://www.sqlite.org/datatype3.html) so you might run into small problems like that once in a while when doing very advanced processing.
 
 ![Advanced links and images](links-and-images-advanced.png)
 
