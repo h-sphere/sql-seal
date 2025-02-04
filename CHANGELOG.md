@@ -1,3 +1,7 @@
+# 0.23.0 (2025-02-04)
+- Added support for wikilinks in the `a` function. You can now use markdown links in your queries.
+- Improved how links are being rendered. Now using native links with the preview on hover
+
 # 0.22.3 (2025-02-04)
 - Ability to enable / disable query refreshing individually for each query (REFRESH / NO REFRESH statement)
 - (Advanced) Added ability to show SQL execution plan for the query
