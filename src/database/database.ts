@@ -3,6 +3,7 @@ import * as Comlink from 'comlink'
 // @ts-ignore
 import workerCode from 'virtual:worker-code'
 import { WorkerDatabase } from "./worker/database";
+import { sanitise } from "../utils/sanitiseColumn";
 
 export class SqlSealDatabase {
     db: Comlink.Remote<WorkerDatabase>
@@ -35,7 +36,9 @@ export class SqlSealDatabase {
                 });
                 const DatabaseWrap = Comlink.wrap<typeof WorkerDatabase>(worker)
 
-                const instance = await new DatabaseWrap()
+                const filename = sanitise(this.app.vault.getName()) + '___' + (this.app as any).appId
+
+                const instance = await new DatabaseWrap(filename)
 
                 await instance.connect()
                 this.db = instance

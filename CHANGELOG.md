@@ -1,3 +1,6 @@
+# 0.23.1 (2025-02-04)
+- SQLSeal now works with multiple vaults open. It registers database with unique filename to avoid conflicts.
+
 # 0.23.0 (2025-02-04)
 - Added support for wikilinks in the `a` function. You can now use markdown links in your queries.
 - Improved how links are being rendered. Now using native links with the preview on hover
