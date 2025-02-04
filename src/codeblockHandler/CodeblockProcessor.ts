@@ -56,11 +56,16 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
             this.flags = config.flags
 
-            this.extrasEl = this.el.createDiv({ cls: 'sqlseal-extras-container' })
-            if (config.flags.explain) { 
-                this.explainEl = this.extrasEl.createEl('pre', { cls: 'sqlseal-extras-explain-container' })
+            let rendererEl = this.el
+
+            if (this.flags.explain) {
+
+                this.extrasEl = this.el.createDiv({ cls: 'sqlseal-extras-container' })
+                if (config.flags.explain) { 
+                    this.explainEl = this.extrasEl.createEl('pre', { cls: 'sqlseal-extras-explain-container' })
+                }
+                rendererEl = this.el.createDiv({ cls: 'sqlseal-renderer-container' })
             }
-            const rendererEl = this.el.createDiv({ cls: 'sqlseal-renderer-container' })
 
             this.renderer = this.rendererRegistry.prepareRender(config.renderer.toLowerCase(), config.rendererArguments)(rendererEl)
             

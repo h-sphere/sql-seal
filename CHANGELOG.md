@@ -1,3 +1,6 @@
+# 0.23.2 (2025-02-04)
+- No longer captalising renderer options (it was breaking SQLSeal Charts integration)
+
 # 0.23.1 (2025-02-04)
 - SQLSeal now works with multiple vaults open. It registers database with unique filename to avoid conflicts.
 

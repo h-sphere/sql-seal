@@ -1,4 +1,4 @@
-import { assign } from "lodash"
+import { assign, trim } from "lodash"
 
 export interface IntermediateContent {
     flags: {
@@ -35,18 +35,19 @@ export const parseIntermediateContent = (content: string, initialConfig: Partial
     let processingFlags = true
     const rendererArguments = []
     for (const row of content.split('\n')) {
-        const trimmedRow = row.trim().toUpperCase()
+        const trimmedRow = row.trim()
+        const upperRow = trimmedRow.toUpperCase()
         if (!trimmedRow) {
             continue // empty row
         }
         if (processingFlags) {
-            if (!FLAGS[trimmedRow]) {
+            if (!FLAGS[upperRow]) {
                 processingFlags = false
                 const [renderer, ...rest ] = trimmedRow.split(' ')
                 config.renderer = renderer.toUpperCase()
                 rendererArguments.push(rest.join(' '))
             } else {
-                const fn = FLAGS[trimmedRow]
+                const fn = FLAGS[upperRow]
                 fn(config)
             }
         } else {
