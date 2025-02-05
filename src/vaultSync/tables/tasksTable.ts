@@ -10,7 +10,7 @@ export class TasksFileSyncTable extends AFileSyncTable {
         await this.onFileCreate(file)
     }
     async onFileDelete(path: string): Promise<void> {
-        await this.db.deleteData('tasks', [{ filePath: path }], 'filePath')
+        await this.db.deleteData('tasks', [{ path: path }], 'path')
     }
 
     async onFileCreate(file: TFile): Promise<void> {
@@ -41,6 +41,7 @@ export class TasksFileSyncTable extends AFileSyncTable {
             ).trim();
             return {
                 filePath: file.path,
+                path: file.path,
                 task: taskContent,
                 completed: status ? 1 : 0
             }
@@ -48,7 +49,7 @@ export class TasksFileSyncTable extends AFileSyncTable {
     }
 
     async onInit(): Promise<void> {
-        await this.db.createTableNoTypes('tasks', ['task', 'completed', 'filePath'])
+        await this.db.createTableNoTypes('tasks', ['task', 'completed', 'filePath', 'path'])
 
          // Indexes
          const toIndex = ['filePath']
