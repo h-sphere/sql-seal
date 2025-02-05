@@ -1,3 +1,6 @@
+# 0.24.2 (2025-02-05)
+- Fixed how links are displayed. Now you can use links as `a(href)` or `a(href, name)`.
+
 # 0.24.1 (2025-02-05)
 - Added `path` columns to `tags` and `tasks` tables. Thanks to that you can use `NATURAL JOIN`s now to connect join them.
 

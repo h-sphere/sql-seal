@@ -1,4 +1,4 @@
-import { App, getLinkpath, parseLinktext } from "obsidian"
+import { App } from "obsidian"
 import { CellParserRegistar } from "src/cellParser"
 
 export  const displayNotice = (el: HTMLElement, text: string) => {
@@ -28,9 +28,21 @@ const renderCheckbox = (app: App) => ([value]: [string]) => {
     }
     return el
 }
-const renderLink = (app: App) => ([name, href]: [string, string]) => {
-    if (!href) {
-        href = name
+
+const removeExtension = (filename: string) => {
+    const parts = filename.split('.')
+    if (parts.length > 1) {
+        return parts.slice(0, -1).join('.')
+    }
+    return filename
+}
+
+
+type LinkType = [string] | [string, string]
+
+export const renderLink = (app: App, create = createEl) => ([href, name]: LinkType) => {
+    if (!name) {
+        name = href
     }
     href = href.trim()
     let cls = ''
@@ -54,10 +66,13 @@ const renderLink = (app: App) => ([name, href]: [string, string]) => {
         if (fileHref.endsWith('.md')) {
             fileHref = fileHref.slice(0, -3)
         }
-        href = href
+        if (name === href) {
+            const components = href.split('/')
+            name = removeExtension(components[components.length - 1])
+        }
         cls = 'internal-link'
     }
-    const el = createEl('a', { text: name, href, cls })
+    const el = create('a', { text: name, href, cls })
     return el
 }
 
