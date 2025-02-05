@@ -1,3 +1,6 @@
+# 0.24.0 (2025-02-05)
+- Better column names! Now non-latin characters are being romanised so you can access your properties (and other column names) easier: geändert becomes geandert, 类别 becomes lei_bie, ノートタイプ becomes nototaipu, etc.
+
 # 0.23.2 (2025-02-04)
 - No longer captalising renderer options (it was breaking SQLSeal Charts integration)
 

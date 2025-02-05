@@ -62,6 +62,9 @@ importers:
       sql-parser-cst:
         specifier: ^0.32.0
         version: 0.32.0
+      unidecode:
+        specifier: ^1.1.0
+        version: 1.1.0
       util:
         specifier: ^0.12.5
         version: 0.12.5
@@ -3086,6 +3089,10 @@ packages:
 
   undici-types@6.19.8:
     resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
+
+  unidecode@1.1.0:
+    resolution: {integrity: sha512-GIp57N6DVVJi8dpeIU6/leJGdv7W65ZSXFLFiNmxvexXkc0nXdqUvhA/qL9KqBKsILxMwg5MnmYNOIDJLb5JVA==}
+    engines: {node: '>= 0.4.12'}
 
   unique-filename@2.0.1:
     resolution: {integrity: sha512-ODWHtkkdx3IAR+veKxFV+VBkUMcN+FaqzUUd7IZzt+0zhDZFPFxhlqwPF3YQvMHx1TD0tdgYl+kuPnJ8E6ql7A==}
@@ -6599,6 +6606,8 @@ snapshots:
   underscore@1.12.1: {}
 
   undici-types@6.19.8: {}
+
+  unidecode@1.1.0: {}
 
   unique-filename@2.0.1:
     dependencies:
