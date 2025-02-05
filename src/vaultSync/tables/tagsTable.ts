@@ -10,7 +10,7 @@ export class TagsFileSyncTable extends AFileSyncTable {
         await this.onFileCreate(file)
     }
     async onFileDelete(path: string): Promise<void> {
-        await this.db.deleteData('tags', [{ fileId: path }], 'fileId')
+        await this.db.deleteData('tags', [{ path }], 'path')
     }
 
     async onFileCreate(file: TFile): Promise<void> {
@@ -29,15 +29,16 @@ export class TagsFileSyncTable extends AFileSyncTable {
         }
         return tags.map((t) => ({
             tag: t,
-            fileId: file.path
+            fileId: file.path,
+            path: file.path
         }))
     }
 
 
     async onInit(): Promise<void> {
-        await this.db.createTableNoTypes('tags', ['tag', 'fileId'])
+        await this.db.createTableNoTypes('tags', ['tag', 'fileId', 'path'])
          // Indexes
-         const toIndex = ['tag', 'fileId']
+         const toIndex = ['tag', 'fileId', 'path']
          await Promise.all(toIndex.map(column =>
              this.db.createIndex(`tags_${column}_idx`, this.tableName, [column])
          ))

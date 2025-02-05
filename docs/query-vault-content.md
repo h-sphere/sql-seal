@@ -1,6 +1,6 @@
 # Query your Vault content
 
-You can query your vault content using SQLSeal built-in tables `files` and `tags` and `tasks`. You can use them to query specific files in the fault based on Properties (Frontmatter) and associated tags.
+You can query your vault content using SQLSeal built-in tables `files`, `tags`, `tasks` and `links`. You can use them to query specific files in the fault based on Properties (Frontmatter) and associated tags.
 
 ## Example: Get all files from the vault
 To get all files from the fault you can run the following query:
@@ -22,7 +22,7 @@ The query above will return only files that have property `type` set to value `r
 Tags are kept in a separate table `tags`. To select all files that have specific tag, we can perform simple join.
 
 ```sqlseal
-SELECT files.* FROM files JOIN tags ON files.id=tags.fileId WHERE tag = '#important'
+SELECT files.* FROM files JOIN tags ON files.path=tags.path WHERE tag = '#important'
 ```
 
 ## Table Structure

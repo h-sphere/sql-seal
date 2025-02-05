@@ -25,18 +25,20 @@ Files table consists of the following columns:
 
 ### `tags` table
 Tags table consists of the following columns:
-| Column   | Description                                         | Introduced In |
-| -------- | --------------------------------------------------- | ------------- |
-| `tag`    | Full tag, including `#` symbol. For example `#todo` |               |
-| `fileId` | Full path of the file the tag belongs to            |               |
+| Column   | Description                                                                                                              | Introduced In |
+| -------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| `tag`    | Full tag, including `#` symbol. For example `#todo`                                                                      |               |
+| `path`   | Full path of the file the tag belongs to                                                                                 | 0.24.1        |
+| `fileId` | (deprecated) same like `path`. Name changed for compatibility with other tables. Will get removed in the future versions |               |
 
 ### `tasks` table
 Tasks table consists of the following columns:
-| Column      | Description                              |
-| ----------- | ---------------------------------------- |
-| `task`      | Content of the task (text)               |
-| `completed` | 0 if not completed, 1 if completed       |
-| `filePath`  | Full path of the file the tag belongs to |
+| Column      | Description                                                                                                              | Introduced In |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| `task`      | Content of the task (text)                                                                                               |               |
+| `completed` | 0 if not completed, 1 if completed                                                                                       |               |
+| `path`      | Full path of the file the tag belongs to                                                                                 | 0.24.1        |
+| `filePath`  | (deprecated) same like `path`. Name changed for compatibility with other tables. Will get removed in the future versions |               |
 
 ### `links` table
 Table containing all the links between files.
