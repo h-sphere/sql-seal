@@ -1,5 +1,5 @@
 import { uniq } from 'lodash';
-import { parse, show, Node, cstVisitor } from 'sql-parser-cst';
+import { parse, show, cstVisitor } from 'sql-parser-cst';
 
 /**
  * Function transforms SQL query and updates tables into actual names in te database.

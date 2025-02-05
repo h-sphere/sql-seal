@@ -1,3 +1,5 @@
+const unidecode = require('unidecode')
+
 /**
  * Sanitizes a string to be used as a valid SQLite column name.
  * Rules implemented:
@@ -35,8 +37,10 @@ export function sanitise(input: string): string {
         return '_empty';
     }
 
+    const nonAccented = unidecode(input).trim()
+
     // Replace any character that isn't a letter, number, or underscore with underscore
-    let sanitized = input.replace(/[^a-zA-Z0-9_]/g, '_');
+    let sanitized = nonAccented.replace(/[^a-zA-Z0-9_]/g, '_');
 
     // Ensure it starts with a letter or underscore
     if (!/^[a-zA-Z_]/.test(sanitized)) {
