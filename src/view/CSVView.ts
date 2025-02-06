@@ -1,10 +1,11 @@
-import { WorkspaceLeaf, TextFileView, Menu } from 'obsidian';
+import { WorkspaceLeaf, TextFileView, Menu, Notice } from 'obsidian';
 import { parse, unparse } from 'papaparse';
 import { DeleteConfirmationModal } from '../modal/deleteConfirmationModal';
 import { RenameColumnModal } from '../modal/renameColumnModal';
 import { CodeSampleModal } from '../modal/showCodeSample';
 import { GridRenderer } from '../renderer/GridRenderer';
 import { CellParser } from '../cellParser';
+import { errorNotice } from 'src/utils/notice';
 
 export const CSV_VIEW_TYPE = "csv-viewer" as const;
 export const CSV_VIEW_EXTENSIONS = ['csv'];
@@ -78,6 +79,28 @@ export class CSVView extends TextFileView {
         }
         this.result.fields.push(columnName)
         this.result.data = this.result.data.map((d: any) => ({ [columnName]: '', ...d }))
+        this.saveData()
+    }
+
+    renameColumn(oldName: string, newName: string) {
+        if (!newName) {
+            return
+        }
+        if (this.result.fields.contains(newName)) {
+            errorNotice('Column already exists')
+            return
+        }
+        const oldNameIdx = this.result.fields.indexOf(oldName)
+        if (oldNameIdx < 0) {
+            errorNotice('Old column does not exist')
+            return
+        }
+        this.result.fields[oldNameIdx] = newName
+        this.result.data = this.result.data.map((d: Record<string, unknown>) => {
+            d[newName] = d[oldName]
+            delete d[oldName]
+            return d
+        })
         this.saveData()
     }
 
@@ -175,6 +198,17 @@ export class CSVView extends TextFileView {
                     enableMenu: this.enableEditing,
                     showColumnMenu: function (e: any) {
                         const menu = new Menu()
+
+                        menu.addItem(item => {
+                            item.setTitle('Rename Column')
+                            item.onClick(() => {
+                                const modal = new RenameColumnModal(csvView.app, (res) => {
+                                    csvView.renameColumn(this.column.colId, res)
+                                })
+                                modal.open()
+                            })
+                        })
+
                         menu.addItem(item => {
                             item.setTitle('Delete Column')
                             item.onClick(() => {
@@ -185,6 +219,8 @@ export class CSVView extends TextFileView {
                                 modal.open()
                             })
                         })
+
+                        
                         const pos = e.getBoundingClientRect();
                         menu.showAtPosition({ x: pos.x, y: pos.y + 20 })
                     }
