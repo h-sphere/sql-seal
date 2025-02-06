@@ -162,7 +162,7 @@ export class WorkerDatabase {
         const fields = Object.keys(data.reduce((acc, obj) => ({ ...acc, ...obj }), {}));
         data.forEach((d: Record<string, unknown>) => {
             const stmt = this.db.prepare(`UPDATE ${tableName} SET ${fields.map((key: string) => `${key} = @${key}`).join(', ')} WHERE ${matchKey} = @${matchKey}`)
-            stmt.run(recordToBindParams(d))
+            stmt.run(recordToBindParams(formatData(d)))
             stmt.free()
         })
     }

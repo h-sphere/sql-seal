@@ -1,6 +1,7 @@
 import { Database } from "sql.js";
 import { parse } from 'json5'
 import { SqlSealDatabase } from "./database/database";
+import { isStringifiedArray, renderStringifiedArray } from "./utils/ui";
 
 export interface CellParser {
     render: (content: string) => Node | string;
@@ -44,6 +45,16 @@ export class CellParserRegistar implements CellParser {
                 const parsedData = parse(content.slice('SQLSEALCUSTOM('.length, -1))
                 return this.renderCustomElement(parsedData)
             }
+
+            // If it's an array, decode it and render each individual elements
+            if (isStringifiedArray(content)) {
+                try {
+                    return renderStringifiedArray(content)
+                } catch (e) {
+                    return content
+                }
+            }
+
             return content
         } catch (e) {
             console.error('Error parsing cell with data:', content, e)

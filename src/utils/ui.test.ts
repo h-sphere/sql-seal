@@ -46,4 +46,12 @@ describe('UI', () => {
             text: 'Alias'
         })
     })
+
+    it('should properly return empty string when link is empty', () => {
+        const app = makeApp()
+        const createEl = jest.fn()
+        const res = renderLink(app as any, createEl)([undefined as any])
+        expect(createEl).not.toHaveBeenCalled()
+        expect(res).toEqual('')
+    })
 })
