@@ -89,6 +89,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         const res = transformQuery(this.query, registeredTablesForContext)
         const transformedQuery = res.sql
 
+
         if (this.flags.refresh) {
             registerObservers({
                 bus: this.registrator,
