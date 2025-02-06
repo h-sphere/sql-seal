@@ -2,6 +2,7 @@
 - feat: you can now generate list of links
 - feat: lists are now properly rendered
 - feat: ability to edit column names in CSV files
+- feat: ability to reorder columns order in CSV files
 - fix: empty links no longer generate errors
 - fix: fixed how lists behave when you refresh the file
 

@@ -128,7 +128,6 @@ export class CSVView extends TextFileView {
             name,
             ...fields.slice(toIndex)
         ]
-        console.log('NEW FIELDS', fields)
         this.result.fields = fields
         this.saveData()
     }
@@ -244,12 +243,10 @@ export class CSVView extends TextFileView {
             paginationAutoPageSize: true,
             suppressMovableColumns: false,
             onColumnMoved: (e) => {
-                console.log('EVENT', e)
                 if (!e.finished) {
                     return
                 }
                 const columnName = e.column?.getUserProvidedColDef()
-                console.log('DEF', columnName, e.toIndex)
                 if (!columnName) {
                     return
                 }
