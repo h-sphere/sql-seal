@@ -120,6 +120,19 @@ export class CSVView extends TextFileView {
 
     }
 
+    moveColumn(name: string, toIndex: number) {
+        let fields = this.result.fields as Array<string>
+        fields = fields.filter(f => f !== name)
+        fields = [
+            ...fields.slice(0, toIndex),
+            name,
+            ...fields.slice(toIndex)
+        ]
+        console.log('NEW FIELDS', fields)
+        this.result.fields = fields
+        this.saveData()
+    }
+
     api: any = null;
 
     loadDataIntoGrid() {
@@ -229,6 +242,19 @@ export class CSVView extends TextFileView {
             enableCellTextSelection: false,
             ensureDomOrder: false,
             paginationAutoPageSize: true,
+            suppressMovableColumns: false,
+            onColumnMoved: (e) => {
+                console.log('EVENT', e)
+                if (!e.finished) {
+                    return
+                }
+                const columnName = e.column?.getUserProvidedColDef()
+                console.log('DEF', columnName, e.toIndex)
+                if (!columnName) {
+                    return
+                }
+                csvView.moveColumn(columnName?.field!, e.toIndex!)
+            },
             domLayout: 'normal',
             getRowId: (p) => p.data.__index,
             onCellValueChanged: (event) => {
