@@ -191,10 +191,7 @@ export class WorkerDatabase {
             SQL.FS.mkdir('/sql');
             SQL.FS.mount(sqlFS, {}, '/sql');
 
-            // Removing old database under the generic name
-            indexedDB.deleteDatabase('sqlseal.sqlite')
-
-            const path = `sql/sqlseal___${this.dbName}.sqlite3`
+            const path = `sql/sqlseal___${sanitise(this.dbName)}.db`
 
             let stream = SQL.FS.open(path, 'a+');
             await stream.node.contents.readIfFallback();
