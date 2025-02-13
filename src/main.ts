@@ -1,4 +1,4 @@
-import { Menu, Plugin, TAbstractFile, Tasks, TFile } from 'obsidian';
+import { Menu, Plugin, TAbstractFile, TFile } from 'obsidian';
 import { GridRenderer } from './renderer/GridRenderer';
 import { MarkdownRenderer } from './renderer/MarkdownRenderer';
 import { TableRenderer } from './renderer/TableRenderer';
@@ -16,6 +16,14 @@ import { SQLSealRegisterApi } from './pluginApi/sqlSealApi';
 import { registerDefaultFunctions } from './utils/ui';
 import { DatabaseTable } from './database/table';
 import { FilepathHasher } from './utils/hasher';
+import { createFileCompletionSource, createSyntaxHighlightPlugin, sqlsealTheme, SQLSealViewPlugin } from './editorExtension/syntaxHighlight';
+import { EditorView, ViewPlugin } from '@codemirror/view';
+import {
+    CompletionContext,
+    autocompletion,
+    Completion,
+    CompletionResult
+  } from '@codemirror/autocomplete';
 
 export default class SqlSealPlugin extends Plugin {
 	settings: SQLSealSettings;
@@ -25,6 +33,18 @@ export default class SqlSealPlugin extends Plugin {
 	cellParserRegistar: CellParserRegistar;
 
 	async onload() {
+		this.registerEditorExtension([
+			ViewPlugin.define(
+			  (view: EditorView) => new SQLSealViewPlugin(view, this.app),
+			  { decorations: v => v.decorations }
+			),
+			sqlsealTheme,
+			autocompletion({
+			  override: [createFileCompletionSource(this.app)],
+			  defaultKeymap: true,
+			  closeOnBlur: true
+			})
+		  ]);
 		await this.loadSettings();
 		const settingsTab = new SQLSealSettingsTab(this.app, this, this.settings)
 		this.addSettingTab(settingsTab);
