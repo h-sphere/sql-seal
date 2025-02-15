@@ -3,6 +3,7 @@ import { App } from "obsidian";
 import { CellParser } from "../cellParser";
 import { RendererConfig } from "../renderer/rendererRegistry";
 import { displayError } from "../utils/ui";
+import { ViewDefinition } from "../grammar/parser";
 
 interface HTMLRendererConfig {
     classNames: string[]
@@ -15,6 +16,13 @@ export class TableRenderer implements RendererConfig {
     get rendererKey() {
         return 'html'
     }
+    get viewDefinition(): ViewDefinition {
+            return {
+                name: this.rendererKey,
+                argument: 'restLine?',
+                singleLine: true
+            }
+        }
 
     validateConfig(config: string): HTMLRendererConfig {
         if (!config) {

@@ -1,32 +1,53 @@
 import * as ohm from 'ohm-js';
 
-
-const SQLSealGrammar = String.raw`
-SQLSealLang {
-    Grammar = (TableExpression | RendererExpression | FlagExpression)* SelectStmt*
-    SelectStmt = ("WITH" | "SELECT") any+
-    FlagExpression = "REFRESH" -- refresh
-    | "NO REFRESH" -- norefresh
-    | "EXPLAIN" -- explain
-    TableExpression = "TABLE" identifier "=" "file(" filename ")"
-    identifier = alnum+
-    filename  = (alnum | ".")+
-    RendererExpression = "GRID" anyObject -- grid
-    	| "HTML" -- html
-        | "MARKDOWN" --markdown
-    anyObject = "{" (~"}" any)*  "}"
+export interface ViewDefinition {
+    name: string,
+    singleLine: boolean,
+    argument: string
 }
+
+const viewName = (view: ViewDefinition) => `caseInsensitive<"${view.name}">`
+
+
+
+const SQLSealLangDefinition = (views: ViewDefinition[]) => {
+    const viewsDefinitions = views
+        .map(view => view.singleLine ?
+            `#(${viewName(view)} ${view.argument})`
+        : `${viewName(view)} ${view.argument}`)
+        .join(' | ')
+
+    return String.raw`
+        SQLSealLang {
+            Grammar =               (TableExpression | ViewExpression | FlagExpression | blank)* SelectStmt*
+            SelectStmt =            selectKeyword any+
+            FlagExpression =        caseInsensitive<"REFRESH">                                     -- refresh
+            |                       caseInsensitive<"NO REFRESH">                                  -- norefresh
+            |                       caseInsensitive<"EXPLAIN">                                     -- explain
+            TableExpression =       caseInsensitive<"TABLE"> identifier "=" TableDefinition
+            TableDefinition =       caseInsensitive<"file("> NonemptyListOf<filename, ","> ")"     -- file
+            |                       caseInsensitive<"table("> alnum+ ")"                           -- mdtable
+            identifier =            (alnum | "_")+
+            filename  =             (alnum | "." | "-" | space | "_" | "/" | "\\" | "$" | "[" | "]")+
+
+            ViewExpression =        ${viewsDefinitions}
+            anyObject =             "{"  (~selectKeyword any)*
+            selectKeyword =         caseInsensitive<"WITH"> | caseInsensitive<"SELECT">
+            nl =                    "\n"
+            character =             (alnum | "." | "-" | space | "_")
+            restLine =              " " (~nl character)* nl
+            blank = space* nl
+        }
 `
+}
 
 const generateSemantic = (grammar: ohm.Grammar) => {
     const s = grammar.createSemantics()
+
     s.addOperation<any>('toObject', {
        Grammar: (entries, selectStatement) => {
-        console.log('GRAMMAR', entries, selectStatement)
         const res = {
             flags: {
-                refresh: true,
-                explain: false
             },
             renderer: {
                 name: 'GRID',
@@ -37,15 +58,14 @@ const generateSemantic = (grammar: ohm.Grammar) => {
         }
         if (entries.children.length) {
             entries.children.forEach(c => {
-                console.log(c.ctorName)
                 switch (c.ctorName) {
                     case 'TableExpression':
                         res.tables.push(c.toObject())
                         break;
-                    case 'RendererExpression':
+                    case 'ViewExpression':
                         res.renderer = c.toObject()
                         break
-                    case 'Flag':
+                    case 'FlagExpression':
                         res.flags = {...res.flags, ...c.toObject()}
                         break
                 }
@@ -57,8 +77,24 @@ const generateSemantic = (grammar: ohm.Grammar) => {
 
         return res
        },
-       TableExpression: (_table, identifier, _eq, _file, filename, _close) => {
-        return { identifier: identifier.sourceString , filename: filename.sourceString, type: 'csv' }
+       TableExpression: (_table, identifier, _eq, tableDef) => {
+        return {
+            tableAlias: identifier.sourceString ,
+            ...tableDef.toObject()
+        }
+       },
+       TableDefinition_file: (_file, args, _close) => {
+        return {
+            arguments: args.asIteration().children.map((c: ohm.Node) => c.sourceString.trim()),
+            type: 'file'
+        }
+       },
+       TableDefinition_mdtable: (_file, tableIndex, _close) =>  {
+        return {
+
+            arguments: [tableIndex.sourceString],
+            type: 'table'
+        }
        },
        FlagExpression_refresh: (v) => {
         return { refresh: true }
@@ -68,22 +104,60 @@ const generateSemantic = (grammar: ohm.Grammar) => {
        },
        FlagExpression_explain: (v) => {
         return { explain: true }
+       },
+       ViewExpression: (view, options) => {
+        return {
+            type: view.toObject().toUpperCase(),
+            options: (options.sourceString ?? '').trim()
+        }
+       },
+       _terminal() {
+            return this.sourceString
        }
     })
 
     return s
 }
 
-export const parse = (query: string) => {
-    
+export interface TableDefinition {
+    type: string,
+    tableAlias: string,
+    arguments: [string]
+}
 
-    const grammar = ohm.grammar(SQLSealGrammar)
+export interface ParserResult {
+    flags: {
+        explain: boolean,
+        refresh: boolean
+    },
+    renderer: {
+        type: string,
+        options: string
+    },
+    query: string,
+    tables: Array<TableDefinition>
+}
+
+export const parse = (query: string, views: ViewDefinition[]) => {
+    const grammar = ohm.grammar(SQLSealLangDefinition(views))
+    console.log('GRammar', SQLSealLangDefinition(views))
     const match = grammar.match(query)
     if (match.succeeded()) {
         // Converting
         const s = generateSemantic(grammar)(match)
-        return s.toObject()
+        return s.toObject() as Partial<ParserResult>
     } else {
         throw new Error(match.message || 'Unknown parsing error')
     }
+}
+
+
+export const parseWithDefaults = (query: string, views: ViewDefinition[], defaultvalues: ParserResult): ParserResult => {
+    const parsed = parse(query, views)
+    return {
+        flags: {...defaultvalues.flags, ...parsed.flags},
+        query: parsed.query || defaultvalues.query,
+        renderer: {...defaultvalues.renderer, ...parsed.renderer},
+        tables: parsed.tables ?? []
+    } satisfies ParserResult
 }

@@ -4,6 +4,7 @@ import { App } from "obsidian";
 import { RendererConfig } from "./rendererRegistry";
 import { parse } from 'json5'
 import { CellParser } from "../cellParser";
+import { ViewDefinition } from "../grammar/parser";
 
 const getCurrentTheme = () => {
     return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
@@ -115,6 +116,13 @@ class GridRendererCommunicator {
 
 export class GridRenderer implements RendererConfig {
     constructor(private app: App, private readonly cellParser: CellParser) { }
+    get viewDefinition(): ViewDefinition {
+        return {
+            name: this.rendererKey,
+            argument: 'anyObject?',
+            singleLine: false
+        }
+    }
     get rendererKey() {
         return 'grid'
     }
