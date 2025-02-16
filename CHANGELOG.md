@@ -1,4 +1,5 @@
-# Unreleased
+# 0.26.0 (2025-02-16)
+- Better language parser! Reworked from the ground up, now SQLSeal uses Ohm.js parser which works much better and opens much more possibilities (like syntax highlighting also introduced in this version).
 - Syntax highlighting! Your SQLSeal text is now being highlighted helping you spot potential syntax issues quickly. The highlighting will be iterated on so please join discussion on our Discord!
 - fix: database did not load properly when vault name consisted spaces or was in the subfolder (mostly causing issue on mobile)
 
