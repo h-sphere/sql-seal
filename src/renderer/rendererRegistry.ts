@@ -1,4 +1,4 @@
-import { App } from "obsidian";
+import { ViewDefinition } from "../grammar/parser";
 
 export interface DataFormat {
     data: Record<string, any>[],
@@ -12,7 +12,8 @@ export interface RenderReturn {
 export interface RendererConfig<T extends Record<string, any> = Record<string, any>> {
 	rendererKey: string;
 	validateConfig: (config: string) => T,
-	render: (config: T, el: HTMLElement) => RenderReturn
+	render: (config: T, el: HTMLElement) => RenderReturn,
+    viewDefinition: ViewDefinition
 }
 
 export class RendererRegistry {
@@ -52,5 +53,19 @@ export class RendererRegistry {
         return (el: HTMLElement) => {
             return rendererConfig.render(elConfig, el)
         }
+    }
+
+    getViewDefinitions() {
+        return Array.from(this.renderers.values()).map(r => {
+            if (r.rendererKey.toLowerCase() === 'chart' && !r.viewDefinition) {
+                // backwards compatibility
+                return {
+                    argument: 'anyObject?',
+                    name: 'chart',
+                    singleLine: false
+                } satisfies ViewDefinition
+            }
+            return r.viewDefinition
+    })
     }
 }

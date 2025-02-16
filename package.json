@@ -61,6 +61,7 @@
     "jsonpath": "^1.1.1",
     "lodash": "^4.17.21",
     "markdown-table-ts": "^1.0.3",
+    "ohm-js": "^17.1.0",
     "papaparse": "^5.4.1",
     "sql-parser-cst": "^0.32.0",
     "unidecode": "^1.1.0",

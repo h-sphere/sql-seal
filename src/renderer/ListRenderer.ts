@@ -3,6 +3,7 @@ import { App } from "obsidian";
 import { CellParser } from "../cellParser";
 import { RendererConfig } from "../renderer/rendererRegistry";
 import { displayError } from "../utils/ui";
+import { ViewDefinition } from "../grammar/parser";
 
 interface ListRendererConfig {
     classNames: string[]
@@ -14,6 +15,14 @@ export class ListRenderer implements RendererConfig {
 
     get rendererKey() {
         return 'list'
+    }
+
+    get viewDefinition(): ViewDefinition {
+        return {
+            name: this.rendererKey,
+            argument: 'restLine?',
+            singleLine: true
+        }
     }
 
     validateConfig(config: string): ListRendererConfig {
@@ -42,7 +51,7 @@ export class ListRenderer implements RendererConfig {
                 })
 
                 data.forEach((d: any) => {
-                    const row = list.createEl("li", { cls: ['sqlseal-list-element']}).createEl('ul')
+                    const row = list.createEl("li", { cls: ['sqlseal-list-element'] }).createEl('ul')
                     columns.forEach((c: any) => {
                         const el = row.createEl("li", {
                             text: createEl('span', { text: c, cls: 'sqlseal-column-name' }) as any, // FIXME: this should be properly typed
