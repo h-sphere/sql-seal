@@ -19,7 +19,7 @@ export class TableRenderer implements RendererConfig {
     get viewDefinition(): ViewDefinition {
             return {
                 name: this.rendererKey,
-                argument: 'restLine?',
+                argument: 'viewClassNames?',
                 singleLine: true
             }
         }

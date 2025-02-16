@@ -165,3 +165,81 @@
     width: 16px;
     height: 16px;
 }
+
+
+
+/* COLOURING */
+
+.cm-sqlseal-block-query {
+    --color: #297f30;
+}
+
+.cm-sqlseal-block-view {
+    --color: #c834dd;
+}
+
+.cm-sqlseal-block-flag {
+    --color: #d08306;
+    font-weight: bold;
+    color: var(--color);
+}
+
+.cm-sqlseal-block-table {
+    --color: #4985af;
+}
+
+.cm-sqlseal-identifier {
+    color: #2d7b33;
+}
+
+.cm-sqlseal-function {
+    color: #2c0e9b;
+}
+
+.cm-sqlseal-keyword {
+    color: var(--color);
+    font-weight: bold;
+}
+
+.theme-dark .cm-sqlseal-block-query {
+    --color: #5eff6a;
+}
+
+.theme-dark .cm-sqlseal-block-view {
+    --color: #e945ff;
+}
+
+.theme-dark .cm-sqlseal-block-flag {
+    --color: #e3ab53;
+}
+
+.theme-dark .cm-sqlseal-block-table {
+    --color: #56b5fa;
+}
+
+.theme-dark .cm-sqlseal-function {
+    color: #c4b8ef;
+}
+
+.theme-dark .cm-sqlseal-identifier {
+    color: #6ff77a;
+}
+
+:is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table) {
+    /* background-color: var(--color); */
+}
+
+:is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table)::before {
+    background-color: var(--color);
+    width: 5px;
+    top: -3px;
+    bottom: -3px;
+    left: 0;
+    content: '';
+    display: block;
+    position: absolute;
+}
+
+.cm-indent + :is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table)::before {
+    display: none;
+}

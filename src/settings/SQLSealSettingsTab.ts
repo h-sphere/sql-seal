@@ -5,6 +5,7 @@ export interface SQLSealSettings {
     enableEditing: boolean;
     enableJSONViewer: boolean;
     enableDynamicUpdates: boolean;
+    enableSyntaxHighlighting: boolean;
 }
 
 export const DEFAULT_SETTINGS: SQLSealSettings = {
@@ -12,6 +13,7 @@ export const DEFAULT_SETTINGS: SQLSealSettings = {
     enableEditing: true,
     enableJSONViewer: true,
     enableDynamicUpdates: true,
+    enableSyntaxHighlighting: true
 };
 
 
@@ -27,7 +29,7 @@ export class SQLSealSettingsTab extends PluginSettingTab {
     }
 
     display(): void {
-        const {containerEl} = this;
+        const { containerEl } = this;
         containerEl.empty();
 
         containerEl.createEl('h2', { text: 'CSV File Viewer' });
@@ -90,7 +92,21 @@ export class SQLSealSettingsTab extends PluginSettingTab {
                     this.display();
                     this.callChanges()
                 }));
-        
+        new Setting(containerEl)
+            .setName('Enable Syntax Highlighting')
+            .setDesc('Syntax will get highlighted when editing SQLSeal code')
+            .addToggle(toggle => toggle
+                .setValue(this.settings.enableSyntaxHighlighting)
+                .onChange(async (value) => {
+                    this.settings.enableSyntaxHighlighting = value;
+                    if (!value) {
+                        this.settings.enableSyntaxHighlighting = false;
+                    }
+                    await this.plugin.saveData(this.settings);
+                    this.display();
+                    this.callChanges()
+                }));
+
     }
 
     private callChanges() {

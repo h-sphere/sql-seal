@@ -1,4 +1,4 @@
-import { Menu, Plugin, TAbstractFile, Tasks, TFile } from 'obsidian';
+import { Menu, Plugin, TAbstractFile, TFile } from 'obsidian';
 import { GridRenderer } from './renderer/GridRenderer';
 import { MarkdownRenderer } from './renderer/MarkdownRenderer';
 import { TableRenderer } from './renderer/TableRenderer';
@@ -16,6 +16,8 @@ import { SQLSealRegisterApi } from './pluginApi/sqlSealApi';
 import { registerDefaultFunctions } from './utils/ui';
 import { DatabaseTable } from './database/table';
 import { FilepathHasher } from './utils/hasher';
+import { SQLSealViewPlugin } from './editorExtension/syntaxHighlight';
+import { EditorView, ViewPlugin } from '@codemirror/view';
 
 export default class SqlSealPlugin extends Plugin {
 	settings: SQLSealSettings;
@@ -37,6 +39,7 @@ export default class SqlSealPlugin extends Plugin {
 
 		await this.registerViews();
 		await this.registerSQLSealExtensions()
+		await this.loadSyntaxHighlighting()
 
 		this.registerGlobalApi();
 		const sqlSeal = new SqlSeal(this.app, false, this.rendererRegistry, this) // FIXME: set verbose based on the env.
@@ -108,6 +111,19 @@ export default class SqlSealPlugin extends Plugin {
 					}
 				});
 		});
+	}
+
+	private loadSyntaxHighlighting() {
+		if (!this.settings.enableSyntaxHighlighting) {
+			return
+		}
+
+		this.registerEditorExtension([
+			ViewPlugin.define(
+				(view: EditorView) => new SQLSealViewPlugin(view, this.app, this.rendererRegistry),
+				{ decorations: v => v.decorations }
+			)
+		]);
 	}
 
 	private async createNewCSVFile(file: TAbstractFile) {

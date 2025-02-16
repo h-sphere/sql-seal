@@ -5,7 +5,7 @@ import { RenameColumnModal } from '../modal/renameColumnModal';
 import { CodeSampleModal } from '../modal/showCodeSample';
 import { GridRenderer } from '../renderer/GridRenderer';
 import { CellParser } from '../cellParser';
-import { errorNotice } from 'src/utils/notice';
+import { errorNotice } from '../utils/notice';
 
 export const CSV_VIEW_TYPE = "csv-viewer" as const;
 export const CSV_VIEW_EXTENSIONS = ['csv'];
