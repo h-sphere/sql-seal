@@ -11,9 +11,9 @@ import {
   DecorationSet
 } from '@codemirror/view';
 
-import { SQLSealLangDefinition } from 'src/grammar/parser';
-import { RendererRegistry } from 'src/renderer/rendererRegistry';
-import { traceWalker } from 'src/utils/traceWalker';
+import { SQLSealLangDefinition } from '../grammar/parser';
+import { RendererRegistry } from '../renderer/rendererRegistry';
+import { traceWalker } from '../utils/traceWalker';
 import { Range } from '@codemirror/state';
 
 const markDecorations = {
