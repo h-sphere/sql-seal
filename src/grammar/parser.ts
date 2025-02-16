@@ -10,7 +10,7 @@ const viewName = (view: ViewDefinition) => `caseInsensitive<"${view.name}">`
 
 
 
-const SQLSealLangDefinition = (views: ViewDefinition[]) => {
+export const SQLSealLangDefinition = (views: ViewDefinition[]) => {
     const viewsDefinitions = views
         .map(view => view.singleLine ?
             `#(${viewName(view)} ${view.argument})`
@@ -19,24 +19,29 @@ const SQLSealLangDefinition = (views: ViewDefinition[]) => {
 
     return String.raw`
         SQLSealLang {
-            Grammar =               (TableExpression | ViewExpression | FlagExpression | blank)* SelectStmt*
-            SelectStmt =            selectKeyword any+
-            FlagExpression =        caseInsensitive<"REFRESH">                                     -- refresh
-            |                       caseInsensitive<"NO REFRESH">                                  -- norefresh
-            |                       caseInsensitive<"EXPLAIN">                                     -- explain
-            TableExpression =       caseInsensitive<"TABLE"> identifier "=" TableDefinition
-            TableDefinition =       caseInsensitive<"file("> NonemptyListOf<filename, ","> ")"     -- file
-            |                       caseInsensitive<"table("> alnum+ ")"                           -- mdtable
-            identifier =            (alnum | "_")+
-            filename  =             (alnum | "." | "-" | space | "_" | "/" | "\\" | "$" | "[" | "]")+
-
-            ViewExpression =        ${viewsDefinitions}
-            anyObject =             "{"  (~selectKeyword any)*
-            selectKeyword =         caseInsensitive<"WITH"> | caseInsensitive<"SELECT">
-            nl =                    "\n"
-            character =             (alnum | "." | "-" | space | "_")
-            restLine =              " " (~nl character)* nl
-            blank = space* nl
+            Grammar =                  (TableExpression | ViewExpression | FlagExpression | blank)* SelectStmt*
+            SelectStmt =               selectKeyword any+
+            FlagExpression =           caseInsensitive<"REFRESH">                                               -- refresh
+            |                          caseInsensitive<"NO REFRESH">                                            -- norefresh
+            |                          caseInsensitive<"EXPLAIN">                                               -- explain
+            TableExpression =          tableKeyword identifier "=" TableDefinition          
+            TableDefinition =          fileOpening NonemptyListOf<filename, ","> tableDefinitionClosing          -- file
+            |                          tableOpening alnum+ tableDefinitionClosing                   -- mdtable
+            identifier =               (alnum | "_")+
+            filename  =                (alnum | "." | "-" | space | "_" | "/" | "\\" | "$" | "[" | "]" | "\"")+
+            fileOpening =              caseInsensitive<"file(">
+            tableOpening =             caseInsensitive<"table(">
+            tableDefinitionClosing =   ")"
+   
+            ViewExpression =           ${viewsDefinitions}
+            anyObject =                "{"  (~selectKeyword any)*
+            selectKeyword =            caseInsensitive<"WITH"> | caseInsensitive<"SELECT">
+            tableKeyword =             caseInsensitive<"TABLE">
+            nl =                       "\n"
+            character =                (alnum | "." | "-" | space | "_")
+            viewClassNames =           restLine
+            restLine =                 " " (~nl character)* nl
+            blank = space* nl   
         }
 `
 }

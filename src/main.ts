@@ -16,14 +16,8 @@ import { SQLSealRegisterApi } from './pluginApi/sqlSealApi';
 import { registerDefaultFunctions } from './utils/ui';
 import { DatabaseTable } from './database/table';
 import { FilepathHasher } from './utils/hasher';
-import { createFileCompletionSource, createSyntaxHighlightPlugin, sqlsealTheme, SQLSealViewPlugin } from './editorExtension/syntaxHighlight';
+import { SQLSealViewPlugin } from './editorExtension/syntaxHighlight';
 import { EditorView, ViewPlugin } from '@codemirror/view';
-import {
-    CompletionContext,
-    autocompletion,
-    Completion,
-    CompletionResult
-  } from '@codemirror/autocomplete';
 
 export default class SqlSealPlugin extends Plugin {
 	settings: SQLSealSettings;
@@ -33,18 +27,6 @@ export default class SqlSealPlugin extends Plugin {
 	cellParserRegistar: CellParserRegistar;
 
 	async onload() {
-		this.registerEditorExtension([
-			ViewPlugin.define(
-			  (view: EditorView) => new SQLSealViewPlugin(view, this.app),
-			  { decorations: v => v.decorations }
-			),
-			sqlsealTheme,
-			autocompletion({
-			  override: [createFileCompletionSource(this.app)],
-			  defaultKeymap: true,
-			  closeOnBlur: true
-			})
-		  ]);
 		await this.loadSettings();
 		const settingsTab = new SQLSealSettingsTab(this.app, this, this.settings)
 		this.addSettingTab(settingsTab);
@@ -57,6 +39,7 @@ export default class SqlSealPlugin extends Plugin {
 
 		await this.registerViews();
 		await this.registerSQLSealExtensions()
+		await this.loadSyntaxHighlighting()
 
 		this.registerGlobalApi();
 		const sqlSeal = new SqlSeal(this.app, false, this.rendererRegistry, this) // FIXME: set verbose based on the env.
@@ -128,6 +111,19 @@ export default class SqlSealPlugin extends Plugin {
 					}
 				});
 		});
+	}
+
+	private loadSyntaxHighlighting() {
+		if (!this.settings.enableSyntaxHighlighting) {
+			return
+		}
+
+		this.registerEditorExtension([
+			ViewPlugin.define(
+				(view: EditorView) => new SQLSealViewPlugin(view, this.app, this.rendererRegistry),
+				{ decorations: v => v.decorations }
+			)
+		]);
 	}
 
 	private async createNewCSVFile(file: TAbstractFile) {
