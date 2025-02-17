@@ -1,5 +1,5 @@
 import * as ohm from 'ohm-js'
-import { parse, show, cstVisitor } from 'sql-parser-cst';
+import { parse, show, cstVisitor, Literal } from 'sql-parser-cst';
 
 interface Trace {
     bindings: Array<{ children: Array<{ matchLength: number }> }>
@@ -101,7 +101,7 @@ const parseStatement = (trace: Trace, results: Array<Decorator>) => {
 
     const offset = trace.pos1
 
-    const literal = (x) => {
+    const literal = (x: Literal) => {
         results.push({
             type: 'literal',
             start: offset + x.range![0],
