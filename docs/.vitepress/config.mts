@@ -29,6 +29,7 @@ export default defineConfig({
           { text: 'Demo Vault', link: '/demo-vault' },
           { text: 'Changing Render Methods', link: '/changing-render-method'},
           { text: 'Using properties', link: '/using-properties' },
+          { text: 'Comments', link: '/comments' },
           { text: 'Query Vault Content', link: '/query-vault-content' },
           { text: 'Query Markdown Tables', link: '/query-markdown-tables'},
           { text: 'Inline codeblocks', link: '/inline-codeblocks' },

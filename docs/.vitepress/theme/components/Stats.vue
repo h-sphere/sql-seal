@@ -6,17 +6,17 @@ const stats = [
     icon: '📥'
   },
   {
-    number: '39+',
+    number: '48+',
     label: 'Releases',
     icon: '📦'
   },
   {
-    number: '51+',
+    number: '64+',
     label: 'GitHub Stars',
     icon: '⭐'
   },
   {
-    number: '48+',
+    number: '50+',
     label: 'Discord Members',
     icon: '🤝'
   }
