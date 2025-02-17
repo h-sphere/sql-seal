@@ -22,6 +22,9 @@ const markDecorations = {
   blockView: Decoration.mark({ class: 'cm-sqlseal-block-view' }),
   blockTable: Decoration.mark({ class: 'cm-sqlseal-block-table' }),
   identifier: Decoration.mark({ class: 'cm-sqlseal-identifier' }),
+  literal: Decoration.mark({ class: 'cm-sqlseal-literal' }),
+  parameter: Decoration.mark({ class: 'cm-sqlseal-parameter' }),
+  comment: Decoration.mark({ class: 'cm-sqlseal-comment' }),
   keyword: Decoration.mark({ class: 'cm-sqlseal-keyword' }),
   function: Decoration.mark({ class: 'cm-sqlseal-function' }),
   error: Decoration.mark({ class: "cm-sql-error" })

@@ -196,13 +196,38 @@
     color: #2c0e9b;
 }
 
+.cm-sqlseal-parameter {
+    color: #2c0e9b;
+}
+
+.cm-sqlseal-comment {
+    color: #7a7a7a;
+    font-style: italic;
+}
+
 .cm-sqlseal-keyword {
     color: var(--color);
     font-weight: bold;
 }
 
+.cm-sqlseal-literal {
+    color: red;
+}
+
 .theme-dark .cm-sqlseal-block-query {
     --color: #5eff6a;
+}
+
+.theme-dark .cm-sqlseal-comment {
+    color: #898787;
+}
+
+.theme-dark .cm-sqlseal-parameter {
+    color: #ed222c;
+}
+
+.theme-dark .cm-sqlseal-literal {
+    color: yellow;
 }
 
 .theme-dark .cm-sqlseal-block-view {
