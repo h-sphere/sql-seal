@@ -41,7 +41,10 @@ export const SQLSealLangDefinition = (views: ViewDefinition[]) => {
             character =                (alnum | "." | "-" | space | "_")
             viewClassNames =           restLine
             restLine =                 " " (~nl character)* nl
-            blank = space* nl   
+            blank = space* nl
+            comment =                  "/*" (~"*/" any)* "*/" -- multiline
+            |                          #("--" (~nl any)*) nl  -- singleline
+            space += comment
         }
 `
 }

@@ -1,7 +1,8 @@
 import * as ohm from 'ohm-js'
+import { parse, show, cstVisitor, Literal } from 'sql-parser-cst';
 
 interface Trace {
-    bindings: Array<{ children: Array<{matchLength: number}>}>
+    bindings: Array<{ children: Array<{ matchLength: number }> }>
     children: Array<Trace>
     expr: ohm.Seq
     input: string
@@ -33,7 +34,8 @@ const nodes = new Map([
     ['digit', { terminal: true, type: 'identifier' }],
     ['tableDefinitionClosing', { terminal: true, type: 'function' }],
     ['selectKeyword', { terminal: true, type: 'keyword' }],
-    ['viewClassNames', { terminal: true, type: 'identifier' }]
+    ['viewClassNames', { terminal: true, type: 'identifier' }],
+    ['comment', { terminal: true, type: 'comment' }]
 ])
 
 interface Decorator {
@@ -66,7 +68,13 @@ export const traceWalker = (trace: Trace, depth: number = 0): Decorator[] => {
                         end: trace.pos1 + len
                     })
                 } catch (e) { }
-                
+
+            }
+
+            if (trace.displayString === 'SelectStmt') {
+                try {
+                    parseStatement(trace, results)
+                } catch (e) { }
             }
 
             if (node.terminal) {
@@ -76,4 +84,69 @@ export const traceWalker = (trace: Trace, depth: number = 0): Decorator[] => {
     }
     results.push(...trace.children.map(c => traceWalker(c, depth + 1)).flat())
     return results
+}
+
+
+const parseStatement = (trace: Trace, results: Array<Decorator>) => {
+    console.log('SELECT STMT',)
+    const cst = parse(trace.input.substring(trace.pos1, trace.pos2), {
+        dialect: 'sqlite',
+        includeSpaces: true,
+        includeComments: true,
+        includeNewlines: true,
+        includeRange: true,
+        acceptUnsupportedGrammar: true,
+        paramTypes: ['@name']
+    })
+
+    const offset = trace.pos1
+
+    const literal = (x: Literal) => {
+        results.push({
+            type: 'literal',
+            start: offset + x.range![0],
+            end: offset + x.range![1]
+        })
+    }
+
+    const visitor = cstVisitor({
+        blob_literal: literal,
+        date_literal: literal,
+        json_literal: literal,
+        null_literal: literal,
+        time_literal: literal,
+        jsonb_literal: literal,
+        number_literal: literal,
+        string_literal: literal,
+        boolean_literal: literal,
+        numeric_literal: literal,
+        datetime_literal: literal,
+        interval_literal: literal,
+        timestamp_literal: literal,
+        bignumeric_literal: literal,
+        identifier: (identifier) => {
+            results.push({
+                type: 'function',
+                start: offset + identifier.range![0],
+                end: offset + identifier.range![1]
+            })
+        },
+        keyword: (keyword) => {
+            results.push({
+                type: 'keyword',
+                start: offset + keyword.range![0],
+                end: offset + keyword.range![1]
+            })
+        },
+        parameter: (vari) => {
+            results.push({
+                type: 'parameter',
+                start: offset + vari.range![0],
+                end: offset + vari.range![1]
+            })
+        }
+    })
+
+    visitor(cst)
+
 }
