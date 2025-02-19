@@ -22,6 +22,9 @@ const markDecorations = {
   blockView: Decoration.mark({ class: 'cm-sqlseal-block-view' }),
   blockTable: Decoration.mark({ class: 'cm-sqlseal-block-table' }),
   identifier: Decoration.mark({ class: 'cm-sqlseal-identifier' }),
+  'string': Decoration.mark({ class: 'cm-sqlseal-literal' }),
+  punctuation: Decoration.mark({ class: 'cm-sqlseal-punctuation' }),
+  property: Decoration.mark({ class: 'cm-sqlseal-property' }),
   literal: Decoration.mark({ class: 'cm-sqlseal-literal' }),
   parameter: Decoration.mark({ class: 'cm-sqlseal-parameter' }),
   comment: Decoration.mark({ class: 'cm-sqlseal-comment' }),
@@ -54,6 +57,7 @@ export class SQLSealViewPlugin implements PluginValue {
 
     const trace = grammar.trace(sql)
     const decs = traceWalker(trace as any)
+    console.log(decs)
     return decs
   }
 
@@ -74,6 +78,7 @@ export class SQLSealViewPlugin implements PluginValue {
 
       if (decorations) {
         decorations.forEach(dec => {
+          console.log(dec.type)
           const decoration = markDecorations[dec.type as keyof typeof markDecorations];
           if (decoration) {
             builder.push(decoration.range(
