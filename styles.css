@@ -214,6 +214,10 @@
     color: red;
 }
 
+.cm-sqlseal-punctuation {
+    color: #6ff77a;
+}
+
 .theme-dark .cm-sqlseal-block-query {
     --color: #5eff6a;
 }
@@ -228,6 +232,10 @@
 
 .theme-dark .cm-sqlseal-literal {
     color: yellow;
+}
+
+.theme-dark .cm-sqlseal-punctuation {
+    color: #ef9eff;
 }
 
 .theme-dark .cm-sqlseal-block-view {

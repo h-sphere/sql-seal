@@ -1,5 +1,6 @@
 import * as ohm from 'ohm-js'
 import { parse, show, cstVisitor, Literal } from 'sql-parser-cst';
+import { generateDecorators } from './highlightObject';
 
 interface Trace {
     bindings: Array<{ children: Array<{ matchLength: number }> }>
@@ -47,6 +48,28 @@ interface Decorator {
 export const traceWalker = (trace: Trace, depth: number = 0): Decorator[] => {
     const results: Array<Decorator> = []
     if (trace.succeeded && trace.pos1 !== trace.pos2) {
+
+        if (trace.displayString == 'anyObject') {
+            console.log('any obj', trace.input.substring(trace.pos1, trace.pos2))
+            try {
+                const data = trace.input.substring(trace.pos1, trace.pos2)
+                const decs = generateDecorators(data).map(d => ({
+                        ...d,
+                        start: d.start + trace.pos1,
+                        end: d.end + trace.pos1
+                    })).filter(d => d.start < d.end)
+                console.log('DECS', decs)
+                results.push(...decs)
+                // results.push(...decs.map(d => ({
+                //     ...d,
+                //     start: d.start + trace.pos1,
+                //     end: d.start + trace.pos1
+                // })))
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
         if (nodes.has(trace.displayString)) {
             const node = nodes.get(trace.displayString)!
             if (node.type) {
