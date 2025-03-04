@@ -6,6 +6,10 @@ import { CodeSampleModal } from '../modal/showCodeSample';
 import { GridRenderer } from '../renderer/GridRenderer';
 import { CellParser } from '../cellParser';
 import { errorNotice } from '../utils/notice';
+import { ConfigObject, loadConfig, saveConfig } from 'src/utils/csvConfig';
+import { ColumnType } from '../utils/types';
+
+const delay = (n: number) => new Promise(resolve => setTimeout(resolve, n))
 
 export const CSV_VIEW_TYPE = "csv-viewer" as const;
 export const CSV_VIEW_EXTENSIONS = ['csv'];
@@ -13,6 +17,7 @@ export const CSV_VIEW_EXTENSIONS = ['csv'];
 export class CSVView extends TextFileView {
     private content: string;
     private table: HTMLTableElement;
+    private config: ConfigObject;
 
     constructor(
         leaf: WorkspaceLeaf,
@@ -120,6 +125,37 @@ export class CSVView extends TextFileView {
 
     }
 
+    getColumnType(columnName: string) {
+        if (this.config.columnDefinitions[columnName]) {
+            return this.config.columnDefinitions[columnName].type
+        }
+        return 'auto'
+    }
+
+    async changeColumnType(columnName: string, type: ColumnType) {
+        const prev = this.config.columnDefinitions[columnName] ?? {}
+        this.config.columnDefinitions[columnName] = {
+            ...prev,
+            type: type
+        }
+        await this.saveConfig()
+
+        // We need to touch original file to reload the data - probably we should make it in a nicer way
+        this.saveData()
+        
+    }
+
+    async loadConfig() {
+        while (!this.file) {
+            await delay(100)
+        }
+        this.config = await loadConfig(this.file, this.app.vault)
+    }
+
+    async saveConfig() {
+        await saveConfig(this.file!, this.config, this.app.vault)
+    }
+
     moveColumn(name: string, toIndex: number) {
         let fields = this.result.fields as Array<string>
         fields = fields.filter(f => f !== name)
@@ -224,7 +260,6 @@ export class CSVView extends TextFileView {
                         menu.addItem(item => {
                             item.setTitle('Delete Column')
                             item.onClick(() => {
-                                this.column.colId
                                 const modal = new DeleteConfirmationModal(csvView.app, `column ${this.column.colId}`, () => {
                                     csvView.deleteColumn(this.column.colId)
                                 })
@@ -232,6 +267,26 @@ export class CSVView extends TextFileView {
                             })
                         })
 
+                        // FIXME: rework it to submenus.
+                        menu.addSeparator()
+                        menu.addItem(item => {
+                            item.setDisabled(true)
+                            item.setTitle('Data Type')
+                        })
+
+                        const current = csvView.getColumnType(this.column.colId)
+
+                        const types = ['auto', 'text', 'number'] as ColumnType[]
+
+                        types.forEach(type => {
+                            menu.addItem(item => {
+                                const checkbox = type === current ? '✔️ ' : ''
+                                item.setTitle(checkbox + type)
+                                item.onClick(() => {
+                                    csvView.changeColumnType(this.column.colId, type)
+                                })
+                            })
+                        })
                         
                         const pos = e.getBoundingClientRect();
                         menu.showAtPosition({ x: pos.x, y: pos.y + 20 })
@@ -279,6 +334,7 @@ export class CSVView extends TextFileView {
         }, gridEl)
 
         this.api = api;
+        await this.loadConfig()
         this.loadDataIntoGrid()
     }
 }
