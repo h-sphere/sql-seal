@@ -16,9 +16,15 @@ export interface RendererConfig<T extends Record<string, any> = Record<string, a
     viewDefinition: ViewDefinition
 }
 
+interface Flag {
+    name: string;
+    restType: string;
+}
+
 export class RendererRegistry {
     renderers: Map<string, RendererConfig> = new Map()
     renderersByKey: Map<string, RendererConfig> = new Map()
+    _extraFlags: Array<Flag> = []
     constructor() { }
 
     private default = 'grid'
@@ -33,6 +39,14 @@ export class RendererRegistry {
 
         this.renderers.set(uniqueName, config)
         this.renderersByKey.set(config.rendererKey, config)
+    }
+
+    registerFlag(name: string, restType: string) {
+        this._extraFlags.push({ name, restType })
+    }
+
+    unregisterFlag(name: string) {
+        this._extraFlags = this._extraFlags.filter(f => f.name !== name)
     }
 
     unregister(uniqueName: string) {

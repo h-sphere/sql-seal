@@ -208,6 +208,14 @@ export default class SqlSealPlugin extends Plugin {
 		this.cellParserRegistar.unregister(name)
 	}
 
+	registerSQLSealFlag(name: string, restType: string) {
+		this.rendererRegistry.registerFlag(name, restType)
+	}
+
+	unregisterSQLSealFlag(name: string) {
+		this.rendererRegistry.unregisterFlag(name)
+	}
+
 	async registerTable<const columns extends string[]>(plugin: Plugin, name: string, columns: columns) {
 		const hash = await FilepathHasher.sha256(`${plugin.manifest.name}`)
 		const tableName = `external_table_${hash}_name`

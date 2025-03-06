@@ -41,9 +41,15 @@ interface RegisteredFunction {
     fn: CallableFunction
 }
 
+interface RegisteredFlag {
+    name: string,
+    restType: string
+}
+
 export class SQLSealApi {
     private views: Array<RegisteredView> = []
     private functions: Array<RegisteredFunction> = []
+    private flags: Array<RegisteredFlag> = []
 
     constructor(private readonly plugin: Plugin, private sqlSealPlugin: SqlSealPlugin) {
         plugin.register(() => {
@@ -71,6 +77,14 @@ export class SQLSealApi {
         return this.sqlSealPlugin.registerTable(this.plugin, tableName, columns)
     }
 
+    registerFlag(name: string, restType: string) {
+        this.flags.push({
+            name,
+            restType
+        })
+        this.sqlSealPlugin.registerSQLSealFlag(name, restType)
+    }
+
     unregister() {
         for(const view of this.views) {
             this.sqlSealPlugin.unregisterSQLSealView(view.name)
@@ -79,6 +93,10 @@ export class SQLSealApi {
 
         for(const fn of this.functions) {
             this.sqlSealPlugin.unregisterSQLSealFunction(fn.name)
+        }
+
+        for(const flag of this.flags) {
+            this.sqlSealPlugin.unregisterSQLSealFlag(flag.name)
         }
     }
 }
