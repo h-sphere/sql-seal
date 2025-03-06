@@ -55,9 +55,18 @@ export class InlineProcessor extends MarkdownRenderChild {
             }
 
             const fileCache = this.app.metadataCache.getFileCache(file);
+            
+            // TODO: unify this between codeblock and inline handlers
+            const variables = {
+                ...fileCache?.frontmatter ?? {},
+                path: file.path,
+                fileName: file.name,
+                extension: file.extension,
+            }
+
             const { data, columns } = await this.db.select(
-                transformedQuery.sql, 
-                fileCache?.frontmatter ?? {}
+                transformedQuery.sql,
+                variables
             );
 
             this.el.empty()
