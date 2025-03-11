@@ -344,4 +344,26 @@ SELECT * FROM data`, [...DEFAULT_VIEWS, { argument: 'anyObject?', name: 'chart',
       ],
     })
     })
+
+    it('should properly parse json5 with JSONPath', () => {
+        expect(parseWithDefaults(`
+            TABLE data = file(data.json5, $.results.latest[*], "abcd,()e")
+SELECT id, value FROM data`, DEFAULT_VIEWS, DEFAULTS)).toEqual({
+    flags: {
+        explain: false,
+        refresh: true
+    },
+    query: 'SELECT id, value FROM data',
+    renderer: {
+        type: 'GRID',
+        name: 'GRID',
+        options: ''
+    },
+    tables: [{
+        arguments: ['data.json5', '$.results.latest[*]', 'abcd,()e'],
+        tableAlias: 'data',
+        type: 'file'
+    }]
+})
+    })
 })
