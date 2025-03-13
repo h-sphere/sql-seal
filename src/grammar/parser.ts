@@ -10,7 +10,7 @@ const viewName = (view: ViewDefinition) => `caseInsensitive<"${view.name}">`
 
 
 
-export const SQLSealLangDefinition = (views: ViewDefinition[]) => {
+export const SQLSealLangDefinition = (views: ViewDefinition[], enableErrors: boolean = false) => {
     const viewsDefinitions = views
         .map(view => view.singleLine ?
             `#(${viewName(view)} ${view.argument})`
@@ -19,7 +19,7 @@ export const SQLSealLangDefinition = (views: ViewDefinition[]) => {
 
     return String.raw`
         SQLSealLang {
-            Grammar =                  (TableExpression | ViewExpression | FlagExpression | blank)* SelectStmt*
+            Grammar =                  (TableExpression | ViewExpression | FlagExpression | blank ${enableErrors ? '| errorLine' : ''})* SelectStmt*
             SelectStmt =               selectKeyword any+
             FlagExpression =           caseInsensitive<"REFRESH">                                               -- refresh
             |                          caseInsensitive<"NO REFRESH">                                            -- norefresh
@@ -32,9 +32,11 @@ export const SQLSealLangDefinition = (views: ViewDefinition[]) => {
             fileOpening =              caseInsensitive<"file(">
             tableOpening =             caseInsensitive<"table(">
             tableDefinitionClosing =   ")"
+            errorLine =                (~(nl|selectKeyword) any)* nl
    
             ViewExpression =           ${viewsDefinitions}
             anyObject =                "{"  (~selectKeyword any)*
+            handlebarsTemplate =       (~selectKeyword any)*
             selectKeyword =            caseInsensitive<"WITH"> | caseInsensitive<"SELECT">
             tableKeyword =             caseInsensitive<"TABLE">
             nl =                       "\n"
@@ -148,7 +150,6 @@ export interface ParserResult {
 
 export const parse = (query: string, views: ViewDefinition[]) => {
     const grammar = ohm.grammar(SQLSealLangDefinition(views))
-    console.log('GRammar', SQLSealLangDefinition(views))
     const match = grammar.match(query)
     if (match.succeeded()) {
         // Converting

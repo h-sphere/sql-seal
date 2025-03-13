@@ -18,6 +18,7 @@ import { DatabaseTable } from './database/table';
 import { FilepathHasher } from './utils/hasher';
 import { SQLSealViewPlugin } from './editorExtension/syntaxHighlight';
 import { EditorView, ViewPlugin } from '@codemirror/view';
+import { TemplateRenderer } from './renderer/TemplateRenderer';
 
 export default class SqlSealPlugin extends Plugin {
 	settings: SQLSealSettings;
@@ -55,6 +56,7 @@ export default class SqlSealPlugin extends Plugin {
 		this.rendererRegistry.register('sql-seal-internal-grid', new GridRenderer(this.app, this.cellParserRegistar))
 		this.rendererRegistry.register('sql-seal-internal-markdown', new MarkdownRenderer(this.app))
 		this.rendererRegistry.register('sql-seal-internal-list', new ListRenderer(this.app, this.cellParserRegistar))
+		this.rendererRegistry.register('sql-seal-internal-template', new TemplateRenderer(this.app, this.cellParserRegistar))
 
 		// start syncing when files are loaded
 		this.app.workspace.onLayoutReady(async () => {
