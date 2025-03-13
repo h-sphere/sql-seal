@@ -3,7 +3,7 @@ import SqlSealPlugin from "../main"
 import { version } from '../../package.json'
 import { RendererConfig } from "../renderer/rendererRegistry";
 
-const API_VERSION = 1;
+const API_VERSION = 2;
 
 export class SQLSealRegisterApi {
     registeredApis: Array<SQLSealApi> = []
