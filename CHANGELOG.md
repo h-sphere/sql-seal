@@ -2,6 +2,9 @@
 - Added TEMPLATE view that allow to render your template with custom Handlebars template.
 - Improved syntax highlighting - now lines with errors will get highlighted with appropriate colour to indicate the issue
 
+Fixes:
+- Fixed parsing arguments to the `file` function. Now parameters with symbols like `[]*` should work properly (i.e. JSONPath arguments)
+
 # 0.27.0 (2025-02-17)
 - Better syntax highlighting! Now it highlights SQL query parts
 - Support for comments. You can now add comments like `--` and `/* */` to you queries

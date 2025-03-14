@@ -25,8 +25,8 @@ export const SQLSealLangDefinition = (views: ViewDefinition[], enableErrors: boo
             |                          caseInsensitive<"NO REFRESH">                                            -- norefresh
             |                          caseInsensitive<"EXPLAIN">                                               -- explain
             TableExpression =          tableKeyword identifier "=" TableDefinition          
-            TableDefinition =          fileOpening NonemptyListOf<filename, ","> tableDefinitionClosing          -- file
-            |                          tableOpening alnum+ tableDefinitionClosing                   -- mdtable
+            TableDefinition =          fileOpening NonemptyListOf<listElement, ","> tableDefinitionClosing      -- file
+            |                          tableOpening alnum+ tableDefinitionClosing                               -- mdtable
             identifier =               (alnum | "_")+
             filename  =                (alnum | "." | "-" | space | "_" | "/" | "\\" | "$" | "[" | "]" | "\"")+
             fileOpening =              caseInsensitive<"file(">
@@ -34,6 +34,9 @@ export const SQLSealLangDefinition = (views: ViewDefinition[], enableErrors: boo
             tableDefinitionClosing =   ")"
             errorLine =                (~(nl|selectKeyword) any)* nl
    
+            listElement =              "\"" (~"\"" any)+ "\""                                                   -- quoted
+            |                          (~ ("," | ")") any)+                                                     -- unquoted
+
             ViewExpression =           ${viewsDefinitions}
             anyObject =                "{"  (~selectKeyword any)*
             handlebarsTemplate =       (~selectKeyword any)*
@@ -95,7 +98,7 @@ const generateSemantic = (grammar: ohm.Grammar) => {
        },
        TableDefinition_file: (_file, args, _close) => {
         return {
-            arguments: args.asIteration().children.map((c: ohm.Node) => c.sourceString.trim()),
+            arguments: args.asIteration().children.map((c: ohm.Node) => c.toObject().trim()),
             type: 'file'
         }
        },
@@ -121,6 +124,8 @@ const generateSemantic = (grammar: ohm.Grammar) => {
             options: (options.sourceString ?? '').trim()
         }
        },
+       listElement_quoted: (_q, value, _q2) => value.sourceString,
+       listElement_unquoted: (v) => v.sourceString,
        _terminal() {
             return this.sourceString
        }
