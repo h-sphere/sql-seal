@@ -117,9 +117,6 @@ export const highlighterOperation = (grammar: ohm.Grammar) => {
                     end: d.end - prefix.length + offset
                 })).filter(x => x.start >= offset)
               } catch (error) {
-                console.error(error)
-                // If parsing fails, return an error decorator
-                // return [{ type: 'error', start: 0, end: source.length }];
                 return [{ type: 'error', start: this.source.startIdx, end: this.source.endIdx }]
               }
         }

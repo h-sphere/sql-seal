@@ -144,7 +144,6 @@ const generateSemantic = (grammar: ohm.Grammar) => {
     if ((grammar.rules['ExtraFlags'].body as any).ruleName) {
         operations.ExtraFlags = (flag) => {
             const key = flag.ctorName.substring('ExtraFlags_'.length)
-            console.log('FLAG PARSING', flag.ctorName, key)
             return { [key]: true }
         }
     }
