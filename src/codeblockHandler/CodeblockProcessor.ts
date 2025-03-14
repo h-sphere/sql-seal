@@ -114,7 +114,14 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 this.explainEl.textContent = result
             }
 
-            const { data, columns } = await this.db.select(transformedQuery, fileCache?.frontmatter ?? {})
+            const variables = {
+                ...fileCache?.frontmatter ?? {},
+                path: file.path,
+                fileName: file.name,
+                extension: file.extension,
+            }
+
+            const { data, columns } = await this.db.select(transformedQuery, variables)
             this.renderer.render({ data, columns, flags: this.flags })
         } catch (e) {
             this.renderer.error(e.toString())
