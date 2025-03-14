@@ -13,8 +13,8 @@ import {
 
 import { SQLSealLangDefinition } from '../grammar/parser';
 import { RendererRegistry } from '../renderer/rendererRegistry';
-import { traceWalker } from '../utils/traceWalker';
 import { Range } from '@codemirror/state';
+import { Decorator, highlighterOperation } from '../grammar/highlighterOperation';
 
 const markDecorations = {
   blockFlag: Decoration.mark({ class: 'cm-sqlseal-block-flag' }),
@@ -26,8 +26,9 @@ const markDecorations = {
   parameter: Decoration.mark({ class: 'cm-sqlseal-parameter' }),
   comment: Decoration.mark({ class: 'cm-sqlseal-comment' }),
   keyword: Decoration.mark({ class: 'cm-sqlseal-keyword' }),
+  'template-keyword': Decoration.mark({ class: 'cm-sqlseal-template-keyword' }),
   function: Decoration.mark({ class: 'cm-sqlseal-function' }),
-  error: Decoration.mark({ class: "cm-sql-error" })
+  error: Decoration.mark({ class: "cm-sqlseal-error" })
 };
 
 export class SQLSealViewPlugin implements PluginValue {
@@ -49,12 +50,20 @@ export class SQLSealViewPlugin implements PluginValue {
 
   destroy(): void { }
 
-  private parseWithGrammar(sql: string) {
-    const grammar = ohm.grammar(SQLSealLangDefinition(this.renderers.getViewDefinitions()));
+  private parseWithGrammar(sql: string): Decorator[] {
+    const grammar = ohm.grammar(SQLSealLangDefinition(this.renderers.getViewDefinitions(), true))
 
-    const trace = grammar.trace(sql)
-    const decs = traceWalker(trace as any)
-    return decs
+    // FIXME: extend grammar with error line.
+
+    const match = grammar.match(sql)
+    if (match.failed()) {
+      return []
+    }
+    const highlight = highlighterOperation(grammar)(match)
+
+    const results = highlight.highlight()
+
+    return results
   }
 
   private buildDecorations(view: EditorView): DecorationSet {

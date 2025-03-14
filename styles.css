@@ -211,6 +211,23 @@
 }
 
 .cm-sqlseal-literal {
+    color: rgb(0, 51, 255);
+}
+
+.cm-sqlseal-error {
+    color: rgb(235, 47, 47);
+    font-style: italic;
+}
+
+.cm-sqlseal-template-keyword {
+    color: #e3ab53;
+}
+
+.theme-dark .cm-sqlseal-template-keyword {
+    color: #dd8e10;
+}
+
+.theme-dark .cm-sqlseal-block-error {
     color: red;
 }
 
@@ -223,7 +240,7 @@
 }
 
 .theme-dark .cm-sqlseal-parameter {
-    color: #ed222c;
+    color: #95ed22;
 }
 
 .theme-dark .cm-sqlseal-literal {
