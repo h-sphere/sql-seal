@@ -1,3 +1,6 @@
+# 0.28.1 (2025-03-14)
+- Adding syntax highlighting for javascript (to be used with GRAPH view)
+
 # 0.28.0 (2025-03-14)
 - Added TEMPLATE view that allow to render your template with custom Handlebars template.
 - Improved syntax highlighting - now lines with errors will get highlighted with appropriate colour to indicate the issue

@@ -50,6 +50,7 @@ export const SQLSealLangDefinition = (views: ViewDefinition[], flags: readonly F
             ExtraFlags =               ${flagsDefinitions}
             anyObject =                "{"  (~selectKeyword any)*
             handlebarsTemplate =       (~selectKeyword any)*
+            javascriptTemplate =       (~selectKeyword any)*
             selectKeyword =            caseInsensitive<"WITH"> | caseInsensitive<"SELECT">
             tableKeyword =             caseInsensitive<"TABLE">
             nl =                       "\n"
