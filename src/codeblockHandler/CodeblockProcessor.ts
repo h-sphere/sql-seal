@@ -42,7 +42,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                     explain: false
                 },
                 query: '',
-                renderer: { options: '', type: 'GRID' },
+                renderer: { options: '', type: this.plugin.settings.defaultView.toUpperCase() },
                 tables: []
             
             }

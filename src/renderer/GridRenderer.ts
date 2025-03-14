@@ -5,6 +5,7 @@ import { RendererConfig } from "./rendererRegistry";
 import { parse } from 'json5'
 import { CellParser } from "../cellParser";
 import { ViewDefinition } from "../grammar/parser";
+import SqlSealPlugin from "../main";
 
 const getCurrentTheme = () => {
     return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
@@ -28,6 +29,7 @@ class GridRendererCommunicator {
     constructor(
         private el: HTMLElement,
         private config: Partial<GridOptions>,
+        private plugin: SqlSealPlugin | null,
         private app: App,
         private cellParser: CellParser
     ) {
@@ -84,7 +86,8 @@ class GridRendererCommunicator {
             columnDefs: [],
             domLayout: 'autoHeight',
             enableCellTextSelection: true,
-            ensureDomOrder: true
+            paginationPageSize: this.plugin? this.plugin.settings.gridItemsPerPage : undefined,
+            // ensureDomOrder: true
         }, this.config)
         this.gridApi = createGrid(
             grid,
@@ -115,7 +118,7 @@ class GridRendererCommunicator {
 }
 
 export class GridRenderer implements RendererConfig {
-    constructor(private app: App, private readonly cellParser: CellParser) { }
+    constructor(private app: App, private readonly plugin: SqlSealPlugin | null, private readonly cellParser: CellParser) { }
     get viewDefinition(): ViewDefinition {
         return {
             name: this.rendererKey,
@@ -138,7 +141,7 @@ export class GridRenderer implements RendererConfig {
 
 
     render(config: Partial<GridOptions>, el: HTMLElement) {
-        const communicator = new GridRendererCommunicator(el, config, this.app, this.cellParser)
+        const communicator = new GridRendererCommunicator(el, config, this.plugin, this.app, this.cellParser)
         return {
             render: (data: any) => {
                 // FIXME: we need to update that.

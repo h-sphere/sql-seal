@@ -53,7 +53,7 @@ export default class SqlSealPlugin extends Plugin {
 		// REGISTERING VIEWS
 
 		this.rendererRegistry.register('sql-seal-internal-table', new TableRenderer(this.app, this.cellParserRegistar))
-		this.rendererRegistry.register('sql-seal-internal-grid', new GridRenderer(this.app, this.cellParserRegistar))
+		this.rendererRegistry.register('sql-seal-internal-grid', new GridRenderer(this.app, this, this.cellParserRegistar))
 		this.rendererRegistry.register('sql-seal-internal-markdown', new MarkdownRenderer(this.app))
 		this.rendererRegistry.register('sql-seal-internal-list', new ListRenderer(this.app, this.cellParserRegistar))
 		this.rendererRegistry.register('sql-seal-internal-template', new TemplateRenderer(this.app, this.cellParserRegistar))

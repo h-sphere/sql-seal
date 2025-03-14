@@ -1,3 +1,7 @@
+# 0.28.2 (2025-03-14)
+- Added ability to define default view (Grid, HTML or Markdown)
+- Added ability to configure default page size for the GRID view
+
 # 0.28.1 (2025-03-14)
 - Adding syntax highlighting for javascript (to be used with GRAPH view)
 
