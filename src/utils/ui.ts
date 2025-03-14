@@ -1,6 +1,6 @@
 import { identity } from "lodash"
 import { App } from "obsidian"
-import { CellParserRegistar } from "src/cellParser"
+import { CellParserRegistar } from "../cellParser"
 
 export  const displayNotice = (el: HTMLElement, text: string) => {
     el.empty()

@@ -7,7 +7,7 @@ import { transformQuery } from "../sql/sqlTransformer";
 import { displayError, displayNotice } from "../utils/ui";
 import SqlSealPlugin from "../main";
 import { registerObservers } from "../utils/registerObservers";
-import { ParserResult, parseWithDefaults, TableDefinition } from "src/grammar/parser";
+import { ParserResult, parseWithDefaults, TableDefinition } from "../grammar/parser";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
 
