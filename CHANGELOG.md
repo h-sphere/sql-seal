@@ -1,4 +1,4 @@
-# Unreleased
+# 0.28.0 (2025-03-14)
 - Added TEMPLATE view that allow to render your template with custom Handlebars template.
 - Improved syntax highlighting - now lines with errors will get highlighted with appropriate colour to indicate the issue
 - Added @path, @fileName and @extension variables you can use inside your SQL alongside other Frontmatter properties
