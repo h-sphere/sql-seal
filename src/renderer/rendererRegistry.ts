@@ -27,8 +27,6 @@ export class RendererRegistry {
     _extraFlags: Array<Flag> = []
     constructor() { }
 
-    private default = 'grid'
-
     register(uniqueName: string, config: RendererConfig) {
         if (this.renderers.has(uniqueName)) {
             throw new Error(`Renderer already registered for ${uniqueName}`)

@@ -201,7 +201,7 @@ export class CSVView extends TextFileView {
         })
 
 
-        const grid = new GridRenderer(this.app, this.cellParser)
+        const grid = new GridRenderer(this.app, null, this.cellParser)
         const csvView = this;
         const api = grid.render({
             defaultColDef: {
