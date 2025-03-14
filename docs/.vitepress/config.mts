@@ -55,6 +55,7 @@ export default defineConfig({
         items: [
           { text: 'Grid', link: '/renderers/grid' },
           { text: 'HTML', link: '/renderers/html' },
+          { text: 'Template', link: '/renderers/template' },
           { text: 'List', link: '/renderers/list' },
           { text: 'Markdown', link: '/renderers/markdown' },
         ]
