@@ -2,7 +2,7 @@ import { Menu, Plugin, TAbstractFile, TFile } from 'obsidian';
 import { GridRenderer } from './renderer/GridRenderer';
 import { MarkdownRenderer } from './renderer/MarkdownRenderer';
 import { TableRenderer } from './renderer/TableRenderer';
-import { RendererConfig, RendererRegistry } from './renderer/rendererRegistry';
+import { Flag, RendererConfig, RendererRegistry } from './renderer/rendererRegistry';
 import { DEFAULT_SETTINGS, SQLSealSettings, SQLSealSettingsTab } from './settings/SQLSealSettingsTab';
 import { SqlSeal } from './sqlSeal';
 import { SealFileSync } from './vaultSync/SealFileSync';
@@ -208,8 +208,8 @@ export default class SqlSealPlugin extends Plugin {
 		this.cellParserRegistar.unregister(name)
 	}
 
-	registerSQLSealFlag(name: string, restType: string) {
-		this.rendererRegistry.registerFlag(name, restType)
+	registerSQLSealFlag(flag: Flag) {
+		this.rendererRegistry.registerFlag(flag)
 	}
 
 	unregisterSQLSealFlag(name: string) {

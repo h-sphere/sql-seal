@@ -50,8 +50,8 @@ export class SQLSealViewPlugin implements PluginValue {
 
   destroy(): void { }
 
-  private parseWithGrammar(sql: string): Decorator[] {
-    const grammar = ohm.grammar(SQLSealLangDefinition(this.renderers.getViewDefinitions(), true))
+  private parseWithGrammar(sql: string) {
+    const grammar = ohm.grammar(SQLSealLangDefinition(this.renderers.getViewDefinitions(), this.renderers.flags, true));
 
     // FIXME: extend grammar with error line.
 

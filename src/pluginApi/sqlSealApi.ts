@@ -41,9 +41,10 @@ interface RegisteredFunction {
     fn: CallableFunction
 }
 
-interface RegisteredFlag {
+// TODO: use the type from registrator
+export interface RegisteredFlag {
     name: string,
-    restType: string
+    key: string
 }
 
 export class SQLSealApi {
@@ -77,12 +78,9 @@ export class SQLSealApi {
         return this.sqlSealPlugin.registerTable(this.plugin, tableName, columns)
     }
 
-    registerFlag(name: string, restType: string) {
-        this.flags.push({
-            name,
-            restType
-        })
-        this.sqlSealPlugin.registerSQLSealFlag(name, restType)
+    registerFlag(flag: RegisteredFlag) {
+        this.flags.push(flag)
+        this.sqlSealPlugin.registerSQLSealFlag(flag)
     }
 
     unregister() {

@@ -154,7 +154,6 @@ export class Sync {
         // TODO: THIS PART SHOULD BE REWRITTEN SOONish
         const existingTableLog = await this.tableMapLog.getByAlias(reg.sourceFile, reg.tableAlias)
         if (!existingTableLog) {
-            // console.log(`Registering new mapping ${reg.sourceFile} :: ${reg.tableAlias} -> ${tableName}`)
             // Create new one
             await this.tableMapLog.insert({
                 alias_name: reg.tableAlias,
@@ -164,7 +163,6 @@ export class Sync {
         } else {
             // Check if it is the same mapping
             if (existingTableLog.table_name !== tableName) {
-                // console.log(`Alias ${reg.sourceFile} :: ${reg.tableAlias} changed table, now it should refer to ${tableName})`)
                 await this.tableMapLog.deleteMapping(existingTableLog.id)
                 await this.tableMapLog.insert({
                     alias_name: reg.tableAlias,
