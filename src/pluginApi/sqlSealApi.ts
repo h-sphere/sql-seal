@@ -3,7 +3,7 @@ import SqlSealPlugin from "../main"
 import { version } from '../../package.json'
 import { RendererConfig } from "../renderer/rendererRegistry";
 
-const API_VERSION = 1;
+const API_VERSION = 2;
 
 export class SQLSealRegisterApi {
     registeredApis: Array<SQLSealApi> = []
@@ -41,9 +41,16 @@ interface RegisteredFunction {
     fn: CallableFunction
 }
 
+// TODO: use the type from registrator
+export interface RegisteredFlag {
+    name: string,
+    key: string
+}
+
 export class SQLSealApi {
     private views: Array<RegisteredView> = []
     private functions: Array<RegisteredFunction> = []
+    private flags: Array<RegisteredFlag> = []
 
     constructor(private readonly plugin: Plugin, private sqlSealPlugin: SqlSealPlugin) {
         plugin.register(() => {
@@ -71,6 +78,11 @@ export class SQLSealApi {
         return this.sqlSealPlugin.registerTable(this.plugin, tableName, columns)
     }
 
+    registerFlag(flag: RegisteredFlag) {
+        this.flags.push(flag)
+        this.sqlSealPlugin.registerSQLSealFlag(flag)
+    }
+
     unregister() {
         for(const view of this.views) {
             this.sqlSealPlugin.unregisterSQLSealView(view.name)
@@ -79,6 +91,10 @@ export class SQLSealApi {
 
         for(const fn of this.functions) {
             this.sqlSealPlugin.unregisterSQLSealFunction(fn.name)
+        }
+
+        for(const flag of this.flags) {
+            this.sqlSealPlugin.unregisterSQLSealFlag(flag.name)
         }
     }
 }

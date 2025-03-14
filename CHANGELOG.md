@@ -5,6 +5,9 @@
 Fixes:
 - Fixed parsing arguments to the `file` function. Now parameters with symbols like `[]*` should work properly (i.e. JSONPath arguments)
 
+Technical:
+- Other plugins can now register flags to allow for extra configuration
+
 # 0.27.0 (2025-02-17)
 - Better syntax highlighting! Now it highlights SQL query parts
 - Support for comments. You can now add comments like `--` and `/* */` to you queries

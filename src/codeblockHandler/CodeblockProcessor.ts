@@ -47,7 +47,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             
             }
 
-            const results = parseWithDefaults(this.source, this.rendererRegistry.getViewDefinitions(), defaults)
+            const results = parseWithDefaults(this.source, this.rendererRegistry.getViewDefinitions(), defaults, this.rendererRegistry.flags)
 
             // const results = parseLanguage(this.source, this.ctx.sourcePath)
             if (results.tables) {
@@ -59,7 +59,6 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             }
 
             this.flags = results.flags
-
             let rendererEl = this.el
 
             if (this.flags.explain) {
@@ -116,7 +115,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             }
 
             const { data, columns } = await this.db.select(transformedQuery, fileCache?.frontmatter ?? {})
-            this.renderer.render({ data, columns })
+            this.renderer.render({ data, columns, flags: this.flags })
         } catch (e) {
             this.renderer.error(e.toString())
         }
