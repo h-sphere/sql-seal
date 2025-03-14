@@ -50,6 +50,7 @@ export const SQLSealLangDefinition = (views: ViewDefinition[], flags: readonly F
             ExtraFlags =               ${flagsDefinitions}
             anyObject =                "{"  (~selectKeyword any)*
             handlebarsTemplate =       (~selectKeyword any)*
+            javascriptTemplate =       (~selectKeyword any)*
             selectKeyword =            caseInsensitive<"WITH"> | caseInsensitive<"SELECT">
             tableKeyword =             caseInsensitive<"TABLE">
             nl =                       "\n"
@@ -143,6 +144,7 @@ const generateSemantic = (grammar: ohm.Grammar) => {
     if ((grammar.rules['ExtraFlags'].body as any).ruleName) {
         operations.ExtraFlags = (flag) => {
             const key = flag.ctorName.substring('ExtraFlags_'.length)
+            console.log('FLAG PARSING', flag.ctorName, key)
             return { [key]: true }
         }
     }

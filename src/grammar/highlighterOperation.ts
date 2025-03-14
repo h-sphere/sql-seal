@@ -1,6 +1,7 @@
 import * as ohm from 'ohm-js';
 import { cstVisitor, Literal, parse } from 'sql-parser-cst';
 import highlightHandlebars from './highlighter/handlebarsHighlighter';
+import { highlightJavaScript } from './highlighter/jsHighlighter';
 
 const nodes = new Map([
     ['FlagExpression', { terminal: true, type: 'blockFlag' }],
@@ -93,6 +94,34 @@ export const highlighterOperation = (grammar: ohm.Grammar) => {
             } catch (e) {
                 return []
             }
+        },
+        javascriptTemplate(_node) {
+            let prefix = `async function x () {
+            `
+            let sufix = ' }'
+
+
+            if (this.source.contents.trim()[0] === '{') {
+                // we are parsing simple object, we need to adjust it
+                prefix = `const data = `
+                sufix = ';'
+            }
+
+            const source = prefix + this.source.contents + sufix
+            const offset = this.source.startIdx
+            try {
+                const decorators = highlightJavaScript(source)
+                return decorators.map(d => ({
+                    type: d.type === 'keyword' ? 'template-keyword' : d.type,
+                    start: d.start - prefix.length + offset,
+                    end: d.end - prefix.length + offset
+                })).filter(x => x.start >= offset)
+              } catch (error) {
+                console.error(error)
+                // If parsing fails, return an error decorator
+                // return [{ type: 'error', start: 0, end: source.length }];
+                return [{ type: 'error', start: this.source.startIdx, end: this.source.endIdx }]
+              }
         }
     })
 
