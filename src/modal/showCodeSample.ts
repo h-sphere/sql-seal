@@ -20,10 +20,12 @@ export class CodeSampleModal extends Modal {
 
         const tableName = sanitise(this.file.basename)
         
-        textArea.setText(`TABLE ${tableName} = file(${this.file.path})
+        textArea.setText(`\`\`\`sqlseal
+TABLE ${tableName} = file(${this.file.path})
 
 SELECT * FROM ${tableName}
-LIMIT 100`);
+LIMIT 100
+\`\`\``);
 
         // Add copy button
         new Setting(contentEl)
