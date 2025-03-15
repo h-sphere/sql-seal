@@ -1,3 +1,5 @@
+# 0.28.4 (2025-03-15)
+- Feat: Template view can now access file properties
 # 0.28.3 (2025-03-15)
 - Fix: Filename field in files column no longer truncates name after dot
 

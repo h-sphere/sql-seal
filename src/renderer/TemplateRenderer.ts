@@ -39,11 +39,11 @@ export class TemplateRenderer implements RendererConfig {
 
     render(config: TemplateRendererConfig, el: HTMLElement) {
         return {
-            render: ({ columns, data }: any) => {
+            render: ({ columns, data, frontmatter }: any) => {
                 el.empty()
                 
                 // Seems to be the only way to render handlebars into DOM. Don't like it but what can we do.
-                el.innerHTML = config.template({ data, columns })
+                el.innerHTML = config.template({ data, columns, properties: frontmatter })
             },
             error: (error: string) => {
                 displayError(el, error)
