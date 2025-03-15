@@ -1,3 +1,6 @@
+# 0.28.3 (2025-03-15)
+- Fix: Filename field in files column no longer truncates name after dot
+
 # 0.28.2 (2025-03-14)
 - Added ability to define default view (Grid, HTML or Markdown)
 - Added ability to configure default page size for the GRID view
