@@ -122,7 +122,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             }
 
             const { data, columns } = await this.db.select(transformedQuery, variables)
-            this.renderer.render({ data, columns, flags: this.flags })
+            this.renderer.render({ data, columns, flags: this.flags, frontmatter: variables })
         } catch (e) {
             this.renderer.error(e.toString())
         }
