@@ -26,10 +26,7 @@ export class LinksFileSyncTable extends AFileSyncTable {
         if (!cache) {
             return []
         }
-        const tags = cache.links
-        if (!tags) {
-            return []
-        }
+        const tags = (cache.links || []).concat(cache.frontmatterLinks || []);
         return tags.map((t) => {
             const targetFile = this.app.metadataCache.getFirstLinkpathDest(t.link, file.path)
             let targetExists = false
@@ -38,10 +35,16 @@ export class LinksFileSyncTable extends AFileSyncTable {
                 target = targetFile.path
                 targetExists = true
             }
+            let position = t.position;
+            if (t.key) {
+                position = {
+                    frontmatterKey: t.key
+                }
+            }
             return {
                 path: file.path,
                 target: target,
-                position: t.position,
+                position: position,
                 display_text: t.displayText,
                 target_exists: targetExists
             }
