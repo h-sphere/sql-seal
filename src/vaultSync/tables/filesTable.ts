@@ -10,15 +10,34 @@ export const FILES_TABLE_NAME = 'files'
 
 const extractFrontmatterFromFile = (file: TFile, plugin: Plugin): Record<string, unknown> => {
     const frontmatter = plugin.app.metadataCache.getFileCache(file)?.frontmatter || {}
-
-    return Object.fromEntries(
-        Object.entries(frontmatter)
-            .map(([v, s]) => ([sanitise(v), s]))
-    )
+	const result = 
+		Object.fromEntries(
+			Object.entries(frontmatter)
+				.map(([v, s]) => ([sanitise(v), s]))
+		)
+	if (file.name == 'Career Plan.md') {
+		console.log('extractFrontmatterFromFile');
+		console.log(file)
+		console.log(frontmatter);
+		console.log('Result:')	
+		console.log(result)
+	}
+	return result;
 }
 
-function fileData(file: TFile, { tags: _tags, ...frontmatter }: Record<string, any>) {
-    return {
+function fileData(file: TFile, { ...frontmatter }: Record<string, any>) {
+	if (file.name == 'Career Plan.md') {
+		console.log('fileData')
+		console.log('file')
+		console.log(file)
+		// console.log('_tags')
+		// console.log(_tags)
+		console.log('frontMatter')
+		console.log(frontmatter)
+	}	
+	
+	
+	const result = {
         ...frontmatter,
         id: file.path,
         path: file.path,
@@ -27,6 +46,13 @@ function fileData(file: TFile, { tags: _tags, ...frontmatter }: Record<string, a
         modified_at: (new Date(file.stat.mtime)).toISOString(),
         file_size: file.stat.size
     }
+
+	if (file.name == 'Career Plan.md') {
+		console.log('fileData')
+		console.log(result)
+	}
+
+	return result
 }
 
 export class FilesFileSyncTable extends AFileSyncTable {
