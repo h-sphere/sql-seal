@@ -54,7 +54,10 @@ export const highlighterOperation = (grammar: ohm.Grammar) => {
 
     s.addOperation<any>('highlight', {
         _terminal() {
-            return computeNodeHighlight(this)
+            return [
+                ...computeNodeHighlight(this),
+                ...this.children.map(c => c.highlight()).flat()
+            ]
         },
         _nonterminal() {
             return [
@@ -73,6 +76,13 @@ export const highlighterOperation = (grammar: ohm.Grammar) => {
 
             }
             return [...computeNodeHighlight(this), ...results]
+        },
+        comment(_comment) {
+            return [{
+                type: 'comment',
+                start: this.source.startIdx,
+                end: this.source.endIdx
+            }]
         },
         errorLine: (node, _nl) => {
             return [{

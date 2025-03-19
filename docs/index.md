@@ -29,7 +29,7 @@ hero:
     <div class="content">
 Turn your Obsidian vault into a powerful, queryable database using SQL. SQLSeal seamlessly integrates with your notes and CSV and JSON files, enabling you to extract insights and patterns from your personal knowledge base.
 
-```sql
+```sqlseal
 SELECT * FROM files
 ORDER BY modified_at DESC
 LIMIT 10
@@ -71,7 +71,7 @@ LIMIT 10
 ## Query any data
 You can query any CSV and JSON data stored in your vault. SQLSeal can help you analyse your finances, workouts, goals and whatever you imagine!
 
-```sql
+```sqlseal
 TABLE commute = file(transport.csv)
 
 SELECT
@@ -97,9 +97,6 @@ GROUP BY Date, Transport_Type
 </div>
 
 
-
-
-
 <div class="vp-doc">
   <div class="container-split reverse">
 
@@ -120,6 +117,16 @@ SQLSeal Charts is currently being reviewed by Obsidian. As soon as it gets appro
 </div>
 </div>
 </div>
+
+
+## Learn more
+<p>This introduction video should help you get started with basics of SQLSeal</p>
+<div class="video-wrapper">
+  <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/yXDrpWDeQPg?si=rttPk5LdH2lahqRN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
+
+
 
 
 <Stats />
