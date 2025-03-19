@@ -16,7 +16,7 @@ The following variables are exposed
 
 
 ## Example
-```sql
+```sqlseal
 TEMPLATE
 Current Path: {{properties.path}}
 {{#each data}}
