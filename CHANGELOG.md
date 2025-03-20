@@ -1,6 +1,6 @@
 # 0.29.0 (2025-03-19)
 - feat: LIST views with single column are rendered as a regular list (rather than nested one) (by @kDCYorke)
-- 
+- feat: files table now contains tags column with tags defined directly in properties (by @sksizer)
 
 # 0.28.4 (2025-03-15)
 - Feat: Template view can now access file properties
