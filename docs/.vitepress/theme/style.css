@@ -133,3 +133,8 @@
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
 
+.video-wrapper {
+  margin: 1em auto;
+  display: grid;
+  justify-content: center;
+}

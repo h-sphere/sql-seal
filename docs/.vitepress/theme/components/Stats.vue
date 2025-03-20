@@ -1,22 +1,22 @@
 <script setup>
 const stats = [
   {
-    number: '2K+',
+    number: '3K+',
     label: 'Downloads',
     icon: '📥'
   },
   {
-    number: '48+',
+    number: '54+',
     label: 'Releases',
     icon: '📦'
   },
   {
-    number: '64+',
+    number: '88+',
     label: 'GitHub Stars',
     icon: '⭐'
   },
   {
-    number: '50+',
+    number: '99+',
     label: 'Discord Members',
     icon: '🤝'
   }

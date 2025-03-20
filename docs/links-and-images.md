@@ -5,14 +5,14 @@ SQLSeal allows for rendering links and images. For now the images needs to be ex
 
 ## Links
 To display a link, wrap use the `a` SQL function, for example:
-```sql
+```sqlseal
 SELECT a(path) FROM files LIMIT 10
 ```
 ![Example of links](./links.png)
 
 You can use second parameter to provide name for the link:
 
-```sql
+```sqlseal
 SELECT a(path, name) from files LIMIT 10
 ```
 
@@ -22,14 +22,14 @@ This API works for both filesystem and CSV files.
 ## Images
 You can embed images within your results. You need to wrap your resulting column with `img` function.
 
-```sql
+```sqlseal
 SELECT name, img(coverImg) FROM files
 ```
 
 ### Local images
 When using local images (stored in Obsidian) you need to pass second parameter being path of the original note. For example:
 
-```sql
+```sqlseal
 SELECT path, img(cover, path) FROM files
 ```
 
@@ -37,7 +37,7 @@ SELECT path, img(cover, path) FROM files
 The example below uses [Goodreads-books](https://www.kaggle.com/datasets/jealousleopard/goodreadsbooks) Kaggle dataset in CSV loaded in obsidian to display books with links to Open Library and showing the covers from Open Library Cover API. It uses Obsidian property to filter the author name.
 
 
-```sql
+```sqlseal
 TABLE books = file(books.csv)
 
 SELECT
@@ -56,6 +56,6 @@ LIMIT 10
 
 ## Checkboxes
 You can display boolean data as checkbox in the interface by calling `checkbox` function:
-```sql
+```sqlseal
 SELECT date, checkbox(excercised) FROM files WHERE date is not null
 ```

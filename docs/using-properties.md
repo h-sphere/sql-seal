@@ -15,11 +15,11 @@ On top of properties current file exposes in the properties, you can also use th
 
 ### Example 1: Selecting just the current file from the files table
 
-```sql
+```sqlseal
 SELECT * FROM files WHERE path = @path
 ```
 
 ### Example2: Select tags of the current file
-```sql
+```sqlseal
 SELECT * FROM tags WHERE path = @path
 ```

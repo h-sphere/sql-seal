@@ -3,6 +3,7 @@ import { h } from 'vue'
 import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import './style.css'
+import './syntax-highlighting.css'
 import Stats from './components/Stats.vue'
 
 export default {

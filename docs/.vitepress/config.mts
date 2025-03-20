@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import ohmMarkdownPlugin from '../plugins/ohm-plugin/vitepress-ohm-plugin'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -63,7 +64,9 @@ export default defineConfig({
       {
         text: 'FAQ',
         items: [
-          { text: 'Comparison with Dataview', link: '/faq/comparison-with-dataview' }
+          { text: 'Comparison with Dataview', link: '/faq/comparison-with-dataview' },
+		  { text: 'Understanding Tags', link: '/faq/understanding-tags'}
+
         ]
       },
       {
@@ -90,5 +93,10 @@ export default defineConfig({
       message: '',
       copyright: 'By <a href="https://hypersphere.blog">hypersphere</a>.<br/>Sponsor Me: <a href="https://ko-fi.com/hypersphere">Ko-Fi</a>'
     }
+  },
+  markdown: {
+    config(md) {
+      md.use(ohmMarkdownPlugin())
+    },
   }
 })
