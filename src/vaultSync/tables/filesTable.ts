@@ -17,7 +17,7 @@ const extractFrontmatterFromFile = (file: TFile, plugin: Plugin): Record<string,
     )
 }
 
-function fileData(file: TFile, { tags: _tags, ...frontmatter }: Record<string, any>) {
+function fileData(file: TFile, { ...frontmatter }: Record<string, any>) {
     return {
         ...frontmatter,
         id: file.path,

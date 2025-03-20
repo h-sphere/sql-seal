@@ -64,7 +64,9 @@ export default defineConfig({
       {
         text: 'FAQ',
         items: [
-          { text: 'Comparison with Dataview', link: '/faq/comparison-with-dataview' }
+          { text: 'Comparison with Dataview', link: '/faq/comparison-with-dataview' },
+		  { text: 'Understanding Tags', link: '/faq/understanding-tags'}
+
         ]
       },
       {
