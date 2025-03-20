@@ -1,4 +1,4 @@
-import { TFile } from "obsidian";
+import { FrontmatterLinkCache, LinkCache, TFile } from "obsidian";
 import { AFileSyncTable } from "./abstractFileSyncTable";
 
 export class LinksFileSyncTable extends AFileSyncTable {
@@ -26,26 +26,39 @@ export class LinksFileSyncTable extends AFileSyncTable {
         if (!cache) {
             return []
         }
-        const tags = cache.links
-        if (!tags) {
-            return []
-        }
-        return tags.map((t) => {
-            const targetFile = this.app.metadataCache.getFirstLinkpathDest(t.link, file.path)
-            let targetExists = false
-            let target = t.link
-            if (targetFile) {
-                target = targetFile.path
-                targetExists = true
-            }
-            return {
-                path: file.path,
-                target: target,
-                position: t.position,
-                display_text: t.displayText,
-                target_exists: targetExists
-            }
-        })
+
+		const links: any[] = (cache.links || []).map((l: LinkCache) => {
+			return {
+				targetLink: l.link,
+				position: l.position,
+				display_text: l.displayText
+			}
+		});
+
+		const frontmatterLinks: any[] = (cache.frontmatterLinks || []).map((l: FrontmatterLinkCache) => {
+			return {
+				targetLink: l.link,
+				position: { frontmatterKey: l.key },
+				display_text: l.displayText
+			}
+		});
+
+		return links.concat(frontmatterLinks).map(({ targetLink, ...reference }) => {
+			const targetFile = this.app.metadataCache.getFirstLinkpathDest(targetLink, file.path)
+			let targetExists = false
+			let target = targetLink
+			if (targetFile) {
+				target = targetFile.path
+				targetExists = true
+			}
+
+			return {
+				path: file.path,
+				target: target,
+				...reference,
+				target_exists: targetExists
+			}
+		})
     }
 
 
