@@ -52,3 +52,26 @@ Introduced in 0.20.0
 | `position`      | JSON object containing information about location of the link      |
 | `display_text`  | Text displayed on the page for that link                           |
 | `target_exists` | information if the target file exists. 1 if it exists, 0 otherwise |
+
+#### Frontmatter links
+
+Links that appear in a file's frontmatter (Obsidian properties) contain a `frontmatterKey` property in the `position`
+JSON object. This can be used to identify links that are in the note body or within a specific frontmatter property.
+
+For instance, to query all links to the current file that appear in the body of a note:
+
+```sql
+SELECT * FROM links
+WHERE target = @path
+AND json_extract(position, '$.frontmatterKey') IS NULL
+```
+
+`frontmatterKey` can be used to select links within a specific property. A Map of Content, for instance, may wish to
+show a list of files that list the MOC as a type:
+
+```sql
+LIST
+SELECT a(path) FROM links
+WHERE target = @path
+AND json_extract(position, '$.frontmatterKey') = 'type'
+```
