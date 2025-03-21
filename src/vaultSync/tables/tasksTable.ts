@@ -39,17 +39,33 @@ export class TasksFileSyncTable extends AFileSyncTable {
             const taskContent = lineContent.substring(
                 lineContent.indexOf(']') + 1
             ).trim();
+            
+            const checkboxData = {
+                type: "checkbox",
+                values: {
+                    checked: status,
+                    path: file.path,
+                    task: taskContent,
+                    position: {
+                        line: listItem.position.start.line,
+                        lineContent: lineContent
+                    }
+                }
+            };
+            
             return {
                 filePath: file.path,
                 path: file.path,
                 task: taskContent,
-                completed: status ? 1 : 0
+                completed: status ? 1 : 0,
+                position: listItem.position.start.line,
+                checkbox: `SQLSEALCUSTOM(${JSON.stringify(checkboxData)})`
             }
         }).filter(t => !!t)
     }
 
     async onInit(): Promise<void> {
-        await this.db.createTableNoTypes('tasks', ['task', 'completed', 'filePath', 'path'])
+        await this.db.createTableNoTypes('tasks', ['checkbox', 'task', 'completed', 'filePath', 'path', 'position'])
 
          // Indexes
          const toIndex = ['filePath']

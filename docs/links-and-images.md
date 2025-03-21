@@ -59,3 +59,31 @@ You can display boolean data as checkbox in the interface by calling `checkbox` 
 ```sqlseal
 SELECT date, checkbox(excercised) FROM files WHERE date is not null
 ```
+
+### Interactive Task Checkboxes
+
+SQLSeal provides two ways to create interactive checkboxes for tasks:
+
+#### Method 1: Direct checkbox column (Recommended)
+The simplest and most reliable approach is to directly use the `checkbox` column:
+
+```sqlseal
+SELECT checkbox, task FROM tasks
+```
+
+This approach automatically renders interactive checkboxes without requiring any function wrappers, making your queries cleaner and more maintainable.
+
+#### Method 2: Using the `checkbox` function
+For backwards compatibility, you can also use the checkbox function with a single parameter:
+
+```sqlseal
+-- Using the checkbox column
+SELECT task, checkbox(completed) FROM tasks
+
+The checkbox function accepts a single parameter which can be either:
+- A numeric value (0 = unchecked, 1 = checked) - renders as a disabled checkbox
+- Any boolean/truthy value - renders as a disabled checkbox
+
+> [!NOTE] Interactive vs Disabled Checkboxes
+> Only checkboxes created using the `checkbox` column are interactive. When using the `completed` column or other values, the checkbox will be rendered in a disabled state to indicate it cannot be modified.
+
