@@ -1,6 +1,7 @@
 import { App } from "obsidian";
 import { TableDefinitionExternal } from "../repository/tableDefinitions";
 import { ParserTableDefinition } from "./types";
+import { ColumnDefinition } from "../../utils/types";
 
 export abstract class ISyncStrategy {
     constructor(protected def: TableDefinitionExternal, protected app: App) {
@@ -11,7 +12,7 @@ export abstract class ISyncStrategy {
     }
     abstract returnData(): Promise<{
         data: Record<string, unknown>[],
-        columns: string[]
+        columns: ColumnDefinition[]
     }>;
 
     static async fromParser(def: ParserTableDefinition, app: App): Promise<ISyncStrategy> {
