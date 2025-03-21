@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "typecheck": "tsc -noEmit -skipLibCheck",
-    "build": " node esbuild.config.mjs production",
+    "build": "node --no-warnings esbuild.config.mjs production",
     "version": "node version-bump.mjs && git add manifest.json versions.json",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "docs:dev": "vitepress dev docs",
