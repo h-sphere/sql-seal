@@ -1,4 +1,4 @@
-import { renderLink } from "./ui"
+import { renderLink } from "./ui/link"
 
 const makeApp = () => ({ metadataCache: { getFirstLinkpathDest: jest.fn(p => ({ path: p })) } })
 
