@@ -193,7 +193,7 @@ Turning off verbose mode
 
 # 0.9.0 (2024-11-03)
 We now use proper grid library to render data. This allow for many great features like pagination, sorting and more visally pleasing UI out of the box.
-Reworked internal communication to use Signals.
+Rewritten internal communication to use Signals.
 
 # 0.8.0 (2024-09-05)
 Now you can embed links and images (both local and external). Introduced `a` and `img` custom SQL functions.
@@ -225,3 +225,11 @@ Also improved the way files are being observed and updated which should lead to 
 
 # 0.1.0 (2024-06-23)
 - Initial release. Allows to create tables based on CSV files in your vault and query them using SQL.
+
+## Unreleased
+
+### Added
+- Added ability to reference markdown tables by header name: `table(Header Name)`
+- Added ability to reference tables from other files using: `table(file:path/to/file.md, 0)`
+- Added support for relative file paths: `table(file:./relative/path.md, Header Name)`
+- Added automatic .md extension when referencing files without extension
