@@ -14,27 +14,20 @@ const FILE_PREFIX = 'file:';
 export class MarkdownTableSyncStrategy extends ISyncStrategy {
 
     static async fromParser(def: ParserTableDefinition, app: App): Promise<MarkdownTableSyncStrategy> {
-        const arguments = def.arguments
+        const args = def.arguments
         
         // Check if the first argument specifies a file
         let sourceFile = def.sourceFile;
-        let argsToUse = [...arguments];
+        let argsToUse = [...args];
         
-        if (arguments[0]?.startsWith(FILE_PREFIX)) {
-            // Extract file path
-            let filePath = arguments[0].substring(FILE_PREFIX.length);
+        if (args[0]?.startsWith(FILE_PREFIX)) {
+            let filePath = args[0].substring(FILE_PREFIX.length);
             
-            // Process relative paths
             if (filePath.startsWith('./') || filePath.startsWith('../')) {
-                // Get the directory of the current file
                 const currentDir = dirname(def.sourceFile);
-                
-                // Join the current directory with the relative path and normalize it
                 filePath = normalizePath(join(currentDir, filePath));
             }
             
-            // Add .md extension if no extension is present
-            // A more reliable way to check for file extension
             const hasExtension = filePath.lastIndexOf('.') > filePath.lastIndexOf('/');
             if (!hasExtension) {
                 filePath += '.md';
@@ -43,7 +36,7 @@ export class MarkdownTableSyncStrategy extends ISyncStrategy {
             sourceFile = filePath;
             
             // Remove the file path from the arguments
-            argsToUse = arguments.slice(1);
+            argsToUse = args.slice(1);
             
             // If no arguments are left, default to index 0
             if (argsToUse.length === 0) {
