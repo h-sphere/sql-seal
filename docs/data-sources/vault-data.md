@@ -13,6 +13,7 @@ LIMIT 10
 ## Table Structure
 ### `files` table
 Files table consists of the following columns:
+
 | Column              | Description                                                                                                                                                                      | Introduced In |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | `id`                | File Path                                                                                                                                                                        |               |
@@ -27,6 +28,7 @@ Files table consists of the following columns:
 
 ### `tags` table
 Tags table consists of the following columns:
+
 | Column   | Description                                                                                                              | Introduced In |
 | -------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
 | `tag`    | Full tag, including `#` symbol. For example `#todo`                                                                      |               |
@@ -37,14 +39,17 @@ Tags table consists of the following columns:
 
 ### `tasks` table
 Tasks table consists of the following columns:
-| Column      | Description                                                                                                              | Introduced In |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
-| `task`      | Content of the task (text)                                                                                               |               |
-| `completed` | 0 if not completed, 1 if completed                                                                                       |               |
-| `path`      | Full path of the file the tag belongs to                                                                                 | 0.24.1        |
-| `filePath`  | (deprecated) same like `path`. Name changed for compatibility with other tables. Will get removed in the future versions |               |
-| `checkbox`  | Interactive checkbox for the task that can be clicked to toggle completion state                                         | 0.29.0        |
-| `position`  | Line number where the task appears in the original file                                                                  | 0.29.0        |
+
+| Column          | Description                                                                                                              | Introduced In |
+| --------------- |--------------------------------------------------------------------------------------------------------------------------| ------------- |
+| `task`          | Content of the task (text)                                                                                               |               |
+| `completed`     | 0 if not completed, 1 if completed                                                                                       |               |
+| `path`          | Full path of the file the tag belongs to                                                                                 | 0.24.1        |
+| `filePath`      | (deprecated) same like `path`. Name changed for compatibility with other tables. Will get removed in the future versions |               |
+| `checkbox`      | Interactive checkbox for the task that can be clicked to toggle completion state                                         | 0.29.0        |
+| `position`      | Line number where the task appears in the original file                                                                  | 0.29.0        |
+| `heading`       | The name of the heading this task appears under (if any)                                                                 |               |
+| `heading_level` | The level of the heading this task appears under (if any), i.e., the number of # in the heading declaration              |               |
 
 ### `links` table
 Table containing all the links between files.
