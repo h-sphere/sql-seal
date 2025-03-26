@@ -1,3 +1,6 @@
+# Unreleased
+- feat: added ability to reference tables from the other files in `table()` functions
+
 # 0.29.0 (2025-03-19)
 - feat: LIST views with single column are rendered as a regular list (rather than nested one) (by @kDCYorke)
 - feat: files table now contains tags column with tags defined directly in properties (by @sksizer)
@@ -225,11 +228,3 @@ Also improved the way files are being observed and updated which should lead to 
 
 # 0.1.0 (2024-06-23)
 - Initial release. Allows to create tables based on CSV files in your vault and query them using SQL.
-
-## Unreleased
-
-### Added
-- Added ability to reference markdown tables by header name: `table(Header Name)`
-- Added ability to reference tables from other files using: `table(file:path/to/file.md, 0)`
-- Added support for relative file paths: `table(file:./relative/path.md, Header Name)`
-- Added automatic .md extension when referencing files without extension
