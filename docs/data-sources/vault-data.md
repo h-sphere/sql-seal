@@ -48,8 +48,8 @@ Tasks table consists of the following columns:
 | `filePath`      | (deprecated) same like `path`. Name changed for compatibility with other tables. Will get removed in the future versions |               |
 | `checkbox`      | Interactive checkbox for the task that can be clicked to toggle completion state                                         | 0.29.0        |
 | `position`      | Line number where the task appears in the original file                                                                  | 0.29.0        |
-| `heading`       | The name of the heading this task appears under (if any)                                                                 |               |
-| `heading_level` | The level of the heading this task appears under (if any), i.e., the number of # in the heading declaration              |               |
+| `heading`       | The name of the heading this task appears under (if any)                                                                 | 0.30.0        |
+| `heading_level` | The level of the heading this task appears under (if any), i.e., the number of # in the heading declaration              | 0.30.0        |
 
 ### `links` table
 Table containing all the links between files.

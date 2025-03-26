@@ -1,5 +1,7 @@
-# Unreleased
+# 0.30.0 (2025-03-26)
 - feat: added ability to reference tables from the other files in `table()` functions
+- feat: added ability to reference tables by their header name
+- feat: new heading and heading_level columns in tasks table (by @kDCYorke)
 
 # 0.29.0 (2025-03-19)
 - feat: LIST views with single column are rendered as a regular list (rather than nested one) (by @kDCYorke)
