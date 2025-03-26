@@ -35,7 +35,7 @@ export const SQLSealLangDefinition = (views: ViewDefinition[], flags: readonly F
             ${flags.length ? '| ExtraFlags -- extraFlags' : ''}
             TableExpression =          tableKeyword identifier "=" TableDefinition          
             TableDefinition =          fileOpening NonemptyListOf<listElement, ","> tableDefinitionClosing      -- file
-            |                          tableOpening alnum+ tableDefinitionClosing                               -- mdtable
+            |                          tableOpening NonemptyListOf<listElement, ","> tableDefinitionClosing      -- mdtable
             identifier =               (alnum | "_")+
             filename  =                (alnum | "." | "-" | space | "_" | "/" | "\\" | "$" | "[" | "]" | "\"")+
             fileOpening =              caseInsensitive<"file(">
@@ -113,10 +113,9 @@ const generateSemantic = (grammar: ohm.Grammar) => {
             type: 'file'
         }
        },
-       TableDefinition_mdtable: (_file, tableIndex, _close) =>  {
+       TableDefinition_mdtable: (_file, args, _close) =>  {
         return {
-
-            arguments: [tableIndex.sourceString],
+            arguments: args.asIteration().children.map((c: ohm.Node) => c.toObject().trim()),
             type: 'table'
         }
        },

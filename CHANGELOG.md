@@ -1,3 +1,6 @@
+# Unreleased
+- feat: added ability to reference tables from the other files in `table()` functions
+
 # 0.29.0 (2025-03-19)
 - feat: LIST views with single column are rendered as a regular list (rather than nested one) (by @kDCYorke)
 - feat: files table now contains tags column with tags defined directly in properties (by @sksizer)
@@ -193,7 +196,7 @@ Turning off verbose mode
 
 # 0.9.0 (2024-11-03)
 We now use proper grid library to render data. This allow for many great features like pagination, sorting and more visally pleasing UI out of the box.
-Reworked internal communication to use Signals.
+Rewritten internal communication to use Signals.
 
 # 0.8.0 (2024-09-05)
 Now you can embed links and images (both local and external). Introduced `a` and `img` custom SQL functions.
