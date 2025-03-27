@@ -1,3 +1,6 @@
+# 0.30.1 (2025-03-27)
+- feat: added basename and parent SQL variables
+ 
 # 0.30.0 (2025-03-26)
 - feat: added ability to reference tables from the other files in `table()` functions
 - feat: added ability to reference tables by their header name
