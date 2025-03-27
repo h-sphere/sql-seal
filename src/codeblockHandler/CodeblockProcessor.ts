@@ -118,6 +118,8 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 ...fileCache?.frontmatter ?? {},
                 path: file.path,
                 fileName: file.name,
+                basename: file.basename,
+                parent: file.parent?.path,
                 extension: file.extension,
             }
 
