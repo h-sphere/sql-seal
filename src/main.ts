@@ -9,6 +9,7 @@ import { SealFileSync } from './vaultSync/SealFileSync';
 import { CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE, CSVView } from './view/CSVView';
 import { createSqlSealEditorExtension } from './editorExtension/inlineCodeBlock';
 import { ListRenderer } from './renderer/ListRenderer';
+import { TaskListRenderer } from './renderer/TaskListRenderer';
 import { JSON_VIEW_EXTENSIONS, JSON_VIEW_TYPE, JsonView } from './view/JsonView';
 import { CellParserRegistar } from './cellParser';
 import { registerAPI } from '@vanakat/plugin-api';
@@ -56,6 +57,7 @@ export default class SqlSealPlugin extends Plugin {
 		this.rendererRegistry.register('sql-seal-internal-grid', new GridRenderer(this.app, this, this.cellParserRegistar))
 		this.rendererRegistry.register('sql-seal-internal-markdown', new MarkdownRenderer(this.app))
 		this.rendererRegistry.register('sql-seal-internal-list', new ListRenderer(this.app, this.cellParserRegistar))
+		this.rendererRegistry.register('sql-seal-internal-tasklist', new TaskListRenderer(this.app, this.cellParserRegistar))
 		this.rendererRegistry.register('sql-seal-internal-template', new TemplateRenderer(this.app, this.cellParserRegistar))
 
 		// start syncing when files are loaded
