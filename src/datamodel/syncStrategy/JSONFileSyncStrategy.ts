@@ -53,7 +53,7 @@ export class JsonFileSyncStrategy extends ISyncStrategy {
             throw new Error('Resulting data is not an array')
         }
 
-        const columns = uniq(data.map(d => Object.keys(d)).flat())
+        const columns = uniq(data.map(d => Object.keys(d)).flat()).map(c => ({ name: c, type: 'auto' as const }))
 
         return { columns, data: data }
     }
