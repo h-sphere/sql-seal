@@ -3,9 +3,9 @@ import { merge } from "lodash";
 import { App } from "obsidian";
 import { RendererConfig } from "./rendererRegistry";
 import { parse } from 'json5'
-import { CellParser } from "../cellParser";
 import { ViewDefinition } from "../grammar/parser";
 import SqlSealPlugin from "../main";
+import { ModernCellParser } from "src/cellParser/ModernCellParser";
 
 const getCurrentTheme = () => {
     return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
@@ -31,7 +31,7 @@ class GridRendererCommunicator {
         private config: Partial<GridOptions>,
         private plugin: SqlSealPlugin | null,
         private app: App,
-        private cellParser: CellParser
+        private cellParser: ModernCellParser
     ) {
         this.initialize()
     }
@@ -118,7 +118,7 @@ class GridRendererCommunicator {
 }
 
 export class GridRenderer implements RendererConfig {
-    constructor(private app: App, private readonly plugin: SqlSealPlugin | null, private readonly cellParser: CellParser) { }
+    constructor(private app: App, private readonly plugin: SqlSealPlugin | null, private readonly cellParser: ModernCellParser) { }
     get viewDefinition(): ViewDefinition {
         return {
             name: this.rendererKey,
