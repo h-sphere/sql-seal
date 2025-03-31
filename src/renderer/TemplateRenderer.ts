@@ -1,13 +1,11 @@
 // This is renderer for a very basic List view.
 import { App } from "obsidian";
-import { CellParser } from "../cellParser";
 import { RendererConfig } from "./rendererRegistry";
 import { displayError } from "../utils/ui";
 import { ViewDefinition } from "../grammar/parser";
 import Handlebars from "handlebars";
-import { getCellParser } from "src/cellParser/factory";
-import { uniqueId } from "lodash";
 import { ParseResults } from "src/cellParser/parseResults";
+import { ModernCellParser } from "src/cellParser/ModernCellParser";
 
 interface TemplateRendererConfig {
     template: HandlebarsTemplateDelegate
@@ -17,8 +15,7 @@ export class TemplateRenderer implements RendererConfig {
 
     parseResult: ParseResults;
 
-    constructor(private readonly app: App, private readonly _cellParser: CellParser) {
-        const cellParser = getCellParser(this.app, createEl)
+    constructor(private readonly app: App, private readonly cellParser: ModernCellParser) {
         this.parseResult = new ParseResults(cellParser, (el) => new Handlebars.SafeString(el.outerHTML))
     }
 
