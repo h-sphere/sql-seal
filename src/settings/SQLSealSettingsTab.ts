@@ -122,7 +122,6 @@ export class SQLSealSettingsTab extends PluginSettingTab {
                 .addOption('markdown', 'Markdown Table')
                 .setValue(this.settings.defaultView)
                 .onChange(async (value) => {
-                    console.log(value)
                     this.settings.defaultView = value as 'grid' | 'html' | 'markdown';
                     if (!value) {
                         this.settings.defaultView = DEFAULT_SETTINGS.defaultView

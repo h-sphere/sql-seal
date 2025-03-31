@@ -4,8 +4,8 @@ import { DeleteConfirmationModal } from '../modal/deleteConfirmationModal';
 import { RenameColumnModal } from '../modal/renameColumnModal';
 import { CodeSampleModal } from '../modal/showCodeSample';
 import { GridRenderer } from '../renderer/GridRenderer';
-import { CellParser } from '../cellParser';
 import { errorNotice } from '../utils/notice';
+import { ModernCellParser } from 'src/cellParser/ModernCellParser';
 
 export const CSV_VIEW_TYPE = "csv-viewer" as const;
 export const CSV_VIEW_EXTENSIONS = ['csv'];
@@ -17,7 +17,7 @@ export class CSVView extends TextFileView {
     constructor(
         leaf: WorkspaceLeaf,
         private enableEditing: boolean,
-        private cellParser: CellParser
+        private cellParser: ModernCellParser
     ) {
         super(leaf);
     }

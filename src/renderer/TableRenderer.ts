@@ -1,9 +1,9 @@
 // This is renderer for a very basic Table view.
 import { App } from "obsidian";
-import { CellParser } from "../cellParser";
 import { RendererConfig } from "../renderer/rendererRegistry";
 import { displayError } from "../utils/ui";
 import { ViewDefinition } from "../grammar/parser";
+import { ModernCellParser } from "../cellParser/ModernCellParser";
 
 interface HTMLRendererConfig {
     classNames: string[]
@@ -11,7 +11,7 @@ interface HTMLRendererConfig {
 
 export class TableRenderer implements RendererConfig {
 
-    constructor(private readonly app: App, private cellParser: CellParser) { }
+    constructor(private readonly app: App, private cellParser: ModernCellParser) { }
 
     get rendererKey() {
         return 'html'

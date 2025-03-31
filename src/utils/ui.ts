@@ -1,9 +1,4 @@
 import { identity } from "lodash"
-import { App } from "obsidian"
-import { CellParserRegistar } from "../cellParser"
-import { renderCheckbox } from "./ui/checkbox"
-import { renderLink } from "./ui/link"
-import { renderImage } from "./ui/image"
 
 export  const displayNotice = (el: HTMLElement, text: string) => {
     el.empty()
@@ -30,10 +25,4 @@ export const renderStringifiedArray = (input: string, transformer: (f: string) =
     const el = createEl('span', { cls: 'sqlseal-element-inline-list'})
     el.append(...links)
     return el
-}
-
-export const registerDefaultFunctions = (registar: CellParserRegistar, app: App) => {
-    registar.register('checkbox', renderCheckbox(app), 1)
-    registar.register('a', renderLink(app), 2)
-    registar.register('img', renderImage(app), 2)
 }

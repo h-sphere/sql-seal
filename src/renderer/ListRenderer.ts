@@ -1,9 +1,9 @@
 // This is renderer for a very basic List view.
 import { App } from "obsidian";
-import { CellParser } from "../cellParser";
 import { RendererConfig } from "../renderer/rendererRegistry";
 import { displayError } from "../utils/ui";
 import { ViewDefinition } from "../grammar/parser";
+import { ModernCellParser } from "src/cellParser/ModernCellParser";
 
 interface ListRendererConfig {
     classNames: string[]
@@ -11,7 +11,7 @@ interface ListRendererConfig {
 
 export class ListRenderer implements RendererConfig {
 
-    constructor(private readonly app: App, private readonly cellParser: CellParser) { }
+    constructor(private readonly app: App, private readonly cellParser: ModernCellParser) { }
 
     get rendererKey() {
         return 'list'

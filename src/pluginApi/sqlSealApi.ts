@@ -2,8 +2,9 @@ import { Plugin } from "obsidian"
 import SqlSealPlugin from "../main"
 import { version } from '../../package.json'
 import { RendererConfig } from "../renderer/rendererRegistry";
+import { CellFunction } from "../cellParser/CellFunction";
 
-const API_VERSION = 2;
+const API_VERSION = 3;
 
 export class SQLSealRegisterApi {
     registeredApis: Array<SQLSealApi> = []
@@ -36,11 +37,6 @@ interface RegisteredView {
     viewClass: any;
 }
 
-interface RegisteredFunction {
-    name: string,
-    fn: CallableFunction
-}
-
 // TODO: use the type from registrator
 export interface RegisteredFlag {
     name: string,
@@ -49,7 +45,7 @@ export interface RegisteredFlag {
 
 export class SQLSealApi {
     private views: Array<RegisteredView> = []
-    private functions: Array<RegisteredFunction> = []
+    private functions: Array<CellFunction> = []
     private flags: Array<RegisteredFlag> = []
 
     constructor(private readonly plugin: Plugin, private sqlSealPlugin: SqlSealPlugin) {
@@ -66,12 +62,9 @@ export class SQLSealApi {
         this.sqlSealPlugin.registerSQLSealView(name, viewClass)
     }
 
-    registerCustomFunction(name: string, fn: CallableFunction, argumentsCount: number = 1) {
-        this.functions.push({
-            name,
-            fn,
-        })
-        this.sqlSealPlugin.registerSQLSealFunction(name, fn, argumentsCount)
+    registerCustomFunction(fn: CellFunction) {
+        this.functions.push(fn)
+        this.sqlSealPlugin.registerSQLSealFunction(fn)
     }
 
     registerTable<const columns extends string[]>(tableName: string, columns: columns) {

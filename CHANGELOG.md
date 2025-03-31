@@ -1,3 +1,5 @@
+# 0.31.0 (2025-03-31)
+- feat: TEMPLATE renderer can now use checkboxes, links and images like other views.
 # 0.30.1 (2025-03-27)
 - feat: added basename and parent SQL variables
  
