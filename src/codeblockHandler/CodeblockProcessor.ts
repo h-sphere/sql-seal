@@ -86,6 +86,9 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
     onunload() {
         this.registrator.offAll()
+        if (this.renderer?.cleanup) {
+            this.renderer.cleanup()
+        }
     }
 
     async render() {

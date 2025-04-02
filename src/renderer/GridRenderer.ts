@@ -6,6 +6,7 @@ import { parse } from 'json5'
 import { ViewDefinition } from "../grammar/parser";
 import SqlSealPlugin from "../main";
 import { ModernCellParser } from "../cellParser/ModernCellParser";
+import { EventRef } from "obsidian";
 
 const getCurrentTheme = () => {
     return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
@@ -34,14 +35,43 @@ class GridRendererCommunicator {
         private cellParser: ModernCellParser
     ) {
         this.initialize()
+        this.setupLayoutObservers()
     }
 
     private _gridApi: GridApi<any>
     private errorEl: HTMLElement
     private errorOverlay: HTMLElement
+    private resizeObserver: ResizeObserver
+    private unregisterLeafChange: EventRef | null = null
 
     get gridApi(): GridApi<any> {
         return this._gridApi
+    }
+
+    private setupLayoutObservers() {
+        // Observe resize changes
+        this.resizeObserver = new ResizeObserver(() => {
+            if (this._gridApi) {
+                this._gridApi.autoSizeAllColumns()
+            }
+        })
+        this.resizeObserver.observe(this.el)
+
+        // Observe tab switches
+        this.unregisterLeafChange = this.app.workspace.on('active-leaf-change', () => {
+            if (this._gridApi) {
+                this._gridApi.autoSizeAllColumns()
+            }
+        })
+    }
+
+    cleanup() {
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect()
+        }
+        if (this.unregisterLeafChange) {
+            this.app.workspace.offref(this.unregisterLeafChange)
+        }
     }
 
     private showError(message: string) {
@@ -151,10 +181,13 @@ export class GridRenderer implements RendererConfig {
             render: (data: any) => {
                 communicator.setData(data.columns, data.data)
                 communicator.gridApi.autoSizeAllColumns()
-
             },
             error: (message: string) => {
                 communicator.showInfo('error', message)
+            },
+            cleanup: () => {
+                communicator.cleanup()
+                communicator.gridApi.destroy()
             }
         }
     }

@@ -13,6 +13,7 @@ export interface RendererContext {
 export interface RenderReturn {
     render: (data: any) => void;
     error: (errorMessage: string) => void;
+    cleanup?: () => void;
 }
 export interface RendererConfig<T extends Record<string, any> = Record<string, any>> {
 	rendererKey: string;
