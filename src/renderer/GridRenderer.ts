@@ -134,7 +134,10 @@ class GridRendererCommunicator {
         if (!this.gridApi) {
             throw new Error('Grid has not been initiated')
         }
-        this.gridApi.setGridOption('columnDefs', columns.map((c: any) => ({ field: c })))
+        this.gridApi.setGridOption('columnDefs', columns.map((c: any) => ({
+            headerName: c,
+            valueGetter: (params) => params.data[c]
+        })))
         this.gridApi.setGridOption('rowData', data)
         this.gridApi.setGridOption('loading', false)
     }

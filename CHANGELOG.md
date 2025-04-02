@@ -1,3 +1,11 @@
+# 0.31.0 (2025-04-02)
+- feat: added text rendering for links, images and checkboxes (for MARKDOWN renderer)
+- fix: fixed issue with rendering numbers
+- fix: fixed how grid renders columns - now they automatically match content and don't truncate the text
+- fix: grid resizing now works better when switching tabs, resizing obsidian, etc.
+- fix: columns with dots in the name render properly in grid view
+- chore: now external plugins can use cellRenderer from the main plugin
+
 # 0.31.0 (2025-03-31)
 - feat: TEMPLATE renderer can now use checkboxes, links and images like other views.
 # 0.30.1 (2025-03-27)
