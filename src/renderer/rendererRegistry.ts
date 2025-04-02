@@ -1,3 +1,4 @@
+import { ModernCellParser } from "../cellParser/ModernCellParser";
 import { ViewDefinition } from "../grammar/parser";
 
 export interface DataFormat {
@@ -5,14 +6,19 @@ export interface DataFormat {
     columns: string[]
 }
 
+export interface RendererContext {
+    cellParser: ModernCellParser
+}
+
 export interface RenderReturn {
     render: (data: any) => void;
     error: (errorMessage: string) => void;
+    cleanup?: () => void;
 }
 export interface RendererConfig<T extends Record<string, any> = Record<string, any>> {
 	rendererKey: string;
 	validateConfig: (config: string) => T,
-	render: (config: T, el: HTMLElement) => RenderReturn,
+	render: (config: T, el: HTMLElement, context: RendererContext) => RenderReturn,
     viewDefinition: ViewDefinition
 }
 
@@ -66,8 +72,8 @@ export class RendererRegistry {
         }
         const rendererConfig = this.renderersByKey.get(type.toLowerCase())!
         const elConfig = rendererConfig.validateConfig(config)
-        return (el: HTMLElement) => {
-            return rendererConfig.render(elConfig, el)
+        return (el: HTMLElement, context: RendererContext) => {
+            return rendererConfig.render(elConfig, el, context)
         }
     }
 

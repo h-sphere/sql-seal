@@ -90,4 +90,19 @@ export class CheckboxParser implements CellFunction<Args> {
             }
         }
     }
+
+    renderAsString(values: Args): string {
+        if (!isCheckboxProp(values)) {
+            if (!!values[0]) {
+                return '[x]'
+            }
+            return '[ ]'
+        } else {
+            if (values.checked) {
+                return '[x]'
+            } else {
+                return '[ ] '
+            }
+        }
+    }
 }

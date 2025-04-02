@@ -57,6 +57,16 @@ export class ParseResults {
         })
     }
 
+    renderAsString(data: Record<string, any>[], columns: string[]) {
+        return data.map(d => {
+            const res: Record<string, string> = {}
+            for (const col of columns) {
+                res[col] = this.cellParser.renderAsString(d[col])
+            }
+            return res
+        })
+    }
+
     initialise(parentEl: HTMLElement) {
         this.functions.forEach(fn => fn(parentEl))
     }

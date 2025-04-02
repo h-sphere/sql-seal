@@ -1,11 +1,12 @@
 import { createGrid, GridApi, GridOptions, themeQuartz } from "ag-grid-community";
 import { merge } from "lodash";
 import { App } from "obsidian";
-import { RendererConfig } from "./rendererRegistry";
+import { RendererConfig, RendererContext } from "./rendererRegistry";
 import { parse } from 'json5'
 import { ViewDefinition } from "../grammar/parser";
 import SqlSealPlugin from "../main";
-import { ModernCellParser } from "src/cellParser/ModernCellParser";
+import { ModernCellParser } from "../cellParser/ModernCellParser";
+import { EventRef } from "obsidian";
 
 const getCurrentTheme = () => {
     return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
@@ -34,11 +35,44 @@ class GridRendererCommunicator {
         private cellParser: ModernCellParser
     ) {
         this.initialize()
+        this.setupLayoutObservers()
     }
 
-    private gridApi: GridApi<any>
+    private _gridApi: GridApi<any>
     private errorEl: HTMLElement
     private errorOverlay: HTMLElement
+    private resizeObserver: ResizeObserver
+    private unregisterLeafChange: EventRef | null = null
+
+    get gridApi(): GridApi<any> {
+        return this._gridApi
+    }
+
+    private setupLayoutObservers() {
+        // Observe resize changes
+        this.resizeObserver = new ResizeObserver(() => {
+            if (this._gridApi) {
+                this._gridApi.autoSizeAllColumns()
+            }
+        })
+        this.resizeObserver.observe(this.el)
+
+        // Observe tab switches
+        this.unregisterLeafChange = this.app.workspace.on('active-leaf-change', () => {
+            if (this._gridApi) {
+                this._gridApi.autoSizeAllColumns()
+            }
+        })
+    }
+
+    cleanup() {
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect()
+        }
+        if (this.unregisterLeafChange) {
+            this.app.workspace.offref(this.unregisterLeafChange)
+        }
+    }
 
     private showError(message: string) {
         this.gridApi.setGridOption('loading', false)
@@ -76,8 +110,9 @@ class GridRendererCommunicator {
                 autoHeight: true
             },
             autoSizeStrategy: {
+                // make sure to fit content
                 type: 'fitGridWidth',
-                defaultMinWidth: 150,
+                // defaultMinWidth: 150,
             },
             pagination: true,
             suppressMovableColumns: true,
@@ -89,7 +124,7 @@ class GridRendererCommunicator {
             paginationPageSize: this.plugin? this.plugin.settings.gridItemsPerPage : undefined,
             // ensureDomOrder: true
         }, this.config)
-        this.gridApi = createGrid(
+        this._gridApi = createGrid(
             grid,
             gridOptions,
         );
@@ -99,7 +134,10 @@ class GridRendererCommunicator {
         if (!this.gridApi) {
             throw new Error('Grid has not been initiated')
         }
-        this.gridApi.setGridOption('columnDefs', columns.map((c: any) => ({ field: c })))
+        this.gridApi.setGridOption('columnDefs', columns.map((c: any) => ({
+            headerName: c,
+            valueGetter: (params) => params.data[c]
+        })))
         this.gridApi.setGridOption('rowData', data)
         this.gridApi.setGridOption('loading', false)
     }
@@ -118,7 +156,7 @@ class GridRendererCommunicator {
 }
 
 export class GridRenderer implements RendererConfig {
-    constructor(private app: App, private readonly plugin: SqlSealPlugin | null, private readonly cellParser: ModernCellParser) { }
+    constructor(private app: App, private readonly plugin: SqlSealPlugin | null) { }
     get viewDefinition(): ViewDefinition {
         return {
             name: this.rendererKey,
@@ -140,15 +178,19 @@ export class GridRenderer implements RendererConfig {
     }
 
 
-    render(config: Partial<GridOptions>, el: HTMLElement) {
-        const communicator = new GridRendererCommunicator(el, config, this.plugin, this.app, this.cellParser)
+    render(config: Partial<GridOptions>, el: HTMLElement, { cellParser }: RendererContext) {
+        const communicator = new GridRendererCommunicator(el, config, this.plugin, this.app, cellParser)
         return {
             render: (data: any) => {
-                // FIXME: we need to update that.
                 communicator.setData(data.columns, data.data)
+                communicator.gridApi.autoSizeAllColumns()
             },
             error: (message: string) => {
                 communicator.showInfo('error', message)
+            },
+            cleanup: () => {
+                communicator.cleanup()
+                communicator.gridApi.destroy()
             }
         }
     }

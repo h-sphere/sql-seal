@@ -1,7 +1,7 @@
+import { isLinkLocal } from "../../utils/ui/helperFunctions";
 import { CellFunction } from "../CellFunction";
 import { CellParserResult } from "../ModernCellParser";
 import { App } from "obsidian";
-import { isLinkLocal } from "src/utils/ui/helperFunctions";
 
 type Args = [string] | [string, string]
 
@@ -17,10 +17,7 @@ export class ImageParser implements CellFunction<Args> {
         return 2 // FIXME: should it be 1 or 2?
     }
 
-    prepare([href, path]: Args): CellParserResult {
-        if (!isLinkLocal(href)) {
-            return createEl('img', { attr: { src: href } });
-        }
+    getResourcePath(href: string, path?: string) {
         href = (href ?? '').trim()
         if (href.startsWith('![[')) {
             href = href.slice(3, -2)
@@ -35,8 +32,35 @@ export class ImageParser implements CellFunction<Args> {
         path = (path ? parentPath + '/' : '') + href
         const file = this.app.vault.getFileByPath(path);
         if (!file) {
-            return 'File does not exist'
+            throw new Error('File does not exist')
         }
-        return this.create('img', { attr: { src: this.app.vault.getResourcePath(file) } });
+        return this.app.vault.getResourcePath(file)
+    }
+
+    prepare([href, path]: Args): CellParserResult {
+        if (!isLinkLocal(href)) {
+            return createEl('img', { attr: { src: href } });
+        }
+        try {
+           let resourcePath = this.getResourcePath(href, path)
+            return this.create('img', { attr: { src: resourcePath } });
+
+        } catch (e) {
+            return e
+        }
+    }
+
+    renderAsString([href, path]: Args): string {
+        if (!isLinkLocal(href)) {
+            return `![](${href})`
+        }
+
+        try {
+            const resourcePath = this.getResourcePath(href, path)
+            return `![[${resourcePath}]]`
+        } catch (e) {
+            return e.toString()
+        }
+
     }
 }

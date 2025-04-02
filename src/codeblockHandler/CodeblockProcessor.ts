@@ -69,7 +69,12 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 rendererEl = this.el.createDiv({ cls: 'sqlseal-renderer-container' })
             }
 
-            this.renderer = this.rendererRegistry.prepareRender(results.renderer.type.toLowerCase(), results.renderer.options)(rendererEl)
+            this.renderer = this.rendererRegistry
+                .prepareRender(
+                    results.renderer.type.toLowerCase(), results.renderer.options
+                )(rendererEl, {
+                    cellParser: this.plugin.cellParser
+                })
 
             // FIXME: probably should save the one before transform and perform transform every time we execute it.
             this.query = results.query
@@ -81,6 +86,9 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
     onunload() {
         this.registrator.offAll()
+        if (this.renderer?.cleanup) {
+            this.renderer.cleanup()
+        }
     }
 
     async render() {
