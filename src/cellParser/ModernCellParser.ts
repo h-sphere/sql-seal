@@ -40,6 +40,8 @@ export class ModernCellParser {
                 }
             }
 
+            // If it is link string, use "a" renderer.
+
             return content
         } catch (e) {
             console.error('Error parsing cell with data:', content, e)
@@ -64,6 +66,39 @@ export class ModernCellParser {
         }
     }
 
+    renderAsString(content: string) {
+        try {
+            if (!content) {
+                return content
+            }
+            if (typeof content !== 'string') {
+                return content
+            }
+            if (content.startsWith('SQLSEALCUSTOM')) {
+                const parsedData = parse(content.slice('SQLSEALCUSTOM('.length, -1))
+                const renderer = this.getRenderer(parsedData)
+                return renderer!.renderAsString(parsedData.values)
+            }
+
+            // FIXME: bring this one back
+            // If it's an array, decode it and render each individual elements
+            if (isStringifiedArray(content)) {
+                try {
+                    const parsed: string[] = parse(content)
+                    return parsed.map(p => this.renderer)
+                    return renderStringifiedArray(content)
+                } catch (e) {
+                    return content
+                }
+            }
+
+            return content
+        } catch (e) {
+            console.error('Error parsing cell with data:', content, e)
+            return 'Parsing Error'
+        }
+    }
+
     register(fn: CellFunction) {
         this.functions.set(fn.name, fn)
     }
@@ -77,8 +112,13 @@ export class ModernCellParser {
     }
 
     private renderCustomElement(el: any) {
+        const renderer = this.getRenderer(el)
+        return renderer?.prepare(el.values)
+    }
+
+    private getRenderer(el: any) {
         if (this.functions.has(el.type)) {
-            return this.functions.get(el.type)!.prepare(el.values)
+            return this.functions.get(el.type)!
         } else {
             throw new Error(`Custom function processor ${el.type} is not registered`)
         }

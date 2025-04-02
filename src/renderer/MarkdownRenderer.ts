@@ -4,6 +4,8 @@ import { App } from "obsidian";
 import { RendererConfig } from "../renderer/rendererRegistry";
 import { displayError } from "../utils/ui";
 import { ViewDefinition } from "../grammar/parser";
+import { ParseResults } from "../cellParser/parseResults";
+import { ModernCellParser } from "../cellParser/ModernCellParser";
 
 const mapDataFromHeaders = (columns: string[], data: Record<string, any>[]) => {
     return data.map(d => columns.map(c => String(d[c])))
@@ -11,7 +13,12 @@ const mapDataFromHeaders = (columns: string[], data: Record<string, any>[]) => {
 
 export class MarkdownRenderer implements RendererConfig {
 
-    constructor(private readonly app: App) { }
+    parseResult: ParseResults;
+
+    constructor(private readonly app: App, private readonly cellParser: ModernCellParser) {
+        this.parseResult = new ParseResults(cellParser)
+
+    }
 
     get rendererKey() {
         return 'markdown'
@@ -34,7 +41,7 @@ export class MarkdownRenderer implements RendererConfig {
                 const tab = getMarkdownTable({
                     table: {
                         head: columns,
-                        body: mapDataFromHeaders(columns, data)
+                        body: mapDataFromHeaders(columns, this.parseResult.renderAsString(data, columns))
                     }
                 })
 

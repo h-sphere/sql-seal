@@ -4,8 +4,8 @@ import { RendererConfig } from "./rendererRegistry";
 import { displayError } from "../utils/ui";
 import { ViewDefinition } from "../grammar/parser";
 import Handlebars from "handlebars";
-import { ParseResults } from "src/cellParser/parseResults";
-import { ModernCellParser } from "src/cellParser/ModernCellParser";
+import { ParseResults } from "../cellParser/parseResults";
+import { ModernCellParser } from "../cellParser/ModernCellParser";
 
 interface TemplateRendererConfig {
     template: HandlebarsTemplateDelegate
