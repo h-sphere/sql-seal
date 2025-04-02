@@ -1,7 +1,7 @@
+import { isLinkLocal } from "../../utils/ui/helperFunctions";
 import { CellFunction } from "../CellFunction";
 import { CellParserResult } from "../ModernCellParser";
 import { App } from "obsidian";
-import { isLinkLocal } from "src/utils/ui/helperFunctions";
 
 type Args = [string] | [string, string]
 

@@ -4,7 +4,7 @@ import { version } from '../../package.json'
 import { RendererConfig } from "../renderer/rendererRegistry";
 import { CellFunction } from "../cellParser/CellFunction";
 
-const API_VERSION = 3;
+const API_VERSION = 4;
 
 export class SQLSealRegisterApi {
     registeredApis: Array<SQLSealApi> = []

@@ -1,7 +1,7 @@
 import { CellFunction } from "./CellFunction";
 import { parse } from 'json5'
 import { isStringifiedArray, renderStringifiedArray } from '../utils/ui'
-import { SqlSealDatabase } from "src/database/database";
+import { SqlSealDatabase } from "../database/database";
 
 export type UnregisterCallback = () => void;
 
@@ -34,13 +34,39 @@ export class ModernCellParser {
             // If it's an array, decode it and render each individual elements
             if (isStringifiedArray(content)) {
                 try {
-                    return renderStringifiedArray(content)
+                    const parsed: string[] = parse(content)
+                    const container = createSpan()
+                    parsed.forEach((p, i) => {
+                        const rendered = this.render(p)
+                        if (rendered instanceof HTMLElement) {
+                            container.appendChild(rendered)
+                            if (i < parsed.length -1) {
+                                container.appendChild(document.createTextNode(', '))
+                            }
+                        }
+                    })
+                    return container
                 } catch (e) {
                     return content
                 }
             }
 
-            // If it is link string, use "a" renderer.
+            // If it is a wikilink or markdown link, use "a" renderer
+            if (content.startsWith('[[') && content.endsWith(']]')) {
+                const renderer = this.functions.get('a');
+                if (renderer) {
+                    const [link, name] = content.slice(2, -2).split('|');
+                    return renderer.prepare([link, name]);
+                }
+            } else if (content.startsWith('[') && content.includes('](') && content.endsWith(')')) {
+                const renderer = this.functions.get('a');
+                if (renderer) {
+                    const closingBracketIndex = content.indexOf('](');
+                    const name = content.slice(1, closingBracketIndex);
+                    const href = content.slice(closingBracketIndex + 2, -1);
+                    return renderer.prepare([href, name]);
+                }
+            }
 
             return content
         } catch (e) {
@@ -66,7 +92,7 @@ export class ModernCellParser {
         }
     }
 
-    renderAsString(content: string) {
+    renderAsString(content: string): string {
         try {
             if (!content) {
                 return content
@@ -85,10 +111,27 @@ export class ModernCellParser {
             if (isStringifiedArray(content)) {
                 try {
                     const parsed: string[] = parse(content)
-                    return parsed.map(p => this.renderer)
-                    return renderStringifiedArray(content)
+                    return parsed.map(p => this.renderAsString(p)).join(', ')
                 } catch (e) {
-                    return content
+                    return content.toString()
+                }
+            }
+
+
+            // If it is a wikilink or markdown link, use "a" renderer
+            if (content.startsWith('[[') && content.endsWith(']]')) {
+                const renderer = this.functions.get('a');
+                if (renderer) {
+                    const [link, name] = content.slice(2, -2).split('|');
+                    return renderer.renderAsString([link, name]);
+                }
+            } else if (content.startsWith('[') && content.includes('](') && content.endsWith(')')) {
+                const renderer = this.functions.get('a');
+                if (renderer) {
+                    const closingBracketIndex = content.indexOf('](');
+                    const name = content.slice(1, closingBracketIndex);
+                    const href = content.slice(closingBracketIndex + 2, -1);
+                    return renderer.renderAsString([href, name]);
                 }
             }
 

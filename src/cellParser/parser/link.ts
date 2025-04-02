@@ -1,9 +1,7 @@
 import { isStringifiedArray, renderStringifiedArray } from "../../utils/ui";
+import { isLinkLocal, isLinktext, removeExtension } from "../../utils/ui/helperFunctions";
 import { CellFunction } from "../CellFunction";
-import { CellParserResult, Result } from "../ModernCellParser";
 import { App } from "obsidian";
-import { isLinkLocal, isLinktext, removeExtension } from "src/utils/ui/helperFunctions";
-import { parse } from 'json5'
 
 type Args = [string] | [string, string]
 
@@ -79,24 +77,6 @@ export class LinkParser implements CellFunction<Args> {
         if (!href) {
             return ''
         }
-        
-        // if (isStringifiedArray(href)) {
-        //     try {
-        //         // FIXME: parse and run render as strings
-        //         const arr: string[] = parse(href)
-                
-        //         return arr.map(e => this.renderAsString(e))
-
-    //         const res =  renderStringifiedArray(href, href => this.prepare([href]))
-        //         if (res instanceof HTMLElement) {
-        //             return res.outerHTML
-        //         }
-        //         return res
-        //     } catch (e) {
-        //         return href
-        //     }
-        // }
-
        const res = this.parseLink(href, name)
        if (res.cls == 'internal-link') {
             if (!name) {

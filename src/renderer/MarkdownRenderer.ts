@@ -1,7 +1,7 @@
 // This is renderer for a very basic Table view.
 import { getMarkdownTable } from "markdown-table-ts";
 import { App } from "obsidian";
-import { RendererConfig } from "../renderer/rendererRegistry";
+import { RendererConfig, RendererContext } from "../renderer/rendererRegistry";
 import { displayError } from "../utils/ui";
 import { ViewDefinition } from "../grammar/parser";
 import { ParseResults } from "../cellParser/parseResults";
@@ -12,12 +12,7 @@ const mapDataFromHeaders = (columns: string[], data: Record<string, any>[]) => {
 }
 
 export class MarkdownRenderer implements RendererConfig {
-
-    parseResult: ParseResults;
-
-    constructor(private readonly app: App, private readonly cellParser: ModernCellParser) {
-        this.parseResult = new ParseResults(cellParser)
-
+    constructor(private readonly app: App) {
     }
 
     get rendererKey() {
@@ -35,13 +30,14 @@ export class MarkdownRenderer implements RendererConfig {
         }
     }
 
-    render(config: ReturnType<typeof this.validateConfig>, el: HTMLElement) {
+    render(config: ReturnType<typeof this.validateConfig>, el: HTMLElement, { cellParser } : RendererContext) {
+        const parseResult = new ParseResults(cellParser)
         return {
             render: ({ columns, data }: any) => {
                 const tab = getMarkdownTable({
                     table: {
                         head: columns,
-                        body: mapDataFromHeaders(columns, this.parseResult.renderAsString(data, columns))
+                        body: mapDataFromHeaders(columns, parseResult.renderAsString(data, columns))
                     }
                 })
 
