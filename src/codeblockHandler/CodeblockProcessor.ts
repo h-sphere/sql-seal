@@ -73,7 +73,8 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 .prepareRender(
                     results.renderer.type.toLowerCase(), results.renderer.options
                 )(rendererEl, {
-                    cellParser: this.plugin.cellParser
+                    cellParser: this.plugin.cellParser,
+                    sourcePath: this.ctx.sourcePath
                 })
 
             // FIXME: probably should save the one before transform and perform transform every time we execute it.
