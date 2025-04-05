@@ -93,7 +93,7 @@ export class CheckboxParser implements CellFunction<Args> {
 
     renderAsString(values: Args): string {
         if (!isCheckboxProp(values)) {
-            if (!!values[0]) {
+            if (values[0]) {
                 return '[x]'
             }
             return '[ ]'
