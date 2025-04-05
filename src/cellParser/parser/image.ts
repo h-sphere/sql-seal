@@ -53,14 +53,8 @@ export class ImageParser implements CellFunction<Args> {
     renderAsString([href, path]: Args): string {
         if (!isLinkLocal(href)) {
             return `![](${href})`
+        } else {
+            return `![[${href}]]`
         }
-
-        try {
-            const resourcePath = this.getResourcePath(href, path)
-            return `![[${resourcePath}]]`
-        } catch (e) {
-            return e.toString()
-        }
-
     }
 }
