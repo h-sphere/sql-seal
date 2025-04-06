@@ -82,6 +82,8 @@ export class ModernCellParser {
         const res = this.prepare(content)
         if (typeof res === 'string' || !res) {
             return res
+        } else if (typeof res === 'number') {
+            return res.toString()
         } else if (res instanceof HTMLElement) {
             return res
         } else {
