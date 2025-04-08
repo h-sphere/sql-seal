@@ -43,6 +43,8 @@ export class ModernCellParser {
                             if (i < parsed.length -1) {
                                 container.appendChild(document.createTextNode(', '))
                             }
+                        } else if (typeof rendered === 'string') {
+                            container.textContent += `${rendered}${i < parsed.length - 1 ? ', ' : ''}`
                         }
                     })
                     return container
