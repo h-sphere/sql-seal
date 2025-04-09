@@ -14,7 +14,7 @@ class RenderContext {
 
     render(context: string) {
         const res = this.cellParser.prepare(context)
-        if (typeof res === 'string') {
+        if (typeof res === 'string' || typeof res === 'number') {
             return res
         }
         if (res instanceof HTMLElement) {
