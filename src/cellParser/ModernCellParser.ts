@@ -11,7 +11,7 @@ export interface Result {
     onRunCallback?: OnRunCallback
 }
 
-export type CellParserResult = Result | string | HTMLElement
+export type CellParserResult = Result | string | HTMLElement | number
 
 export class ModernCellParser {
 
