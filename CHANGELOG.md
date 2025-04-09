@@ -1,4 +1,8 @@
-# 0.31.0 (2025-04-02)
+# 0.33.0 (2025-04-09)
+- fix: better text links for images (by @satkowski)
+- fix: lists are now rendered properly (by @satkowski)
+
+# 0.32.0 (2025-04-02)
 - feat: added text rendering for links, images and checkboxes (for MARKDOWN renderer)
 - fix: fixed issue with rendering numbers
 - fix: fixed how grid renders columns - now they automatically match content and don't truncate the text
