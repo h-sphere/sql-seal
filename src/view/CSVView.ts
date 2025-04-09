@@ -276,7 +276,7 @@ export class CSVView extends TextFileView {
                 })
                 menu.showAtMouseEvent(e.event as any)
             }
-        }, gridEl, { cellParser: this.cellParser })
+        }, gridEl, { cellParser: this.cellParser, sourcePath: this.file?.path || '' })
 
         this.api = api;
         this.loadDataIntoGrid()
