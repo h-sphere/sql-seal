@@ -26,6 +26,8 @@ export class ParseResults {
                     }
                 } else if (typeof data === 'string') {
                     res[col] = data
+                } else if (typeof data === 'number') {
+                    res[col] = data.toString()
                 } else if (!data) {
                     res[col] = ''
                 } else {
