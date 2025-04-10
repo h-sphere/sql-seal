@@ -49,20 +49,23 @@ class GridRendererCommunicator {
     }
 
     private setupLayoutObservers() {
-        // Observe resize changes
+        // Debounce the resize observer to prevent too frequent updates
+        let resizeTimeout: NodeJS.Timeout;
         this.resizeObserver = new ResizeObserver(() => {
             if (this._gridApi) {
-                this._gridApi.autoSizeAllColumns()
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    this._gridApi.autoSizeAllColumns();
+                }, 100);
             }
-        })
-        this.resizeObserver.observe(this.el)
+        });
+        this.resizeObserver.observe(this.el);
 
-        // Observe tab switches
-        this.unregisterLeafChange = this.app.workspace.on('active-leaf-change', () => {
-            if (this._gridApi) {
-                this._gridApi.autoSizeAllColumns()
+        this.unregisterLeafChange = this.app.workspace.on('active-leaf-change', (leaf) => {
+            if (this._gridApi && leaf?.view?.getViewType() !== 'canvas') {
+                this._gridApi.autoSizeAllColumns();
             }
-        })
+        });
     }
 
     cleanup() {

@@ -94,12 +94,10 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
     async render() {
         try {
-
             const registeredTablesForContext = await this.sync.getTablesMappingForContext(this.ctx.sourcePath)
 
             const res = transformQuery(this.query, registeredTablesForContext)
             const transformedQuery = res.sql
-
 
             if (this.flags.refresh) {
                 registerObservers({
@@ -110,26 +108,24 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 })
             }
 
-
+            let variables = {}
             const file = this.app.vault.getFileByPath(this.ctx.sourcePath)
-            if (!file) {
-                return
+            if (file) {
+                const fileCache = this.app.metadataCache.getFileCache(file)
+                variables = {
+                    ...fileCache?.frontmatter ?? {},
+                    path: file.path,
+                    fileName: file.name,
+                    basename: file.basename,
+                    parent: file.parent?.path,
+                    extension: file.extension,
+                }
             }
-            const fileCache = this.app.metadataCache.getFileCache(file)
 
             if (this.flags.explain) {
                 // Rendering explain
-                const result = await this.db.explain(transformedQuery, fileCache?.frontmatter ?? {})
+                const result = await this.db.explain(transformedQuery, variables)
                 this.explainEl.textContent = result
-            }
-
-            const variables = {
-                ...fileCache?.frontmatter ?? {},
-                path: file.path,
-                fileName: file.name,
-                basename: file.basename,
-                parent: file.parent?.path,
-                extension: file.extension,
             }
 
             const { data, columns } = await this.db.select(transformedQuery, variables)
