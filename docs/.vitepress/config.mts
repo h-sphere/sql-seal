@@ -65,6 +65,7 @@ export default defineConfig({
         text: 'FAQ',
         items: [
           { text: 'Comparison with Dataview', link: '/faq/comparison-with-dataview' },
+          { text: 'SQLSeal with Obsidian Sync', link: '/faq/obsidian-sync' },
 		  { text: 'Understanding Tags', link: '/faq/understanding-tags'}
 
         ]
