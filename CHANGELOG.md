@@ -3,6 +3,7 @@
 - fix: lists are now rendered properly (by @satkowski)
 - chore: exposing filename in the renderer (by @satkowski)
 - fix: numbers are now properly handled (by @satkowski)
+- fix: SQLSeal results are now properly rendered on canvas
 
 # 0.32.0 (2025-04-02)
 - feat: added text rendering for links, images and checkboxes (for MARKDOWN renderer)
