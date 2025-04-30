@@ -12,6 +12,10 @@
     position: relative;
 }
 
+.block-language-sqlseal {
+    overflow-y: auto;
+}
+
 .sqlseal-error {
     padding: 1em;
     background: #b80f0f;
@@ -284,4 +288,11 @@
 
 .cm-indent + :is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table)::before {
     display: none;
+}
+
+
+/* Obsidian Minimal Styles */
+.markdown-source-view.mod-cm6.is-readable-line-width .cm-contentContainer.cm-contentContainer>.cm-content>:has(>.block-language-sqlseal table.dataview) {
+    width: var(--container-dataview-table-width);
+    max-width: var(--container-table-max-width);
 }

@@ -17,12 +17,12 @@ export class TableRenderer implements RendererConfig {
         return 'html'
     }
     get viewDefinition(): ViewDefinition {
-            return {
-                name: this.rendererKey,
-                argument: 'viewClassNames?',
-                singleLine: true
-            }
+        return {
+            name: this.rendererKey,
+            argument: 'viewClassNames?',
+            singleLine: true
         }
+    }
 
     validateConfig(config: string): HTMLRendererConfig {
         if (!config) {
@@ -40,28 +40,46 @@ export class TableRenderer implements RendererConfig {
         return {
             render: ({ columns, data }: any) => {
                 el.empty()
-                const container = el.createDiv({
-                    cls: ['sqlseal-table-container', ...config.classNames]
-                })
 
                 let tableClasses = ['sqlseal']
+
+                let adjustLayout = false
+                let classNames = [...config.classNames]
+
+                // To make sure templates like minimal work properly
+                if (classNames.contains('dataview')) {
+                    tableClasses.push('dataview', 'table-view-table')
+                    adjustLayout = true
+                    classNames = classNames.filter(c => c !== 'dataview')
+                }
+
+                const container = el.createDiv({
+                    cls: ['sqlseal-table-container', ...classNames]
+                })
 
                 const table = container.createEl("table", {
                     cls: tableClasses
                 })
 
                 // HEADER
-                const header = table.createEl("thead").createEl("tr")
+                const header = table.createEl("thead", {
+                    cls: adjustLayout ? ['table-view-thead'] : []
+                }).createEl("tr")
                 columns.forEach((c: string) => {
                     header.createEl("th", { text: c })
                 })
 
-                const body = table.createEl("tbody")
+                const body = table.createEl("tbody", { cls: adjustLayout ? ['table-view-tbody'] : [] })
                 data.forEach((d: any) => {
                     const row = body.createEl("tr")
                     columns.forEach((c: any) => {
-                        row.createEl("td", { text: cellParser.render(d[c]) as string })                        
-
+                        const parsed = cellParser.render(d[c]) as string
+                        if (adjustLayout) {
+                            const td = row.createEl("td")
+                            td.createSpan({ text: parsed })
+                        } else {
+                            row.createEl("td", { text: parsed })
+                        }
                     })
                 })
             },
