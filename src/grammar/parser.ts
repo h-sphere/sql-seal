@@ -34,8 +34,9 @@ export const SQLSealLangDefinition = (views: ViewDefinition[], flags: readonly F
             |                          caseInsensitive<"EXPLAIN">                                               -- explain
             ${flags.length ? '| ExtraFlags -- extraFlags' : ''}
             TableExpression =          tableKeyword identifier "=" TableDefinition          
-            TableDefinition =          fileOpening NonemptyListOf<listElement, ","> tableDefinitionClosing      -- file
+            TableDefinition =          fileOpening TableFileExpressionArgs tableDefinitionClosing      -- file
             |                          tableOpening NonemptyListOf<listElement, ","> tableDefinitionClosing      -- mdtable
+            TableFileExpressionArgs =  filename ("," NonemptyListOf<listElement, ",">)?
             identifier =               (alnum | "_")+
             filename  =                (alnum | "." | "-" | space | "_" | "/" | "\\" | "$" | "[" | "]" | "\"")+
             fileOpening =              caseInsensitive<"file(">
@@ -109,9 +110,17 @@ const generateSemantic = (grammar: ohm.Grammar) => {
        },
        TableDefinition_file: (_file, args, _close) => {
         return {
-            arguments: args.asIteration().children.map((c: ohm.Node) => c.toObject().trim()),
+            arguments: args.toObject(),
             type: 'file'
         }
+       },
+       TableFileExpressionArgs: (filename, _sep, rest) => {
+        // ...rest.asIteration().children.map((c: ohm.Node) => c.toObject().trim())
+        let remaining = []
+        if (rest.children.length) {
+            remaining = rest.children[0].asIteration().children.map((c: ohm.Node) => c.toObject().trim())
+        }
+        return [filename.toObject(), ...remaining]
        },
        TableDefinition_mdtable: (_file, args, _close) =>  {
         return {
@@ -136,6 +145,13 @@ const generateSemantic = (grammar: ohm.Grammar) => {
        },
        listElement_quoted: (_q, value, _q2) => value.sourceString,
        listElement_unquoted: (v) => v.sourceString,
+       filename: (v) => {
+        const f = v.sourceString
+        if (f.length && f[0] === '"' && f[f.length - 1] === '"') {
+            return f.substring(1, f.length - 1)
+        }
+        return v.sourceString.trim()
+       },
        _terminal() {
             return this.sourceString
         }

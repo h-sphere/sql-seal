@@ -1,3 +1,7 @@
+# 0.34.0 (2025-04-30)
+- feat: you can now navigate to linked CSV and JSON file sources
+- feat: improved support for minimal theme custom classes
+
 # 0.33.0 (2025-04-09)
 - fix: better text links for images (by @satkowski)
 - fix: lists are now rendered properly (by @satkowski)

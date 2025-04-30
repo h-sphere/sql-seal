@@ -11,7 +11,7 @@ const nodes = new Map([
     ['tableKeyword', { terminal: true, type: 'keyword' }],
     ['fileOpening', { terminal: true, type: 'function' }],
     ['tableOpening', { terminal: true, type: 'function' }],
-    ['filename', { terminal: true, type: 'identifier' }],
+    ['filename', { terminal: true, type: 'filename' }],
     ['digit', { terminal: true, type: 'identifier' }],
     ['tableDefinitionClosing', { terminal: true, type: 'function' }],
     ['selectKeyword', { terminal: false, type: 'keyword' }],
