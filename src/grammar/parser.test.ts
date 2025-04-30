@@ -37,6 +37,18 @@ describe('Ohm parser', () => {
         })
     })
 
+    it('should parse table expression with name quoted', () => {
+        expect(parse('TABLE x = file("abcdef.csv")', DEFAULT_VIEWS)).toEqual({
+            query: '',
+            tables: [{ arguments: ['abcdef.csv'], type: 'file', tableAlias: 'x' }],
+            flags: {},
+            renderer: {
+                name: 'GRID',
+                options: ''
+            }
+        })
+    })
+
     it('should parse SELECT statement alone', () => {
         expect(parse('SELECT * FROM files', DEFAULT_VIEWS)).toEqual({
             query: 'SELECT * FROM files',

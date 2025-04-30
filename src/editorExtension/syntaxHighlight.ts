@@ -15,6 +15,7 @@ import { SQLSealLangDefinition } from '../grammar/parser';
 import { RendererRegistry } from '../renderer/rendererRegistry';
 import { Range } from '@codemirror/state';
 import { Decorator, highlighterOperation } from '../grammar/highlighterOperation';
+import { FilePathWidget } from './widgets/FilePathWidget';
 
 const markDecorations = {
   blockFlag: Decoration.mark({ class: 'cm-sqlseal-block-flag' }),
@@ -85,12 +86,32 @@ export class SQLSealViewPlugin implements PluginValue {
 
       if (decorations) {
         decorations.forEach(dec => {
-          const decoration = markDecorations[dec.type as keyof typeof markDecorations];
-          if (decoration) {
-            builder.push(decoration.range(
+          if (dec.type === 'filename') {
+            // Get the actual filename text from the document
+            const filePath = view.state.doc.sliceString(
+              contentStart + dec.start,
+              contentStart + dec.end
+            );
+
+            console.log('FOUND FILENAME', filePath)
+
+            // Create widget decoration for the filename
+            const widget = new FilePathWidget(filePath, this.app);
+            builder.push(Decoration.replace({
+              widget,
+              inclusive: true
+            }).range(
               contentStart + dec.start,
               contentStart + dec.end
             ));
+          } else {
+            const decoration = markDecorations[dec.type as keyof typeof markDecorations];
+            if (decoration) {
+              builder.push(decoration.range(
+                contentStart + dec.start,
+                contentStart + dec.end
+              ));
+            }
           }
         });
       }
