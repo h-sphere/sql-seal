@@ -1,3 +1,6 @@
+# 0.35.0 (2025-05-02)
+- fix: fixed issue with CSV files edits not being saved
+
 # 0.34.0 (2025-04-30)
 - feat: you can now navigate to linked CSV and JSON file sources
 - feat: improved support for minimal theme custom classes

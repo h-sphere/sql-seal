@@ -206,6 +206,10 @@ export class CSVView extends TextFileView {
         const api = grid.render({
             defaultColDef: {
                 editable: this.enableEditing,
+                valueSetter: (e) => {
+                    e.data[e.column.getUserProvidedColDef()?.headerName!] = e.newValue
+                    return e.newValue
+                },
                 headerComponentParams: {
                     enableMenu: this.enableEditing,
                     showColumnMenu: function (e: any) {
