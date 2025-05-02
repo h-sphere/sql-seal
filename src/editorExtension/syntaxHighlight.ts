@@ -93,8 +93,6 @@ export class SQLSealViewPlugin implements PluginValue {
               contentStart + dec.end
             );
 
-            console.log('FOUND FILENAME', filePath)
-
             // Create widget decoration for the filename
             const widget = new FilePathWidget(filePath, this.app);
             builder.push(Decoration.replace({
