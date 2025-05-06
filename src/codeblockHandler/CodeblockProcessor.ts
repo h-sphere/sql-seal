@@ -113,7 +113,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             if (file) {
                 const fileCache = this.app.metadataCache.getFileCache(file)
                 variables = {
-                    ...fileCache?.frontmatter ?? {},
+                    ...(fileCache?.frontmatter ?? {}),
                     path: file.path,
                     fileName: file.name,
                     basename: file.basename,

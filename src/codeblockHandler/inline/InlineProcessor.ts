@@ -58,7 +58,7 @@ export class InlineProcessor extends MarkdownRenderChild {
             
             // TODO: unify this between codeblock and inline handlers
             const variables = {
-                ...fileCache?.frontmatter ?? {},
+                ...(fileCache?.frontmatter ?? {}),
                 path: file.path,
                 fileName: file.name,
                 basename: file.basename,
