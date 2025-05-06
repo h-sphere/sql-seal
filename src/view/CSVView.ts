@@ -135,9 +135,7 @@ export class CSVView extends TextFileView {
     api: any = null;
 
     loadDataIntoGrid() {
-        console.log('Load data into grid')
-        setTimeout(() => {
-
+        requestAnimationFrame(() => {
             const result = parse(this.content, {
                 header: true,
                 skipEmptyLines: true,
@@ -146,7 +144,6 @@ export class CSVView extends TextFileView {
                 ...d,
                 __index: i.toString()
             }))
-            console.log('DATA', data)
             this.result = {
                 data: data,
                 fields: result.meta.fields
@@ -158,7 +155,7 @@ export class CSVView extends TextFileView {
                 columns: result.meta.fields
             })
 
-        }, 100)
+        })
     }
 
     private async renderCSV() {
@@ -221,8 +218,6 @@ export class CSVView extends TextFileView {
                             item.setTitle('Rename Column')
                             item.onClick(() => {
                                 const modal = new RenameColumnModal(csvView.app, (res) => {
-                                    console.log('RENAME', this.column, res)
-                                    console.log('fff', csvView.result.fields)
                                     csvView.renameColumn(
                                         this.column.userProvidedColDef.headerName, res)
                                 })
