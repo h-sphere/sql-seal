@@ -135,6 +135,7 @@ export class CSVView extends TextFileView {
     api: any = null;
 
     loadDataIntoGrid() {
+        console.log('Load data into grid')
         setTimeout(() => {
 
             const result = parse(this.content, {
@@ -145,6 +146,7 @@ export class CSVView extends TextFileView {
                 ...d,
                 __index: i.toString()
             }))
+            console.log('DATA', data)
             this.result = {
                 data: data,
                 fields: result.meta.fields
@@ -219,7 +221,10 @@ export class CSVView extends TextFileView {
                             item.setTitle('Rename Column')
                             item.onClick(() => {
                                 const modal = new RenameColumnModal(csvView.app, (res) => {
-                                    csvView.renameColumn(this.column.colId, res)
+                                    console.log('RENAME', this.column, res)
+                                    console.log('fff', csvView.result.fields)
+                                    csvView.renameColumn(
+                                        this.column.userProvidedColDef.headerName, res)
                                 })
                                 modal.open()
                             })
@@ -228,9 +233,9 @@ export class CSVView extends TextFileView {
                         menu.addItem(item => {
                             item.setTitle('Delete Column')
                             item.onClick(() => {
-                                this.column.colId
-                                const modal = new DeleteConfirmationModal(csvView.app, `column ${this.column.colId}`, () => {
-                                    csvView.deleteColumn(this.column.colId)
+                                const colName = this.column.userProvidedColDef.headerName
+                                const modal = new DeleteConfirmationModal(csvView.app, `column ${colName}`, () => {
+                                    csvView.deleteColumn(colName)
                                 })
                                 modal.open()
                             })
@@ -254,7 +259,7 @@ export class CSVView extends TextFileView {
                 if (!columnName) {
                     return
                 }
-                csvView.moveColumn(columnName?.field!, e.toIndex!)
+                csvView.moveColumn(columnName?.headerName!, e.toIndex!)
             },
             domLayout: 'normal',
             getRowId: (p) => p.data.__index,
