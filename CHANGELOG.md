@@ -1,3 +1,7 @@
+# 0.36.0 (2025-05-06)
+- fix: deleting columns and renaming columns works again
+- chore: updated dependencies to the latest versions
+
 # 0.35.0 (2025-05-02)
 - fix: fixed issue with CSV files edits not being saved
 

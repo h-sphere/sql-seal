@@ -21,6 +21,14 @@ import { ModernCellParser } from './cellParser/ModernCellParser';
 import { getCellParser } from './cellParser/factory';
 import { CellFunction } from './cellParser/CellFunction';
 
+import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
+
+// Register all community features
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+// Mark all grids as using legacy themes
+provideGlobalGridOptions({ theme: "legacy"});
+
 export default class SqlSealPlugin extends Plugin {
 	settings: SQLSealSettings;
 	fileSync: SealFileSync;
