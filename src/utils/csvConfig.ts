@@ -2,7 +2,8 @@ import { TFile, Vault } from "obsidian"
 import { parse as jsonParse, stringify as jsonStringify } from 'json5'
 
 
-export type ColumnType = 'auto' | 'number' | 'text'
+// export type ColumnType = 'auto' | 'number' | 'text'
+export type ColumnType = string
 
 interface ColumnDefinition {
     type: ColumnType
@@ -17,7 +18,6 @@ export const loadConfig = async (file: TFile, vault: Vault): Promise<ConfigObjec
         columnDefinitions: {}
     }
 
-    console.log('LOADING CONFIG')
     // Now loading saved one
     const configPath = file!.path + '.sqlsealconfig'
     const configFile = vault.getFileByPath(configPath)
@@ -27,7 +27,6 @@ export const loadConfig = async (file: TFile, vault: Vault): Promise<ConfigObjec
     const loadedConfig = await vault.read(configFile)
     // decode
     const decoded = jsonParse(loadedConfig)
-    console.log('Config loaded', decoded)
     return decoded
 }
 

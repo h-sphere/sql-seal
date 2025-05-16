@@ -26,13 +26,13 @@ const getAgGridTheme = (theme: 'dark' | 'light') => {
     } as const
 }
 
-class GridRendererCommunicator {
+export class GridRendererCommunicator {
     constructor(
         private el: HTMLElement,
         private config: Partial<GridOptions>,
         private plugin: SqlSealPlugin | null,
         private app: App,
-        private cellParser: ModernCellParser
+        private cellParser?: ModernCellParser
     ) {
         this.initialize()
         this.setupLayoutObservers()
@@ -105,11 +105,11 @@ class GridRendererCommunicator {
             theme: myTheme,
             defaultColDef: {
                 resizable: false,
-                cellRendererSelector: () => {
+                cellRendererSelector: this.cellParser ? () => {
                     return {
-                        component: ({ value }: { value: string }) => this.cellParser.render(value)
+                        component: ({ value }: { value: string }) => this.cellParser!.render(value)
                     }
-                },
+                } : undefined,
                 autoHeight: true
             },
             autoSizeStrategy: {
@@ -137,10 +137,6 @@ class GridRendererCommunicator {
         if (!this.gridApi) {
             throw new Error('Grid has not been initiated')
         }
-        this.gridApi.setGridOption('columnDefs', columns.map((c: any) => ({
-            headerName: c,
-            valueGetter: (params) => params.data[c]
-        })))
         this.gridApi.setGridOption('rowData', data)
         this.gridApi.setGridOption('loading', false)
     }
@@ -194,7 +190,8 @@ export class GridRenderer implements RendererConfig {
             cleanup: () => {
                 communicator.cleanup()
                 communicator.gridApi.destroy()
-            }
+            },
+            communicator
         }
     }
 }

@@ -7,7 +7,7 @@ export interface DataFormat {
 }
 
 export interface RendererContext {
-    cellParser: ModernCellParser,
+    cellParser?: ModernCellParser,
     sourcePath: string
 }
 

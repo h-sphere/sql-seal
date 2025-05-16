@@ -142,10 +142,9 @@ export class WorkerDatabase {
             await this.dropTable(tableName)
         }
 
-        const fieldDefinitions = fields.map(c => c.name + ' ' + (c.type === 'auto' ? '' : c.type.toUpperCase()))
+        const fieldDefinitions = fields.map(c => c.name) // Setting type inside engine changes nothing for SQLite
 
         const createStmt = `CREATE TABLE IF NOT EXISTS ${tableName}(${fieldDefinitions.join(', ')})`
-        console.log('CREATE STMT', createStmt)
         this.db.run(createStmt)
     }
 

@@ -1,9 +1,9 @@
-import { WorkspaceLeaf, TextFileView, Menu, Notice } from 'obsidian';
+import { WorkspaceLeaf, TextFileView, Menu, Notice, MenuItem } from 'obsidian';
 import { parse, unparse } from 'papaparse';
 import { DeleteConfirmationModal } from '../modal/deleteConfirmationModal';
 import { RenameColumnModal } from '../modal/renameColumnModal';
 import { CodeSampleModal } from '../modal/showCodeSample';
-import { GridRenderer } from '../renderer/GridRenderer';
+import { GridRenderer, GridRendererCommunicator } from '../renderer/GridRenderer';
 import { errorNotice } from '../utils/notice';
 import { ModernCellParser } from '../cellParser/ModernCellParser';
 import { ConfigObject, loadConfig, saveConfig } from 'src/utils/csvConfig';
@@ -65,7 +65,7 @@ export class CSVView extends TextFileView {
     private result: any;
     updateRow(newRowData: Record<string, any>) {
         this.result.data[parseInt(newRowData.__index, 10)] = newRowData;
-        this.saveData()
+        this.saveData(true)
     }
 
     deleteRow(idx: number) {
@@ -107,6 +107,7 @@ export class CSVView extends TextFileView {
             return d
         })
         this.saveData()
+        this.loadDataIntoGrid()
     }
 
     setIsEditable(newValue: boolean) {
@@ -114,9 +115,25 @@ export class CSVView extends TextFileView {
         // FIXME: if there already rendered view, use this to rerender it?
     }
 
-    saveData() {
-        const output = unparse(this.result)
+    saveData(noRefresh: boolean = false) {
+        if (noRefresh) {
+            this.refreshSkip = Date.now() + 500
+        }
+
+        // Map results
+        const res = [...this.result.data].map(r => {
+            const r2 = {...r}
+            Object.keys(r).forEach(k => {
+                if (typeof r[k] === 'boolean') {
+                    r2[k] = r[k] ? 1 : 0
+                }
+            })
+            return r2
+        })
+
+        const output = unparse({ ...this.result, data: res })
         this.app.vault.modify(this.file!, output)
+        this.refreshTypes()
     }
 
     createRow() {
@@ -139,10 +156,6 @@ export class CSVView extends TextFileView {
             type: type
         }
         await this.saveConfig()
-
-        // We need to touch original file to reload the data - probably we should make it in a nicer way
-        this.saveData()
-        
     }
 
     async loadConfig() {
@@ -154,6 +167,39 @@ export class CSVView extends TextFileView {
 
     async saveConfig() {
         await saveConfig(this.file!, this.config, this.app.vault)
+    }
+
+    private getColumnConfigurations(columns: string[]) {
+        return columns.map(f => {
+            if (!this.config) {
+                return {
+                    field: f
+                }
+            }
+            const def = this.config.columnDefinitions[f]?.type
+            if (!def || def === 'auto') {
+                return { field: f }
+            }
+            if (def === 'date') {
+                return {
+                    field: f,
+                    cellDataType: 'dateString'
+                }
+            }
+            return {
+                field: f,
+                cellDataType: def
+            }
+        })
+    }
+
+    refreshTypes() {
+        if (this.gridCommunicator) {
+            const columns = this.result.fields
+            if (columns && columns.length) {
+                this.gridCommunicator.gridApi.setGridOption('columnDefs', this.getColumnConfigurations(columns))
+            }
+        }
     }
 
     moveColumn(name: string, toIndex: number) {
@@ -169,42 +215,82 @@ export class CSVView extends TextFileView {
     }
 
     api: any = null;
+    gridCommunicator: GridRendererCommunicator | null = null
+    refreshSkip: number = 0
+
+    formatWithTypes(d: Record<string, string | boolean | number>) {
+        Object.entries(this.config.columnDefinitions).forEach(([key, value]) => {
+            if (!d[key]) {
+                return
+            }
+            if (value.type === 'boolean') {
+                if (d[key] === 'false' || d[key] === '0') {
+                    d[key] = false
+                }
+                d[key] = !!d[key]
+            }
+            if (value.type === 'number') {
+                if (d[key] === null || d[key] === '') {
+                    d[key] = ''
+                } else {
+                    d[key] = parseInt(d[key] as string, 10)
+                }
+            }
+            if (value.type === 'date') {
+                // try parsing
+                const val = d[key] as string
+                const date = new Date(val)
+                d[key] = date.toISOString().split('T')[0]
+            }
+        })
+        return d
+    }
+
+    prepareData() {
+        const result = parse(this.content, {
+            header: true,
+            skipEmptyLines: true,
+        });
+        const data = result.data.map((d: any, i) => ({
+            ...this.formatWithTypes(d),
+            __index: i.toString()
+        }))
+        return {
+            data: data,
+            fields: result.meta.fields
+        }
+    }
 
     loadDataIntoGrid() {
+        if (this.refreshSkip > Date.now()) {
+            return
+        }
         requestAnimationFrame(() => {
-            const result = parse(this.content, {
-                header: true,
-                skipEmptyLines: true,
-            });
-            const data = result.data.map((d: any, i) => ({
-                ...d,
-                __index: i.toString()
-            }))
-            this.result = {
-                data: data,
-                fields: result.meta.fields
-            }
-
-
-            this.api!.render({
-                data: data,
-                columns: result.meta.fields
-            })
-
+            const result = this.prepareData()
+            this.result = result
+            this.refreshTypes()
+            this.api!.render(result)
         })
+
     }
+
+    isLoading: boolean = false
 
     private async renderCSV() {
 
-        if (this.api) {
-            this.loadDataIntoGrid()
+        if (this.isLoading) {
+            if (this.api) {
+                this.loadDataIntoGrid()
+            }
             return
         }
+        this.isLoading = true
 
         this.contentEl.empty()
         const csvEditorDiv = this.contentEl.createDiv({ cls: 'sql-seal-csv-editor' })
 
         const buttonsRow = csvEditorDiv.createDiv({ cls: 'sql-seal-csv-viewer-buttons' })
+        await this.loadConfig()
         if (this.enableEditing) {
             const createColumn = buttonsRow.createEl('button', { text: 'Add Column' })
             const createRow = buttonsRow.createEl('button', { text: 'Add Row' })
@@ -235,16 +321,14 @@ export class CSVView extends TextFileView {
             modal.open()
         })
 
-
         const grid = new GridRenderer(this.app, null)
         const csvView = this;
+        const data = this.prepareData()
+        this.result = data
         const api = grid.render({
+            columnDefs: this.getColumnConfigurations(data.fields ?? []),
             defaultColDef: {
                 editable: this.enableEditing,
-                valueSetter: (e) => {
-                    e.data[e.column.getUserProvidedColDef()?.headerName!] = e.newValue
-                    return e.newValue
-                },
                 headerComponentParams: {
                     enableMenu: this.enableEditing,
                     showColumnMenu: function (e: any) {
@@ -255,7 +339,7 @@ export class CSVView extends TextFileView {
                             item.onClick(() => {
                                 const modal = new RenameColumnModal(csvView.app, (res) => {
                                     csvView.renameColumn(
-                                        this.column.userProvidedColDef.headerName, res)
+                                        this.column.userProvidedColDef.field, res)
                                 })
                                 modal.open()
                             })
@@ -264,7 +348,7 @@ export class CSVView extends TextFileView {
                         menu.addItem(item => {
                             item.setTitle('Delete Column')
                             item.onClick(() => {
-                                const colName = this.column.userProvidedColDef.headerName
+                                const colName = this.column.userProvidedColDef.field
                                 const modal = new DeleteConfirmationModal(csvView.app, `column ${colName}`, () => {
                                     csvView.deleteColumn(colName)
                                 })
@@ -272,27 +356,34 @@ export class CSVView extends TextFileView {
                             })
                         })
 
+
                         // FIXME: rework it to submenus.
                         menu.addSeparator()
                         menu.addItem(item => {
-                            item.setDisabled(true)
+                            // item.setDisabled(true)
                             item.setTitle('Data Type')
-                        })
+                            // item.setIsLabel(true)
+                            const ipfSubmenu = (item as any).setSubmenu();
+                            const types = ['auto', 'text', 'number', 'boolean', 'date'] as ColumnType[]
 
-                        const current = csvView.getColumnType(this.column.colId)
 
-                        const types = ['auto', 'text', 'number'] as ColumnType[]
 
-                        types.forEach(type => {
-                            menu.addItem(item => {
-                                const checkbox = type === current ? '✔️ ' : ''
-                                item.setTitle(checkbox + type)
-                                item.onClick(() => {
-                                    csvView.changeColumnType(this.column.colId, type)
+                            const colName = this.column.userProvidedColDef.field
+
+                            const current = csvView.getColumnType(colName)
+                            types.forEach(type => {
+                                ipfSubmenu.addItem((subItem: MenuItem) => {
+                                    const checkbox = type === current ? '✓ ' : ''
+                                    subItem.setTitle(checkbox + type)
+                                    subItem.onClick(() => {
+                                        csvView.changeColumnType(colName, type)
+                                        csvView.refreshTypes()
+                                        csvView.loadDataIntoGrid()
+                                    })
                                 })
                             })
                         })
-                        
+
                         const pos = e.getBoundingClientRect();
                         menu.showAtPosition({ x: pos.x, y: pos.y + 20 })
                     }
@@ -310,7 +401,7 @@ export class CSVView extends TextFileView {
                 if (!columnName) {
                     return
                 }
-                csvView.moveColumn(columnName?.headerName!, e.toIndex!)
+                csvView.moveColumn(columnName?.field!, e.toIndex!)
             },
             domLayout: 'normal',
             getRowId: (p) => p.data.__index,
@@ -336,10 +427,9 @@ export class CSVView extends TextFileView {
                 })
                 menu.showAtMouseEvent(e.event as any)
             }
-        }, gridEl, { cellParser: this.cellParser, sourcePath: this.file?.path || '' })
-
+        }, gridEl, { sourcePath: this.file?.path || '' })
         this.api = api;
-        await this.loadConfig()
-        this.loadDataIntoGrid()
+        this.gridCommunicator = api.communicator
+        api.render(data)
     }
 }
