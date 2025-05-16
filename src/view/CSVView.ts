@@ -233,7 +233,7 @@ export class CSVView extends TextFileView {
                 if (d[key] === null || d[key] === '') {
                     d[key] = ''
                 } else {
-                    d[key] = parseInt(d[key] as string, 10)
+                    d[key] = parseFloat(d[key] as string)
                 }
             }
             if (value.type === 'date') {
