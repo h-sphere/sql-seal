@@ -112,7 +112,7 @@ export class SqlSealDatabase {
         const INDENT_INCREASE = 4
         map.set(0, -INDENT_INCREASE)
         for (const result of explainResults) {
-            const parent = parseInt((result.parent as unknown as  string) ?? 0, 10)
+            const parent = parseInt((result.parent as unknown as  string) ?? '0', 10)
             const indent = map.get(parent)! + INDENT_INCREASE
             for (let i=0;i<indent;i++) {
                 strResult += ' '

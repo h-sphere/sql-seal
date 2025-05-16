@@ -7,7 +7,7 @@ import { transformQuery } from "../sql/sqlTransformer";
 import { displayError, displayNotice } from "../utils/ui";
 import SqlSealPlugin from "../main";
 import { registerObservers } from "../utils/registerObservers";
-import { ParserResult, parseWithDefaults, TableDefinition } from "src/grammar/parser";
+import { ParserResult, parseWithDefaults, TableDefinition } from "../grammar/parser";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
 
@@ -42,12 +42,12 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                     explain: false
                 },
                 query: '',
-                renderer: { options: '', type: 'GRID' },
+                renderer: { options: '', type: this.plugin.settings.defaultView.toUpperCase() },
                 tables: []
             
             }
 
-            const results = parseWithDefaults(this.source, this.rendererRegistry.getViewDefinitions(), defaults)
+            const results = parseWithDefaults(this.source, this.rendererRegistry.getViewDefinitions(), defaults, this.rendererRegistry.flags)
 
             // const results = parseLanguage(this.source, this.ctx.sourcePath)
             if (results.tables) {
@@ -59,7 +59,6 @@ export class CodeblockProcessor extends MarkdownRenderChild {
             }
 
             this.flags = results.flags
-
             let rendererEl = this.el
 
             if (this.flags.explain) {
@@ -70,7 +69,13 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 rendererEl = this.el.createDiv({ cls: 'sqlseal-renderer-container' })
             }
 
-            this.renderer = this.rendererRegistry.prepareRender(results.renderer.type.toLowerCase(), results.renderer.options)(rendererEl)
+            this.renderer = this.rendererRegistry
+                .prepareRender(
+                    results.renderer.type.toLowerCase(), results.renderer.options
+                )(rendererEl, {
+                    cellParser: this.plugin.cellParser,
+                    sourcePath: this.ctx.sourcePath
+                })
 
             // FIXME: probably should save the one before transform and perform transform every time we execute it.
             this.query = results.query
@@ -82,16 +87,17 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
     onunload() {
         this.registrator.offAll()
+        if (this.renderer?.cleanup) {
+            this.renderer.cleanup()
+        }
     }
 
     async render() {
         try {
-
             const registeredTablesForContext = await this.sync.getTablesMappingForContext(this.ctx.sourcePath)
 
             const res = transformQuery(this.query, registeredTablesForContext)
             const transformedQuery = res.sql
-
 
             if (this.flags.refresh) {
                 registerObservers({
@@ -102,21 +108,28 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 })
             }
 
-
+            let variables = {}
             const file = this.app.vault.getFileByPath(this.ctx.sourcePath)
-            if (!file) {
-                return
+            if (file) {
+                const fileCache = this.app.metadataCache.getFileCache(file)
+                variables = {
+                    ...(fileCache?.frontmatter ?? {}),
+                    path: file.path,
+                    fileName: file.name,
+                    basename: file.basename,
+                    parent: file.parent?.path,
+                    extension: file.extension,
+                }
             }
-            const fileCache = this.app.metadataCache.getFileCache(file)
 
             if (this.flags.explain) {
                 // Rendering explain
-                const result = await this.db.explain(transformedQuery, fileCache?.frontmatter ?? {})
+                const result = await this.db.explain(transformedQuery, variables)
                 this.explainEl.textContent = result
             }
 
-            const { data, columns } = await this.db.select(transformedQuery, fileCache?.frontmatter ?? {})
-            this.renderer.render({ data, columns })
+            const { data, columns } = await this.db.select(transformedQuery, variables)
+            this.renderer.render({ data, columns, flags: this.flags, frontmatter: variables })
         } catch (e) {
             this.renderer.error(e.toString())
         }

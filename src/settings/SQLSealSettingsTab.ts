@@ -6,6 +6,8 @@ export interface SQLSealSettings {
     enableJSONViewer: boolean;
     enableDynamicUpdates: boolean;
     enableSyntaxHighlighting: boolean;
+    defaultView: 'grid' | 'markdown' | 'html';
+    gridItemsPerPage: number
 }
 
 export const DEFAULT_SETTINGS: SQLSealSettings = {
@@ -13,7 +15,9 @@ export const DEFAULT_SETTINGS: SQLSealSettings = {
     enableEditing: true,
     enableJSONViewer: true,
     enableDynamicUpdates: true,
-    enableSyntaxHighlighting: true
+    enableSyntaxHighlighting: true,
+    defaultView: 'grid',
+    gridItemsPerPage: 20
 };
 
 
@@ -106,6 +110,45 @@ export class SQLSealSettingsTab extends PluginSettingTab {
                     this.display();
                     this.callChanges()
                 }));
+
+
+        containerEl.createEl('h3', { text: 'Views' });
+        new Setting(containerEl)
+            .setName('Default View')
+            .setDesc('This view will be used by default when you don\'t provide any view definition in your query')
+            .addDropdown(dropdown => dropdown
+                .addOption('grid', 'Grid')
+                .addOption('html', 'HTML Table')
+                .addOption('markdown', 'Markdown Table')
+                .setValue(this.settings.defaultView)
+                .onChange(async (value) => {
+                    this.settings.defaultView = value as 'grid' | 'html' | 'markdown';
+                    if (!value) {
+                        this.settings.defaultView = DEFAULT_SETTINGS.defaultView
+                    }
+                    await this.plugin.saveData(this.settings);
+                    this.display();
+                    this.callChanges()
+                }));
+        containerEl.createEl('h4', { text: 'Grid View' });
+        new Setting(containerEl)
+            .setName('Items per page ')
+            .setDesc('How many items should display for each page of the Grid view')
+            .addDropdown(dropdown => dropdown
+                .addOption('20', '20')
+                .addOption('50', '50')
+                .addOption('100', '100')
+                .setValue(this.settings.gridItemsPerPage + '')
+                .onChange(async (value) => {
+                    this.settings.gridItemsPerPage = parseInt(value, 10);
+                    if (!value) {
+                        this.settings.gridItemsPerPage = DEFAULT_SETTINGS.gridItemsPerPage
+                    }
+                    await this.plugin.saveData(this.settings);
+                    this.display();
+                    this.callChanges()
+                }));
+
 
     }
 

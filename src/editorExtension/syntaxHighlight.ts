@@ -13,8 +13,9 @@ import {
 
 import { SQLSealLangDefinition } from '../grammar/parser';
 import { RendererRegistry } from '../renderer/rendererRegistry';
-import { traceWalker } from '../utils/traceWalker';
 import { Range } from '@codemirror/state';
+import { Decorator, highlighterOperation } from '../grammar/highlighterOperation';
+import { FilePathWidget } from './widgets/FilePathWidget';
 
 const markDecorations = {
   blockFlag: Decoration.mark({ class: 'cm-sqlseal-block-flag' }),
@@ -23,11 +24,14 @@ const markDecorations = {
   blockTable: Decoration.mark({ class: 'cm-sqlseal-block-table' }),
   identifier: Decoration.mark({ class: 'cm-sqlseal-identifier' }),
   literal: Decoration.mark({ class: 'cm-sqlseal-literal' }),
+  number: Decoration.mark({ class: 'cm-sqlseal-literal' }),
+  string: Decoration.mark({ class: 'cm-sqlseal-literal' }),
   parameter: Decoration.mark({ class: 'cm-sqlseal-parameter' }),
   comment: Decoration.mark({ class: 'cm-sqlseal-comment' }),
   keyword: Decoration.mark({ class: 'cm-sqlseal-keyword' }),
+  'template-keyword': Decoration.mark({ class: 'cm-sqlseal-template-keyword' }),
   function: Decoration.mark({ class: 'cm-sqlseal-function' }),
-  error: Decoration.mark({ class: "cm-sql-error" })
+  error: Decoration.mark({ class: "cm-sqlseal-error" })
 };
 
 export class SQLSealViewPlugin implements PluginValue {
@@ -49,12 +53,20 @@ export class SQLSealViewPlugin implements PluginValue {
 
   destroy(): void { }
 
-  private parseWithGrammar(sql: string) {
-    const grammar = ohm.grammar(SQLSealLangDefinition(this.renderers.getViewDefinitions()));
+  private parseWithGrammar(sql: string): Decorator[] {
+    const grammar = ohm.grammar(SQLSealLangDefinition(this.renderers.getViewDefinitions(), this.renderers.flags, true));
 
-    const trace = grammar.trace(sql)
-    const decs = traceWalker(trace as any)
-    return decs
+    // FIXME: extend grammar with error line.
+
+    const match = grammar.match(sql)
+    if (match.failed()) {
+      return []
+    }
+    const highlight = highlighterOperation(grammar)(match)
+
+    const results = highlight.highlight()
+
+    return results
   }
 
   private buildDecorations(view: EditorView): DecorationSet {
@@ -74,12 +86,30 @@ export class SQLSealViewPlugin implements PluginValue {
 
       if (decorations) {
         decorations.forEach(dec => {
-          const decoration = markDecorations[dec.type as keyof typeof markDecorations];
-          if (decoration) {
-            builder.push(decoration.range(
+          if (dec.type === 'filename') {
+            // Get the actual filename text from the document
+            const filePath = view.state.doc.sliceString(
+              contentStart + dec.start,
+              contentStart + dec.end
+            );
+
+            // Create widget decoration for the filename
+            const widget = new FilePathWidget(filePath, this.app);
+            builder.push(Decoration.replace({
+              widget,
+              inclusive: true
+            }).range(
               contentStart + dec.start,
               contentStart + dec.end
             ));
+          } else {
+            const decoration = markDecorations[dec.type as keyof typeof markDecorations];
+            if (decoration) {
+              builder.push(decoration.range(
+                contentStart + dec.start,
+                contentStart + dec.end
+              ));
+            }
           }
         });
       }

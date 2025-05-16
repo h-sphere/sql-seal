@@ -2,7 +2,7 @@ import { Menu, Plugin, TAbstractFile, TFile } from 'obsidian';
 import { GridRenderer } from './renderer/GridRenderer';
 import { MarkdownRenderer } from './renderer/MarkdownRenderer';
 import { TableRenderer } from './renderer/TableRenderer';
-import { RendererConfig, RendererRegistry } from './renderer/rendererRegistry';
+import { Flag, RendererConfig, RendererRegistry } from './renderer/rendererRegistry';
 import { DEFAULT_SETTINGS, SQLSealSettings, SQLSealSettingsTab } from './settings/SQLSealSettingsTab';
 import { SqlSeal } from './sqlSeal';
 import { SealFileSync } from './vaultSync/SealFileSync';
@@ -10,23 +10,38 @@ import { CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE, CSVView } from './view/CSVView';
 import { createSqlSealEditorExtension } from './editorExtension/inlineCodeBlock';
 import { ListRenderer } from './renderer/ListRenderer';
 import { JSON_VIEW_EXTENSIONS, JSON_VIEW_TYPE, JsonView } from './view/JsonView';
-import { CellParserRegistar } from './cellParser';
 import { registerAPI } from '@vanakat/plugin-api';
 import { SQLSealRegisterApi } from './pluginApi/sqlSealApi';
-import { registerDefaultFunctions } from './utils/ui';
 import { DatabaseTable } from './database/table';
 import { FilepathHasher } from './utils/hasher';
 import { SQLSealViewPlugin } from './editorExtension/syntaxHighlight';
 import { EditorView, ViewPlugin } from '@codemirror/view';
+import { TemplateRenderer } from './renderer/TemplateRenderer';
+import { ModernCellParser } from './cellParser/ModernCellParser';
+import { getCellParser } from './cellParser/factory';
+import { CellFunction } from './cellParser/CellFunction';
+
+import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
+
+// Register all community features
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+// Mark all grids as using legacy themes
+provideGlobalGridOptions({ theme: "legacy"});
 
 export default class SqlSealPlugin extends Plugin {
 	settings: SQLSealSettings;
 	fileSync: SealFileSync;
 	sqlSeal: SqlSeal;
 	rendererRegistry: RendererRegistry = new RendererRegistry();
-	cellParserRegistar: CellParserRegistar;
+
+	cellParser: ModernCellParser;
 
 	async onload() {
+		// Preparing cell parser
+		this.cellParser = getCellParser(this.app, createEl)
+
+
 		await this.loadSettings();
 		const settingsTab = new SQLSealSettingsTab(this.app, this, this.settings)
 		this.addSettingTab(settingsTab);
@@ -46,15 +61,16 @@ export default class SqlSealPlugin extends Plugin {
 		this.sqlSeal = sqlSeal
 
 		await this.sqlSeal.db.connect()
-		this.cellParserRegistar = new CellParserRegistar(this.sqlSeal.db)
-		registerDefaultFunctions(this.cellParserRegistar, this.app)
+
+		this.cellParser.registerDbFunctions(this.sqlSeal.db)
 
 		// REGISTERING VIEWS
 
-		this.rendererRegistry.register('sql-seal-internal-table', new TableRenderer(this.app, this.cellParserRegistar))
-		this.rendererRegistry.register('sql-seal-internal-grid', new GridRenderer(this.app, this.cellParserRegistar))
+		this.rendererRegistry.register('sql-seal-internal-table', new TableRenderer(this.app))
+		this.rendererRegistry.register('sql-seal-internal-grid', new GridRenderer(this.app, this))
 		this.rendererRegistry.register('sql-seal-internal-markdown', new MarkdownRenderer(this.app))
-		this.rendererRegistry.register('sql-seal-internal-list', new ListRenderer(this.app, this.cellParserRegistar))
+		this.rendererRegistry.register('sql-seal-internal-list', new ListRenderer(this.app))
+		this.rendererRegistry.register('sql-seal-internal-template', new TemplateRenderer(this.app))
 
 		// start syncing when files are loaded
 		this.app.workspace.onLayoutReady(async () => {
@@ -182,7 +198,7 @@ export default class SqlSealPlugin extends Plugin {
 	async registerViews() {
 		this.registerView(
 			CSV_VIEW_TYPE,
-			(leaf) => new CSVView(leaf, this.settings.enableEditing, this.cellParserRegistar)
+			(leaf) => new CSVView(leaf, this.settings.enableEditing, this.cellParser)
 		);
 		this.registerView(
 			JSON_VIEW_TYPE,
@@ -198,12 +214,20 @@ export default class SqlSealPlugin extends Plugin {
 		this.rendererRegistry.unregister(name)
 	}
 
-	registerSQLSealFunction(name: string, fn: any, argumentsCount: number = 1) {
-		this.cellParserRegistar.register(name, fn, argumentsCount)
+	registerSQLSealFunction(fn: CellFunction) {
+		this.cellParser.register(fn)
 	}
 
 	unregisterSQLSealFunction(name: string) {
-		this.cellParserRegistar.unregister(name)
+		this.cellParser.unregister(name)
+	}
+
+	registerSQLSealFlag(flag: Flag) {
+		this.rendererRegistry.registerFlag(flag)
+	}
+
+	unregisterSQLSealFlag(name: string) {
+		this.rendererRegistry.unregisterFlag(name)
 	}
 
 	async registerTable<const columns extends string[]>(plugin: Plugin, name: string, columns: columns) {

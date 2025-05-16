@@ -1,3 +1,68 @@
+# 0.36.0 (2025-05-06)
+- fix: deleting columns and renaming columns works again
+- chore: updated dependencies to the latest versions
+
+# 0.35.0 (2025-05-02)
+- fix: fixed issue with CSV files edits not being saved
+
+# 0.34.0 (2025-04-30)
+- feat: you can now navigate to linked CSV and JSON file sources
+- feat: improved support for minimal theme custom classes
+
+# 0.33.0 (2025-04-09)
+- fix: better text links for images (by @satkowski)
+- fix: lists are now rendered properly (by @satkowski)
+- chore: exposing filename in the renderer (by @satkowski)
+- fix: numbers are now properly handled (by @satkowski)
+- fix: SQLSeal results are now properly rendered on canvas
+
+# 0.32.0 (2025-04-02)
+- feat: added text rendering for links, images and checkboxes (for MARKDOWN renderer)
+- fix: fixed issue with rendering numbers
+- fix: fixed how grid renders columns - now they automatically match content and don't truncate the text
+- fix: grid resizing now works better when switching tabs, resizing obsidian, etc.
+- fix: columns with dots in the name render properly in grid view
+- chore: now external plugins can use cellRenderer from the main plugin
+
+# 0.31.0 (2025-03-31)
+- feat: TEMPLATE renderer can now use checkboxes, links and images like other views.
+# 0.30.1 (2025-03-27)
+- feat: added basename and parent SQL variables
+ 
+# 0.30.0 (2025-03-26)
+- feat: added ability to reference tables from the other files in `table()` functions
+- feat: added ability to reference tables by their header name
+- feat: new heading and heading_level columns in tasks table (by @kDCYorke)
+
+# 0.29.0 (2025-03-19)
+- feat: LIST views with single column are rendered as a regular list (rather than nested one) (by @kDCYorke)
+- feat: files table now contains tags column with tags defined directly in properties (by @sksizer)
+- feat: frontmatter links are now exposed in links table (by @kDCYorke)
+- feat: added checkbox field to tasks which adds **interactive** checkbox so you can mark tasks as completed directly from the SQLSeal
+
+# 0.28.4 (2025-03-15)
+- Feat: Template view can now access file properties
+# 0.28.3 (2025-03-15)
+- Fix: Filename field in files column no longer truncates name after dot
+
+# 0.28.2 (2025-03-14)
+- Added ability to define default view (Grid, HTML or Markdown)
+- Added ability to configure default page size for the GRID view
+
+# 0.28.1 (2025-03-14)
+- Adding syntax highlighting for javascript (to be used with GRAPH view)
+
+# 0.28.0 (2025-03-14)
+- Added TEMPLATE view that allow to render your template with custom Handlebars template.
+- Improved syntax highlighting - now lines with errors will get highlighted with appropriate colour to indicate the issue
+- Added @path, @fileName and @extension variables you can use inside your SQL alongside other Frontmatter properties
+
+Fixes:
+- Fixed parsing arguments to the `file` function. Now parameters with symbols like `[]*` should work properly (i.e. JSONPath arguments)
+
+Technical:
+- Other plugins can now register flags to allow for extra configuration
+
 # 0.27.0 (2025-02-17)
 - Better syntax highlighting! Now it highlights SQL query parts
 - Support for comments. You can now add comments like `--` and `/* */` to you queries
@@ -164,7 +229,7 @@ Turning off verbose mode
 
 # 0.9.0 (2024-11-03)
 We now use proper grid library to render data. This allow for many great features like pagination, sorting and more visally pleasing UI out of the box.
-Reworked internal communication to use Signals.
+Rewritten internal communication to use Signals.
 
 # 0.8.0 (2024-09-05)
 Now you can embed links and images (both local and external). Introduced `a` and `img` custom SQL functions.

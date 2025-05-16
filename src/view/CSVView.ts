@@ -4,8 +4,8 @@ import { DeleteConfirmationModal } from '../modal/deleteConfirmationModal';
 import { RenameColumnModal } from '../modal/renameColumnModal';
 import { CodeSampleModal } from '../modal/showCodeSample';
 import { GridRenderer } from '../renderer/GridRenderer';
-import { CellParser } from '../cellParser';
 import { errorNotice } from '../utils/notice';
+import { ModernCellParser } from '../cellParser/ModernCellParser';
 import { ConfigObject, loadConfig, saveConfig } from 'src/utils/csvConfig';
 import { ColumnType } from '../utils/types';
 
@@ -22,7 +22,7 @@ export class CSVView extends TextFileView {
     constructor(
         leaf: WorkspaceLeaf,
         private enableEditing: boolean,
-        private cellParser: CellParser
+        private cellParser: ModernCellParser
     ) {
         super(leaf);
     }
@@ -171,8 +171,7 @@ export class CSVView extends TextFileView {
     api: any = null;
 
     loadDataIntoGrid() {
-        setTimeout(() => {
-
+        requestAnimationFrame(() => {
             const result = parse(this.content, {
                 header: true,
                 skipEmptyLines: true,
@@ -192,7 +191,7 @@ export class CSVView extends TextFileView {
                 columns: result.meta.fields
             })
 
-        }, 100)
+        })
     }
 
     private async renderCSV() {
@@ -237,11 +236,15 @@ export class CSVView extends TextFileView {
         })
 
 
-        const grid = new GridRenderer(this.app, this.cellParser)
+        const grid = new GridRenderer(this.app, null)
         const csvView = this;
         const api = grid.render({
             defaultColDef: {
                 editable: this.enableEditing,
+                valueSetter: (e) => {
+                    e.data[e.column.getUserProvidedColDef()?.headerName!] = e.newValue
+                    return e.newValue
+                },
                 headerComponentParams: {
                     enableMenu: this.enableEditing,
                     showColumnMenu: function (e: any) {
@@ -251,7 +254,8 @@ export class CSVView extends TextFileView {
                             item.setTitle('Rename Column')
                             item.onClick(() => {
                                 const modal = new RenameColumnModal(csvView.app, (res) => {
-                                    csvView.renameColumn(this.column.colId, res)
+                                    csvView.renameColumn(
+                                        this.column.userProvidedColDef.headerName, res)
                                 })
                                 modal.open()
                             })
@@ -260,8 +264,9 @@ export class CSVView extends TextFileView {
                         menu.addItem(item => {
                             item.setTitle('Delete Column')
                             item.onClick(() => {
-                                const modal = new DeleteConfirmationModal(csvView.app, `column ${this.column.colId}`, () => {
-                                    csvView.deleteColumn(this.column.colId)
+                                const colName = this.column.userProvidedColDef.headerName
+                                const modal = new DeleteConfirmationModal(csvView.app, `column ${colName}`, () => {
+                                    csvView.deleteColumn(colName)
                                 })
                                 modal.open()
                             })
@@ -305,7 +310,7 @@ export class CSVView extends TextFileView {
                 if (!columnName) {
                     return
                 }
-                csvView.moveColumn(columnName?.field!, e.toIndex!)
+                csvView.moveColumn(columnName?.headerName!, e.toIndex!)
             },
             domLayout: 'normal',
             getRowId: (p) => p.data.__index,
@@ -331,7 +336,7 @@ export class CSVView extends TextFileView {
                 })
                 menu.showAtMouseEvent(e.event as any)
             }
-        }, gridEl)
+        }, gridEl, { cellParser: this.cellParser, sourcePath: this.file?.path || '' })
 
         this.api = api;
         await this.loadConfig()

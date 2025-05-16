@@ -2,8 +2,9 @@ import { Plugin } from "obsidian"
 import SqlSealPlugin from "../main"
 import { version } from '../../package.json'
 import { RendererConfig } from "../renderer/rendererRegistry";
+import { CellFunction } from "../cellParser/CellFunction";
 
-const API_VERSION = 1;
+const API_VERSION = 4;
 
 export class SQLSealRegisterApi {
     registeredApis: Array<SQLSealApi> = []
@@ -36,14 +37,16 @@ interface RegisteredView {
     viewClass: any;
 }
 
-interface RegisteredFunction {
+// TODO: use the type from registrator
+export interface RegisteredFlag {
     name: string,
-    fn: CallableFunction
+    key: string
 }
 
 export class SQLSealApi {
     private views: Array<RegisteredView> = []
-    private functions: Array<RegisteredFunction> = []
+    private functions: Array<CellFunction> = []
+    private flags: Array<RegisteredFlag> = []
 
     constructor(private readonly plugin: Plugin, private sqlSealPlugin: SqlSealPlugin) {
         plugin.register(() => {
@@ -59,16 +62,18 @@ export class SQLSealApi {
         this.sqlSealPlugin.registerSQLSealView(name, viewClass)
     }
 
-    registerCustomFunction(name: string, fn: CallableFunction, argumentsCount: number = 1) {
-        this.functions.push({
-            name,
-            fn,
-        })
-        this.sqlSealPlugin.registerSQLSealFunction(name, fn, argumentsCount)
+    registerCustomFunction(fn: CellFunction) {
+        this.functions.push(fn)
+        this.sqlSealPlugin.registerSQLSealFunction(fn)
     }
 
     registerTable<const columns extends string[]>(tableName: string, columns: columns) {
         return this.sqlSealPlugin.registerTable(this.plugin, tableName, columns)
+    }
+
+    registerFlag(flag: RegisteredFlag) {
+        this.flags.push(flag)
+        this.sqlSealPlugin.registerSQLSealFlag(flag)
     }
 
     unregister() {
@@ -79,6 +84,10 @@ export class SQLSealApi {
 
         for(const fn of this.functions) {
             this.sqlSealPlugin.unregisterSQLSealFunction(fn.name)
+        }
+
+        for(const flag of this.flags) {
+            this.sqlSealPlugin.unregisterSQLSealFlag(flag.name)
         }
     }
 }

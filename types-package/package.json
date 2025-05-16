@@ -1,6 +1,6 @@
 {
   "name": "@hypersphere/sqlseal",
-  "version": "0.21.0",
+  "version": "0.32.0",
   "description": "",
   "types": "dist/types-package/src/index.d.ts",
   "files": [

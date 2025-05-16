@@ -57,7 +57,7 @@ export class CsvFileSyncStrategy extends ISyncStrategy {
         // TODO: PROBABLY SHOULD BE EXTRACTED SOMEWHERE FROM HERE later.
         const parsed = parse<Record<string, string>>(data, {
             header: true,
-            dynamicTyping: true,
+            dynamicTyping: false,
             skipEmptyLines: true,
             transformHeader: sanitise
         })

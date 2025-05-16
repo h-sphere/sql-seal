@@ -1,7 +1,7 @@
 {
 	"id": "sqlseal",
 	"name": "SQLSeal",
-	"version": "0.27.0",
+	"version": "0.36.0",
 	"minAppVersion": "0.15.0",
 	"description": "Use SQL in your notes to query your vault files and CSV content.",
 	"author": "hypersphere",

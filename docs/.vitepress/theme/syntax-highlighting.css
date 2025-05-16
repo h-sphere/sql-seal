@@ -1,0 +1,132 @@
+.language-sqlseal {
+
+    
+.vp-blockQuery {
+    --color: #297f30;
+}
+
+.vp-blockView {
+    --color: #c834dd;
+}
+
+.vp-blockFlag {
+    --color: #d08306;
+    font-weight: bold;
+    color: var(--color);
+}
+
+.vp-blockTable {
+    --color: #4985af;
+}
+
+.vp-identifier {
+    color: #2d7b33;
+}
+
+.vp-function {
+    color: #2c0e9b;
+}
+
+.vp-parameter {
+    color: #2c0e9b;
+}
+
+.vp-comment {
+    color: #7a7a7a;
+    font-style: italic;
+}
+
+.vp-keyword {
+    color: var(--color);
+    font-weight: bold;
+}
+
+.vp-literal {
+    color: rgb(0, 51, 255);
+}
+
+.vp-error {
+    color: rgb(235, 47, 47);
+    font-style: italic;
+}
+
+.vp-template-keyword {
+    color: #e3ab53;
+}
+
+    .vp-blockQuery, .vp-blockTable, .vp-blockFlag, .vp-blockView {
+        position: relative;
+    }
+
+    :is(.vp-blockQuery, .vp-blockTable, .vp-blockFlag, .vp-blockView)::before {
+        background-color: var(--color);
+        width: 5px;
+        top: -3px;
+        bottom: -5px;
+        /* left: 0; */
+        margin-left: -24px;
+        content: '';
+        display: block;
+        position: absolute;
+    }
+}
+
+.language-sqlseal {
+    display: block;
+    position: relative;
+    background: var(--vp-code-block-bg);
+    padding: 24px 0;
+    text-wrap: wrap;
+    clear: both;
+    overflow-y: scroll;
+    overflow-x: auto;
+}
+
+.dark .language-sqlseal {
+    color: #EEE;
+    --vp-code-block-color: #EEE;
+}
+
+.dark .vp-template-keyword {
+    color: #dd8e10;
+}
+
+.dark .vp-block-error {
+    color: red;
+}
+
+.dark .vp-blockQuery {
+    --color: #5eff6a;
+}
+
+.dark .vp-comment {
+    color: #898787;
+}
+
+.dark .vp-parameter {
+    color: #95ed22;
+}
+
+.dark .vp-literal {
+    color: yellow;
+}
+
+.dark .vp-blockView {
+    --color: #e945ff;
+}
+
+.dark .vp-blockFlag {
+    --color: #e3ab53;
+}
+
+.dark .vp-blockTable {
+    --color: #56b5fa;
+}
+
+.dark .vp-function {
+    color: #c4b8ef;
+}
+
+.dark .vp-identifier {
+    color: #6ff77a;
+}

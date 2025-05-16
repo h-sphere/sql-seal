@@ -12,6 +12,10 @@
     position: relative;
 }
 
+.block-language-sqlseal {
+    overflow-y: auto;
+}
+
 .sqlseal-error {
     padding: 1em;
     background: #b80f0f;
@@ -211,6 +215,23 @@
 }
 
 .cm-sqlseal-literal {
+    color: rgb(0, 51, 255);
+}
+
+.cm-sqlseal-error {
+    color: rgb(235, 47, 47);
+    font-style: italic;
+}
+
+.cm-sqlseal-template-keyword {
+    color: #e3ab53;
+}
+
+.theme-dark .cm-sqlseal-template-keyword {
+    color: #dd8e10;
+}
+
+.theme-dark .cm-sqlseal-block-error {
     color: red;
 }
 
@@ -223,7 +244,7 @@
 }
 
 .theme-dark .cm-sqlseal-parameter {
-    color: #ed222c;
+    color: #95ed22;
 }
 
 .theme-dark .cm-sqlseal-literal {
@@ -267,4 +288,11 @@
 
 .cm-indent + :is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table)::before {
     display: none;
+}
+
+
+/* Obsidian Minimal Styles */
+.markdown-source-view.mod-cm6.is-readable-line-width .cm-contentContainer.cm-contentContainer>.cm-content>:has(>.block-language-sqlseal table.dataview) {
+    width: var(--container-dataview-table-width);
+    max-width: var(--container-table-max-width);
 }

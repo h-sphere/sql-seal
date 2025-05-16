@@ -1,7 +1,6 @@
 // This is renderer for a very basic List view.
 import { App } from "obsidian";
-import { CellParser } from "../cellParser";
-import { RendererConfig } from "../renderer/rendererRegistry";
+import { RendererConfig, RendererContext } from "../renderer/rendererRegistry";
 import { displayError } from "../utils/ui";
 import { ViewDefinition } from "../grammar/parser";
 
@@ -11,7 +10,7 @@ interface ListRendererConfig {
 
 export class ListRenderer implements RendererConfig {
 
-    constructor(private readonly app: App, private readonly cellParser: CellParser) { }
+    constructor(private readonly app: App) { }
 
     get rendererKey() {
         return 'list'
@@ -37,7 +36,7 @@ export class ListRenderer implements RendererConfig {
         }
     }
 
-    render(config: ListRendererConfig, el: HTMLElement) {
+    render(config: ListRendererConfig, el: HTMLElement, { cellParser }: RendererContext) {
         return {
             render: ({ columns, data }: any) => {
                 el.empty()
@@ -51,13 +50,14 @@ export class ListRenderer implements RendererConfig {
                 })
 
                 data.forEach((d: any) => {
-                    const row = list.createEl("li", { cls: ['sqlseal-list-element'] }).createEl('ul')
+					const singleCol = columns.length == 1; // Only one column, do not nest lists
+                    const row = singleCol ? list : list.createEl("li", { cls: ['sqlseal-list-element'] }).createEl('ul')
                     columns.forEach((c: any) => {
                         const el = row.createEl("li", {
                             text: createEl('span', { text: c, cls: 'sqlseal-column-name' }) as any, // FIXME: this should be properly typed
-                            cls: ['sqlseal-list-element-single']
+                            cls: singleCol ? ['sqlseal-list-element', 'sqlseal-list-element-single'] : ['sqlseal-list-element-single']
                         })
-                        const val = this.cellParser.render(d[c])
+                        const val: any = cellParser.render(d[c])
                         el.append(val)
                         el.dataset.sqlsealColumn = c
                     })

@@ -1,3 +1,4 @@
+import { ModernCellParser } from "../cellParser/ModernCellParser";
 import { ViewDefinition } from "../grammar/parser";
 
 export interface DataFormat {
@@ -5,23 +6,33 @@ export interface DataFormat {
     columns: string[]
 }
 
+export interface RendererContext {
+    cellParser: ModernCellParser,
+    sourcePath: string
+}
+
 export interface RenderReturn {
     render: (data: any) => void;
     error: (errorMessage: string) => void;
+    cleanup?: () => void;
 }
 export interface RendererConfig<T extends Record<string, any> = Record<string, any>> {
 	rendererKey: string;
 	validateConfig: (config: string) => T,
-	render: (config: T, el: HTMLElement) => RenderReturn,
+	render: (config: T, el: HTMLElement, context: RendererContext) => RenderReturn,
     viewDefinition: ViewDefinition
+}
+
+export interface Flag {
+    name: string;
+    key: string;
 }
 
 export class RendererRegistry {
     renderers: Map<string, RendererConfig> = new Map()
     renderersByKey: Map<string, RendererConfig> = new Map()
+    _extraFlags: Array<Flag> = []
     constructor() { }
-
-    private default = 'grid'
 
     register(uniqueName: string, config: RendererConfig) {
         if (this.renderers.has(uniqueName)) {
@@ -33,6 +44,18 @@ export class RendererRegistry {
 
         this.renderers.set(uniqueName, config)
         this.renderersByKey.set(config.rendererKey, config)
+    }
+
+    registerFlag(flag: Flag) {
+        this._extraFlags.push(flag)
+    }
+
+    unregisterFlag(name: string) {
+        this._extraFlags = this._extraFlags.filter(f => f.name !== name)
+    }
+
+    get flags(): Readonly<typeof this._extraFlags> {
+        return this._extraFlags
     }
 
     unregister(uniqueName: string) {
@@ -50,8 +73,8 @@ export class RendererRegistry {
         }
         const rendererConfig = this.renderersByKey.get(type.toLowerCase())!
         const elConfig = rendererConfig.validateConfig(config)
-        return (el: HTMLElement) => {
-            return rendererConfig.render(elConfig, el)
+        return (el: HTMLElement, context: RendererContext) => {
+            return rendererConfig.render(elConfig, el, context)
         }
     }
 

@@ -17,12 +17,12 @@ const extractFrontmatterFromFile = (file: TFile, plugin: Plugin): Record<string,
     )
 }
 
-function fileData(file: TFile, { tags: _tags, ...frontmatter }: Record<string, any>) {
+function fileData(file: TFile, { ...frontmatter }: Record<string, any>) {
     return {
         ...frontmatter,
         id: file.path,
         path: file.path,
-        name: file.name.replace(/\.[^/.]+$/, ""),
+        name: file.basename,
         created_at: (new Date(file.stat.ctime)).toISOString(),
         modified_at: (new Date(file.stat.mtime)).toISOString(),
         file_size: file.stat.size

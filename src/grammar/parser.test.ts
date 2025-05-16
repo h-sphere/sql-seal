@@ -37,6 +37,18 @@ describe('Ohm parser', () => {
         })
     })
 
+    it('should parse table expression with name quoted', () => {
+        expect(parse('TABLE x = file("abcdef.csv")', DEFAULT_VIEWS)).toEqual({
+            query: '',
+            tables: [{ arguments: ['abcdef.csv'], type: 'file', tableAlias: 'x' }],
+            flags: {},
+            renderer: {
+                name: 'GRID',
+                options: ''
+            }
+        })
+    })
+
     it('should parse SELECT statement alone', () => {
         expect(parse('SELECT * FROM files', DEFAULT_VIEWS)).toEqual({
             query: 'SELECT * FROM files',
@@ -343,5 +355,27 @@ SELECT * FROM data`, [...DEFAULT_VIEWS, { argument: 'anyObject?', name: 'chart',
         },
       ],
     })
+    })
+
+    it('should properly parse json5 with JSONPath', () => {
+        expect(parseWithDefaults(`
+            TABLE data = file(data.json5, $.results.latest[*], "abcd,()e")
+SELECT id, value FROM data`, DEFAULT_VIEWS, DEFAULTS)).toEqual({
+    flags: {
+        explain: false,
+        refresh: true
+    },
+    query: 'SELECT id, value FROM data',
+    renderer: {
+        type: 'GRID',
+        name: 'GRID',
+        options: ''
+    },
+    tables: [{
+        arguments: ['data.json5', '$.results.latest[*]', 'abcd,()e'],
+        tableAlias: 'data',
+        type: 'file'
+    }]
+})
     })
 })

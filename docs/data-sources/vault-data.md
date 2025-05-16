@@ -13,6 +13,7 @@ LIMIT 10
 ## Table Structure
 ### `files` table
 Files table consists of the following columns:
+
 | Column              | Description                                                                                                                                                                      | Introduced In |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | `id`                | File Path                                                                                                                                                                        |               |
@@ -23,22 +24,32 @@ Files table consists of the following columns:
 | `file_size`         | Size of the file on disk (in bytes)                                                                                                                                              | 0.18.1        |
 | All file properties | All file properties are also added to the table. All the special characters will be transformed to underscores `_`, so for example `note type` will be accessible as `note_type` |               |
 
+> **Note:** Tags data can exist in two contexts - as file metadata here or as an entry in the tags table. Details [here](../faq/understanding-tags.md)
+
 ### `tags` table
 Tags table consists of the following columns:
+
 | Column   | Description                                                                                                              | Introduced In |
 | -------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
 | `tag`    | Full tag, including `#` symbol. For example `#todo`                                                                      |               |
 | `path`   | Full path of the file the tag belongs to                                                                                 | 0.24.1        |
 | `fileId` | (deprecated) same like `path`. Name changed for compatibility with other tables. Will get removed in the future versions |               |
 
+> **Note:** Tags data can in two contexts - as file metadata or as an entry in this tags table. Details [here](../faq/understanding-tags.md)
+
 ### `tasks` table
 Tasks table consists of the following columns:
-| Column      | Description                                                                                                              | Introduced In |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
-| `task`      | Content of the task (text)                                                                                               |               |
-| `completed` | 0 if not completed, 1 if completed                                                                                       |               |
-| `path`      | Full path of the file the tag belongs to                                                                                 | 0.24.1        |
-| `filePath`  | (deprecated) same like `path`. Name changed for compatibility with other tables. Will get removed in the future versions |               |
+
+| Column          | Description                                                                                                              | Introduced In |
+| --------------- |--------------------------------------------------------------------------------------------------------------------------| ------------- |
+| `task`          | Content of the task (text)                                                                                               |               |
+| `completed`     | 0 if not completed, 1 if completed                                                                                       |               |
+| `path`          | Full path of the file the tag belongs to                                                                                 | 0.24.1        |
+| `filePath`      | (deprecated) same like `path`. Name changed for compatibility with other tables. Will get removed in the future versions |               |
+| `checkbox`      | Interactive checkbox for the task that can be clicked to toggle completion state                                         | 0.29.0        |
+| `position`      | Line number where the task appears in the original file                                                                  | 0.29.0        |
+| `heading`       | The name of the heading this task appears under (if any)                                                                 | 0.30.0        |
+| `heading_level` | The level of the heading this task appears under (if any), i.e., the number of # in the heading declaration              | 0.30.0        |
 
 ### `links` table
 Table containing all the links between files.
@@ -52,3 +63,28 @@ Introduced in 0.20.0
 | `position`      | JSON object containing information about location of the link      |
 | `display_text`  | Text displayed on the page for that link                           |
 | `target_exists` | information if the target file exists. 1 if it exists, 0 otherwise |
+
+
+#### Frontmatter links
+
+Links that appear in a file's frontmatter (Obsidian properties) contain a `frontmatterKey` property in the `position`
+JSON object. This can be used to identify links that are in the note body or within a specific frontmatter property.
+
+For instance, to query all links to the current file that appear in the body of a note:
+
+```sql
+SELECT * FROM links
+WHERE target = @path
+AND json_extract(position, '$.frontmatterKey') IS NULL
+```
+
+`frontmatterKey` can be used to select links within a specific property. A Map of Content, for instance, may wish to
+show a list of files that list the MOC as a type:
+
+```sql
+LIST
+SELECT a(path) FROM links
+WHERE target = @path
+AND json_extract(position, '$.frontmatterKey') = 'type'
+```
+
