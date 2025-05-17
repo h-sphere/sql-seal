@@ -1,0 +1,59 @@
+name: Publish
+on:
+  workflow_run:
+    workflows: [CI]
+    branches: [main]
+    types: [completed]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: "pnpm"
+      - name: Get package version
+        id: package-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      - run: pnpm install --frozen-lockfile
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Send Discord notification
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get release URL using gh cli
+          RELEASE_URL=$(gh release view "${{ steps.package-version.outputs.VERSION }}" --json url -q .url)
+          
+          # Create a JSON file with the message
+          cat > discord_payload.json << EOF
+          {
+            "content": "🎉 New release ${{ steps.package-version.outputs.VERSION }} is now available!\n\n📝 Changes:\n${{ steps.release-notes.outputs.NOTES }}\n\n🔗 Release: $RELEASE_URL"
+          }
+          EOF
+          
+          # Send to Discord using curl
+          curl -H "Content-Type: application/json" \
+               -d @discord_payload.json \
+               $DISCORD_WEBHOOK

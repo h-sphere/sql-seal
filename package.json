@@ -9,6 +9,7 @@
     "build": "node --no-warnings esbuild.config.mjs production",
     "version": "node version-bump.mjs && git add manifest.json versions.json",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "release": "pnpm run build && changeset publish",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
