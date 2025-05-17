@@ -1,0 +1,8 @@
+/**
+These styles are to keep compatibility with Obsidian Minimal when adding "dataview" class to the table
+**/
+
+.markdown-source-view.mod-cm6.is-readable-line-width .cm-contentContainer.cm-contentContainer>.cm-content>:has(>.block-language-sqlseal table.dataview) {
+    width: var(--container-dataview-table-width);
+    max-width: var(--container-table-max-width);
+}

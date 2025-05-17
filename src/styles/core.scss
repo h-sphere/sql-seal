@@ -1,0 +1,97 @@
+.sqlseal-table-container {
+    overflow-y: scroll;
+}
+
+.sqlseal-table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sqlseal-grid-wrapper {
+    height: auto;
+    position: relative;
+}
+
+.block-language-sqlseal {
+    overflow-y: auto;
+}
+
+.sqlseal-error {
+    padding: 1em;
+    background: #b80f0f;
+    color: #FFF;
+}
+
+.sqlseal-notice {
+    padding: 1em;
+    background: #1f3f98;
+    color: #FFF;
+}
+
+.sqlseal-grid-error-message {
+    box-sizing: border-box;
+    width: 80%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background: #b80f0f;
+    font-size: 0.8em;
+    color: #FFF;
+    padding: 0.5em 2em;
+
+}
+
+.sqlseal-grid-error-message-overlay {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 5;
+}
+
+.sqlseal-grid-error-message-overlay.hidden {
+    display: none;
+}
+
+.edit-block-button {
+    z-index: 1000;
+}
+
+.sqlseal-markdown-table {
+    font-family: monospace;
+    white-space: pre-wrap;
+}
+
+.sqlseal-markdown-table.no-wrap {
+    display: inline-block;
+    overflow-x: scroll;
+    width: fit-content;
+}
+
+.sqlseal-parse-error {
+    background: #b80f0f;
+    color: #FFF;
+    padding: 0.2em;
+    border-radius: 2px;
+}
+
+
+
+.sqlseal-notice-error {
+    color: #f26464;
+}
+
+.sqlseal-notice-error::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin-right: 8px;
+    transform: translate(0, 3px);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ff0000' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E");
+}

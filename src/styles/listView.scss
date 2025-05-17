@@ -1,0 +1,15 @@
+.sqlseal-list-element-single .sqlseal-column-name {
+    display: none;
+}
+
+.sqlseal-list-element-single .sqlseal-column-name::after {
+    content: ': ';
+}
+
+.sqlseal-list.show-column-names .sqlseal-list-element-single .sqlseal-column-name {
+    display: inline;
+}
+
+.sqlseal-element-inline-list {
+    display: inline-block;
+}
