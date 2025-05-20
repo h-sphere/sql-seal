@@ -87,11 +87,18 @@ export class SQLSealViewPlugin implements PluginValue {
       if (decorations) {
         decorations.forEach(dec => {
           if (dec.type === 'filename') {
+            let hasQuotes = false;
             // Get the actual filename text from the document
-            const filePath = view.state.doc.sliceString(
+            let filePath = view.state.doc.sliceString(
               contentStart + dec.start,
               contentStart + dec.end
             );
+
+            // Remove leading & trailing quotes, if captured.
+            if (filePath.startsWith('"')) {
+              filePath = filePath.substring(1, filePath.length - 1)
+              hasQuotes = true;
+            }
 
             // Create widget decoration for the filename
             const widget = new FilePathWidget(filePath, this.app);
@@ -99,8 +106,8 @@ export class SQLSealViewPlugin implements PluginValue {
               widget,
               inclusive: true
             }).range(
-              contentStart + dec.start,
-              contentStart + dec.end
+              contentStart + dec.start + Number(hasQuotes),
+              contentStart + dec.end - Number(hasQuotes)
             ));
           } else {
             const decoration = markDecorations[dec.type as keyof typeof markDecorations];
