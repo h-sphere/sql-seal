@@ -13,7 +13,9 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "test": "jest"
+    "test": "jest",
+    "ci:publish": "./scripts/tag-and-publish.sh",
+    "ci:version": "pnpm run version && changeset version"
   },
   "keywords": [
     "Obsidian",
