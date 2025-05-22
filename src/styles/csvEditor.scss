@@ -1,0 +1,35 @@
+/* EDITOR */
+.sql-seal-csv-editor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--size-4-4);
+}
+
+.sql-seal-csv-viewer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.sqlseal-grid-wrapper {
+    height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.ag-theme-quartz {
+    flex: 1;
+}
+
+.sql-seal-csv-viewer-buttons {
+    display: flex;
+    gap: var(--size-4-4);
+}
+
+.sql-seal-modal-code {
+    width: 100%;
+    font-family: monospace;
+    padding: 8px;
+}
