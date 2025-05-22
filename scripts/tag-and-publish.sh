@@ -24,6 +24,27 @@ fi
 
 echo "Processing version: $version"
 
+
+# Check if tag already exists locally
+if git tag -l | grep -q "^$version$"; then
+    echo "Error: Git tag '$version' already exists locally"
+    exit 1
+fi
+
+# Check if tag exists on remote
+if git ls-remote --tags origin | grep -q "refs/tags/$version$"; then
+    echo "Error: Git tag '$version' already exists on remote"
+    exit 1
+fi
+
+# Check if GitHub release already exists
+if gh release view "$version" >/dev/null 2>&1; then
+    echo "Error: GitHub release '$version' already exists"
+    exit 1
+fi
+
+echo "Version checks passed - proceeding with release creation"
+
 # Get Release Notes
 awk -v version="$version" '
 BEGIN { found=0; content="" }
