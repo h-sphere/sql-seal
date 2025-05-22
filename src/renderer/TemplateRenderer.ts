@@ -42,7 +42,7 @@ export class TemplateRenderer implements RendererConfig {
             render: ({ columns, data, frontmatter }: any) => {
                 el.empty()
                 
-                const parser = new ParseResults(cellParser, (el) => new Handlebars.SafeString(el.outerHTML))
+                const parser = new ParseResults(cellParser!, (el) => new Handlebars.SafeString(el.outerHTML))
 
                 // Seems to be the only way to render handlebars into DOM. Don't like it but what can we do.
                 el.innerHTML = config.template({

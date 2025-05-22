@@ -36,9 +36,8 @@ jobs:
         with:
           publish: pnpm run ci:publish
           version: pnpm run ci:version
-          title: "Release: $VERSION"
-          commit: "release: Release $VERSION"
+          title: "[Release] Next Release"
+          commit: "automated release"
           createGithubReleases: false # this is handled inside ci:publish script
-          setupGitUser: false # this is handled inside ci:publish script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

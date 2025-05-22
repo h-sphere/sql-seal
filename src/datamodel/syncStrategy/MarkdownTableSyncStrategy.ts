@@ -171,7 +171,7 @@ export class MarkdownTableSyncStrategy extends ISyncStrategy {
 
         return {
             data,
-            columns: headers ?? []
+            columns: headers.map(c => ({ name: c, type: 'auto' as const })) ?? []
         };
     }
 }

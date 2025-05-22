@@ -57,7 +57,7 @@ export class ListRenderer implements RendererConfig {
                             text: createEl('span', { text: c, cls: 'sqlseal-column-name' }) as any, // FIXME: this should be properly typed
                             cls: singleCol ? ['sqlseal-list-element', 'sqlseal-list-element-single'] : ['sqlseal-list-element-single']
                         })
-                        const val: any = cellParser.render(d[c])
+                        const val: any = cellParser!.render(d[c])
                         el.append(val)
                         el.dataset.sqlsealColumn = c
                     })

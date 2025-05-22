@@ -4,6 +4,7 @@ import * as Comlink from 'comlink'
 import workerCode from 'virtual:worker-code'
 import { WorkerDatabase } from "./worker/database";
 import { sanitise } from "../utils/sanitiseColumn";
+import { ColumnDefinition } from "../utils/types";
 
 export class SqlSealDatabase {
     db: Comlink.Remote<WorkerDatabase>
@@ -81,6 +82,10 @@ export class SqlSealDatabase {
 
     async createTableNoTypes(name: string, columns: string[], noDrop?: boolean) {
         await this.db.createTableNoTypes(name, columns, noDrop)
+    }
+
+    async createTable(name: string, columns: ColumnDefinition[], noDrop?: boolean) {
+        this.db.createTable(name, columns, noDrop)
     }
 
     async createIndex(indexName: string, tableName: string, columns: string[]) {
