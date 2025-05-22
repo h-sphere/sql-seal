@@ -34,8 +34,8 @@ jobs:
         with:
           publish: pnpm run ci:publish
           version: pnpm run ci:version
-          title: "[Release] ${{ steps.get-version.outputs.version }}"
-          commit: "release: Release v${{ steps.get-version.outputs.version }}"
+          title: "[Release] ${{ steps.changesets.outputs.version || 'Next' }}"
+          commit: "release: Release ${{ steps.changesets.outputs.version || 'Next' }}"
           createGithubReleases: false # this is handled inside ci:publish script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
