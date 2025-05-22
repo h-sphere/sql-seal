@@ -92,7 +92,7 @@ export class Sync {
                 const { data, columns } = await syncObject.returnData()
     
                 const tableName = entry.table_name
-                await this.db.createTableNoTypes(tableName, columns)
+                await this.db.createTable(tableName, columns)
                 await this.db.insertData(tableName, data)
                 await this.tableDefinitionsRepo.update(entry.id, { file_hash: file.stat.mtime.toString() })
                 this.bus.trigger('change::' + tableName)

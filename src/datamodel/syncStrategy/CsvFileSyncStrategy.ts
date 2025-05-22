@@ -5,6 +5,7 @@ import { FilepathHasher } from "../../utils/hasher";
 import { TableDefinitionExternal } from "../repository/tableDefinitions";
 import { ParserTableDefinition } from "./types";
 import { App } from "obsidian";
+import { loadConfig } from "../../utils/csvConfig";
 
 const DEFAULT_FILE_HASH = ''
 
@@ -60,12 +61,12 @@ export class CsvFileSyncStrategy extends ISyncStrategy {
             skipEmptyLines: true,
             transformHeader: sanitise
         })
-        // const typeStatements = toTypeStatements(parsed.meta.fields ?? [], parsed.data)
-        // const columns = Object.entries(typeStatements.types).map(([key, value]) => ({
-        //     name: key,
-        //     type: value as FieldTypes
-        // }));
 
-        return { data: parsed.data, columns: parsed.meta.fields ?? [] }
+        const config = await loadConfig(file, this.app.vault)
+
+        return { data: parsed.data, columns: parsed.meta.fields?.map(f => ({
+            name: f,
+            type: config.columnDefinitions[f]?.type ?? 'auto' as const
+        })) ?? [] }
     }
 }

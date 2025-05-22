@@ -3,7 +3,6 @@ import { App } from "obsidian";
 import { RendererConfig, RendererContext } from "../renderer/rendererRegistry";
 import { displayError } from "../utils/ui";
 import { ViewDefinition } from "../grammar/parser";
-import { ModernCellParser } from "../cellParser/ModernCellParser";
 
 interface HTMLRendererConfig {
     classNames: string[]
@@ -73,7 +72,7 @@ export class TableRenderer implements RendererConfig {
                 data.forEach((d: any) => {
                     const row = body.createEl("tr")
                     columns.forEach((c: any) => {
-                        const parsed = cellParser.render(d[c]) as string
+                        const parsed = cellParser!.render(d[c]) as string
                         if (adjustLayout) {
                             const td = row.createEl("td")
                             td.createSpan({ text: parsed })

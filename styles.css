@@ -296,3 +296,9 @@
     width: var(--container-dataview-table-width);
     max-width: var(--container-table-max-width);
 }
+
+
+/* AG GRID CUSTOMS */
+.ag-checkbox-input {
+    opacity: 1 !important;
+}

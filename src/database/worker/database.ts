@@ -9,7 +9,8 @@ import { SQLiteFS } from 'absurd-sql';
 import IndexedDBBackend from '../../../node_modules/absurd-sql/dist/indexeddb-backend.js';
 import type { BindParams, Database, Statement } from "sql.js";
 import { sanitise } from "../../utils/sanitiseColumn";
-import { uniq } from "lodash";
+import { uniq, uniqBy } from "lodash";
+import { ColumnDefinition } from "../../utils/types";
 
 
 function toObjectArray(stmt: Statement) {
@@ -128,6 +129,22 @@ export class WorkerDatabase {
             await this.dropTable(tableName)
         }
         const createStmt = `CREATE TABLE IF NOT EXISTS ${tableName}(${fields.join(',')})`
+        this.db.run(createStmt)
+    }
+
+    async createTable(tableName: string, columns: ColumnDefinition[], noDrop: boolean = false) {
+        const fields = uniqBy(columns.map(c => ({
+            ...c,
+            name: sanitise(c.name)
+        })), 'name')
+
+        if (!noDrop) {
+            await this.dropTable(tableName)
+        }
+
+        const fieldDefinitions = fields.map(c => c.name) // Setting type inside engine changes nothing for SQLite
+
+        const createStmt = `CREATE TABLE IF NOT EXISTS ${tableName}(${fieldDefinitions.join(', ')})`
         this.db.run(createStmt)
     }
 
