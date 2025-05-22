@@ -39,6 +39,5 @@ jobs:
           title: "Release: $VERSION"
           commit: "release: Release $VERSION"
           createGithubReleases: false # this is handled inside ci:publish script
-          setupGitUser: false # this is handled inside ci:publish script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
