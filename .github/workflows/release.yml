@@ -1,0 +1,44 @@
+name: Publish
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: "pnpm"
+      - name: Get package version
+        id: package-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: pnpm run ci:publish
+          version: pnpm run ci:version
+          title: "Release: $VERSION"
+          commit: "release: Release $VERSION"
+          createGithubReleases: false # this is handled inside ci:publish script
+          setupGitUser: false # this is handled inside ci:publish script
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
