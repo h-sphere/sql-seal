@@ -23,11 +23,9 @@ jobs:
         with:
           node-version: 18.x
           cache: "pnpm"
-      - name: Get package version
-        id: package-version
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      - name: Get current version
+        id: get-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Create Release Pull Request or Publish
