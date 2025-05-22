@@ -9,10 +9,13 @@
     "build": "node --no-warnings esbuild.config.mjs production",
     "version": "node version-bump.mjs && git add manifest.json versions.json",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "release": "pnpm run build && changeset publish",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "test": "jest"
+    "test": "jest",
+    "ci:publish": "./scripts/tag-and-publish.sh",
+    "ci:version": "pnpm run version && changeset version"
   },
   "keywords": [
     "Obsidian",
@@ -23,6 +26,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@changesets/cli": "^2.29.4",
     "@types/esprima": "^4.0.6",
     "@types/estraverse": "^5.1.7",
     "@types/jest": "^29.5.14",
