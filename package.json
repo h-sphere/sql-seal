@@ -15,7 +15,7 @@
     "docs:preview": "vitepress preview docs",
     "test": "jest",
     "ci:publish": "./scripts/tag-and-publish.sh",
-    "ci:version": "pnpm run version && changeset version"
+    "ci:version": "changeset version && pnpm run version"
   },
   "keywords": [
     "Obsidian",
