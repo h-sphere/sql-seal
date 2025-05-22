@@ -1,10 +1,24 @@
 #!/bin/bash
 
 # Get version - you'll need to pass this as an argument or set it another way
-version="${1:-$(cat package.json | grep '"version":' | sed -E 's/.*"version": "([^"]+)".*/\1/')}"
+if [ -n "$1" ]; then
+    version="$1"
+else
+    # Extract version from package.json more reliably
+    version=$(node -p "require('./package.json').version" 2>/dev/null || echo "")
+    
+    # Fallback to grep/sed if node method fails
+    if [ -z "$version" ]; then
+        version=$(grep '"version":' package.json | head -n1 | sed -E 's/.*"version": "([^"]+)".*/\1/' | tr -d '\n\r')
+    fi
+fi
 
-if [ -z "$version" ]; then
-    echo "Error: No version specified. Pass version as argument or ensure package.json exists."
+# Clean the version string of any whitespace/newlines
+version=$(echo "$version" | tr -d '\n\r' | xargs)
+
+# Validate version format
+if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Error: Invalid version format '$version'. Expected format: x.y.z"
     exit 1
 fi
 
