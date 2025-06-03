@@ -8,6 +8,11 @@ import SqlSealPlugin from "../main";
 import { ModernCellParser } from "../cellParser/ModernCellParser";
 import { EventRef } from "obsidian";
 
+interface DataParam {
+    data: Record<string, unknown>[],
+    columns?: string[]
+}
+
 const getCurrentTheme = () => {
     return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
 }
@@ -55,14 +60,16 @@ export class GridRendererCommunicator {
             if (this._gridApi) {
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
-                    this._gridApi.autoSizeAllColumns();
+                    if (!this._gridApi.isDestroyed()) {
+                        this._gridApi.autoSizeAllColumns();
+                    }
                 }, 100);
             }
         });
         this.resizeObserver.observe(this.el);
 
         this.unregisterLeafChange = this.app.workspace.on('active-leaf-change', (leaf) => {
-            if (this._gridApi && leaf?.view?.getViewType() !== 'canvas') {
+            if (this._gridApi && leaf?.view?.getViewType() !== 'canvas' && !this._gridApi.isDestroyed()) {
                 this._gridApi.autoSizeAllColumns();
             }
         });
@@ -137,6 +144,9 @@ export class GridRendererCommunicator {
         if (!this.gridApi) {
             throw new Error('Grid has not been initiated')
         }
+        if (columns && columns.length) {
+            this.gridApi.setGridOption('columnDefs', columns.map(field => ({ field })))
+        }
         this.gridApi.setGridOption('rowData', data)
         this.gridApi.setGridOption('loading', false)
     }
@@ -180,8 +190,8 @@ export class GridRenderer implements RendererConfig {
     render(config: Partial<GridOptions>, el: HTMLElement, { cellParser }: RendererContext) {
         const communicator = new GridRendererCommunicator(el, config, this.plugin, this.app, cellParser)
         return {
-            render: (data: any) => {
-                communicator.setData(data.columns, data.data)
+            render: (data: DataParam) => {
+                communicator.setData(data.columns ?? [], data.data)
                 communicator.gridApi.autoSizeAllColumns()
             },
             error: (message: string) => {
