@@ -1,5 +1,11 @@
 # Releases
 
+## 0.37.1
+
+### Patch Changes
+
+- c705af3: fixing issue with grid not displaying properly
+
 ## 0.37.0
 
 ### Minor Changes
