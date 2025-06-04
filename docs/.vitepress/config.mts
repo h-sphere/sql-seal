@@ -24,6 +24,7 @@ export default defineConfig({
 
     sidebar: [
       {
+        collapsed: true,
         text: 'Documentation',
         items: [
           { text: 'Quick Start', link: '/quick-start' },
@@ -45,6 +46,7 @@ export default defineConfig({
       },
       {
         text: 'Data Sources',
+        collapsed: true,
         items: [
           { text: 'Vault Data', link: '/data-sources/vault-data' },
           { text: 'CSV', link: '/data-sources/csv' },
@@ -54,6 +56,7 @@ export default defineConfig({
       },
       {
         text: 'Renderers',
+        collapsed: true,
         items: [
           { text: 'Grid', link: '/renderers/grid' },
           { text: 'HTML', link: '/renderers/html' },
@@ -63,7 +66,30 @@ export default defineConfig({
         ]
       },
       {
+        text: 'Charts',
+        collapsed: true,
+        items: [
+          { text: 'Charts introduction', link: '/charts/introduction' },
+          { text: 'Basics', link: '/charts/basics' },
+          { text: 'Chart Types', items: [
+            { text: 'Bar Chart', link: '/charts/types/bar-chart', docFooterText: 'Chart Types: Bar Chart' },
+            { text: 'Line Chart', link: '/charts/types/line-chart', docFooterText: 'Chart Types: Line Chart' },
+            { text: 'Pie Chart', link: '/charts/types/pie-chart', docFooterText: 'Chart Types: Pie Chart' },
+            { text: 'Scatter Plot', link: '/charts/types/scatter-plot', docFooterText: 'Chart Types: Scatter Plot' },
+            { text: 'Candlestick', link: '/charts/types/candlestick', docFooterText: 'Chart Types: Candlestick' },
+            { text: 'Radar', link: '/charts/types/radar', docFooterText: 'Chart Types: Radar' },
+            { text: 'Sunburst', link: '/charts/types/sunburst', docFooterText: 'Chart Types: Sunburst' },
+            { text: 'Mixed Charts', link: '/charts/types/mixed-charts' }
+
+          ]},
+          { text: 'Advanced Mode', link: '/charts/advanced-mode' },
+          { text: 'Regression', link: '/charts/regression' },
+          { text: 'Clustering', link: '/charts/clustering' }
+        ]
+      },
+      {
         text: 'FAQ',
+        collapsed: true,
         items: [
           { text: 'Comparison with Dataview', link: '/faq/comparison-with-dataview' },
           { text: 'SQLSeal with Obsidian Sync', link: '/faq/obsidian-sync' },
@@ -72,6 +98,7 @@ export default defineConfig({
         ]
       },
       {
+        collapsed: true,
         text: 'Contributing',
         items: [
           { text: 'Contributing', link: '/contributing/get-started' },
@@ -89,7 +116,10 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/h-sphere/sql-seal' },
       { icon: 'discord', link: 'https://discord.gg/ZMRnFeAWXb' },
-      { icon: 'bluesky', link: 'https://bsky.app/profile/hypersphereblog.bsky.social' }
+      { icon: 'bluesky', link: 'https://bsky.app/profile/hypersphereblog.bsky.social' },
+      { icon: 'kofi', link: 'https://ko-fi.com/hypersphere' },
+      { icon: 'patreon', link: 'https://www.patreon.com/c/hypersphere' },
+
     ],
     footer: {
       message: '',
