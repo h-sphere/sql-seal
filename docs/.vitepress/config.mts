@@ -78,7 +78,6 @@ export default defineConfig({
             { text: 'Scatter Plot', link: '/charts/types/scatter-plot', docFooterText: 'Chart Types: Scatter Plot' },
             { text: 'Candlestick', link: '/charts/types/candlestick', docFooterText: 'Chart Types: Candlestick' },
             { text: 'Radar', link: '/charts/types/radar', docFooterText: 'Chart Types: Radar' },
-            { text: 'Sunburst', link: '/charts/types/sunburst', docFooterText: 'Chart Types: Sunburst' },
             { text: 'Mixed Charts', link: '/charts/types/mixed-charts' }
 
           ]},

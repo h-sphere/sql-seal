@@ -35,4 +35,4 @@ CHART {
 SELECT * FROM data
 ```
 
-[radar chart](radar.md)
+![radar chart](radar.png)
