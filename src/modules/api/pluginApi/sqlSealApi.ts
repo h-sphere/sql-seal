@@ -1,14 +1,21 @@
 import { Plugin } from "obsidian"
-import SqlSealPlugin from "../main"
-import { version } from '../../package.json'
-import { RendererConfig } from "../renderer/rendererRegistry";
-import { CellFunction } from "../cellParser/CellFunction";
+import SqlSealPlugin from "../../../main";
+import { version } from '../../../../package.json'
+import { RendererConfig } from "../../editor/renderer/rendererRegistry";
+import { CellFunction } from "../../../cellParser/CellFunction";
+
+
+export type PluginRegister = {
+    plugin: Plugin,
+    run: (api: SQLSealApi) => void
+}
+
 
 const API_VERSION = 4;
 
 export class SQLSealRegisterApi {
     registeredApis: Array<SQLSealApi> = []
-    constructor(private sqlSealPlugin: SqlSealPlugin) {
+    constructor(sqlSealPlugin: Plugin) {
         sqlSealPlugin.register(() => {
             this.registeredApis.forEach(p => {
                 p.unregister()
@@ -26,9 +33,20 @@ export class SQLSealRegisterApi {
     }
 
     registerForPlugin(plugin: Plugin) {
-        const api = new SQLSealApi(plugin, this.sqlSealPlugin)
+        const api = new SQLSealApi(plugin)
         this.registeredApis.push(api)
         return api
+    }
+
+    registerForPluginNew(reg: PluginRegister) {
+        const api = new SQLSealApi(reg.plugin)
+        this.registeredApis.push(api)
+
+        // If plugin gets unregistered, we need to handle it.
+        reg.plugin.register(() => {
+            api.unregister()
+            this.registeredApis = this.registeredApis.filter(a => a !== api)
+        })
     }
 }
 
@@ -48,7 +66,7 @@ export class SQLSealApi {
     private functions: Array<CellFunction> = []
     private flags: Array<RegisteredFlag> = []
 
-    constructor(private readonly plugin: Plugin, private sqlSealPlugin: SqlSealPlugin) {
+    constructor(private readonly plugin: Plugin) {
         plugin.register(() => {
             this.unregister()
         })
@@ -59,35 +77,35 @@ export class SQLSealApi {
             name,
             viewClass
         })
-        this.sqlSealPlugin.registerSQLSealView(name, viewClass)
+        // this.sqlSealPlugin.registerSQLSealView(name, viewClass)
     }
 
     registerCustomFunction(fn: CellFunction) {
         this.functions.push(fn)
-        this.sqlSealPlugin.registerSQLSealFunction(fn)
+        // this.sqlSealPlugin.registerSQLSealFunction(fn)
     }
 
     registerTable<const columns extends string[]>(tableName: string, columns: columns) {
-        return this.sqlSealPlugin.registerTable(this.plugin, tableName, columns)
+        // return this.sqlSealPlugin.registerTable(this.plugin, tableName, columns)
     }
 
     registerFlag(flag: RegisteredFlag) {
         this.flags.push(flag)
-        this.sqlSealPlugin.registerSQLSealFlag(flag)
+        // this.sqlSealPlugin.registerSQLSealFlag(flag)
     }
 
     unregister() {
         for(const view of this.views) {
-            this.sqlSealPlugin.unregisterSQLSealView(view.name)
+            // this.sqlSealPlugin.unregisterSQLSealView(view.name)
         }
         this.views = []
 
         for(const fn of this.functions) {
-            this.sqlSealPlugin.unregisterSQLSealFunction(fn.name)
+            // this.sqlSealPlugin.unregisterSQLSealFunction(fn.name)
         }
 
         for(const flag of this.flags) {
-            this.sqlSealPlugin.unregisterSQLSealFlag(flag.name)
+            // this.sqlSealPlugin.unregisterSQLSealFlag(flag.name)
         }
     }
 }

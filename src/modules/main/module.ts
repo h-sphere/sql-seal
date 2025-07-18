@@ -10,6 +10,7 @@ import { settingsModule } from '../settings/module'
 import { syntaxHighlight } from '../syntaxHighlight/module'
 import { contextMenu } from '../contextMenu/module'
 import { debugModule } from '../debug/module'
+import { apiModule } from '../api/module'
 
 const obsidian = buildContainer(c => c
     .externals<{
@@ -29,7 +30,8 @@ export const mainModule = buildContainer(c => c
         settings: settingsModule,
         syntaxHighlight,
         contextMenu,
-        debug: debugModule
+        debug: debugModule,
+        api: apiModule
     })
     .register({
         cellParser: asFactory(CellParserFactory), // FIXME: move this to settings
@@ -45,6 +47,7 @@ export const mainModule = buildContainer(c => c
         'editor.plugin': 'obsidian.plugin',
         'editor.sync': 'sync.syncBus',
         'editor.cellParser': 'cellParser',
+        'editor.settings': 'settings.settings'
     })
     .resolve({
         'sync.app': 'obsidian.app',
@@ -68,6 +71,9 @@ export const mainModule = buildContainer(c => c
     })
     .resolve({
         'debug.plugin': 'obsidian.plugin'
+    })
+    .resolve({
+        'api.plugin': 'obsidian.plugin'
     })
 )
 

@@ -1,5 +1,5 @@
-import { ModernCellParser } from "../cellParser/ModernCellParser";
-import { ViewDefinition } from "../modules/editor/parser";
+import { ModernCellParser } from "../../../cellParser/ModernCellParser";
+import { ViewDefinition } from "../parser";
 
 export interface DataFormat {
     data: Record<string, any>[],

@@ -2,9 +2,9 @@
 import { getMarkdownTable } from "markdown-table-ts";
 import { App } from "obsidian";
 import { RendererConfig, RendererContext } from "./rendererRegistry";
-import { ViewDefinition } from "../modules/editor/parser";
-import { ParseResults } from "../cellParser/parseResults";
-import { displayError } from "../utils/ui";
+import { displayError } from "../../../utils/ui";
+import { ParseResults } from "../../../cellParser/parseResults";
+import { ViewDefinition } from "../parser";
 
 const mapDataFromHeaders = (columns: string[], data: Record<string, any>[]) => {
     return data.map(d => columns.map(c => String(d[c])))

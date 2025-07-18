@@ -3,11 +3,12 @@ import { parse, unparse } from 'papaparse';
 import { DeleteConfirmationModal } from '../modal/deleteConfirmationModal';
 import { RenameColumnModal } from '../modal/renameColumnModal';
 import { CodeSampleModal } from '../modal/showCodeSample';
-import { GridRenderer, GridRendererCommunicator } from '../renderer/GridRenderer';
+import { GridRenderer, GridRendererCommunicator } from '../modules/editor/renderer/GridRenderer';
 import { errorNotice } from '../utils/notice';
 import { ModernCellParser } from '../cellParser/ModernCellParser';
 import { ConfigObject, loadConfig, saveConfig } from 'src/utils/csvConfig';
 import { ColumnType } from '../utils/types';
+import { Settings } from '../modules/settings/Settings';
 
 const delay = (n: number) => new Promise(resolve => setTimeout(resolve, n))
 
@@ -21,8 +22,7 @@ export class CSVView extends TextFileView {
 
     constructor(
         leaf: WorkspaceLeaf,
-        private enableEditing: boolean,
-        private cellParser: ModernCellParser
+        private readonly settings: Settings
     ) {
         super(leaf);
     }
@@ -111,7 +111,7 @@ export class CSVView extends TextFileView {
     }
 
     setIsEditable(newValue: boolean) {
-        this.enableEditing = newValue
+        this.settings.set('enableEditing', newValue)
         // FIXME: if there already rendered view, use this to rerender it?
     }
 
@@ -291,7 +291,7 @@ export class CSVView extends TextFileView {
 
         const buttonsRow = csvEditorDiv.createDiv({ cls: 'sql-seal-csv-viewer-buttons' })
         await this.loadConfig()
-        if (this.enableEditing) {
+        if (this.settings.get('enableEditing')) {
             const createColumn = buttonsRow.createEl('button', { text: 'Add Column' })
             const createRow = buttonsRow.createEl('button', { text: 'Add Row' })
 
@@ -321,16 +321,16 @@ export class CSVView extends TextFileView {
             modal.open()
         })
 
-        const grid = new GridRenderer(this.app, null)
+        const grid = new GridRenderer(this.settings, null, this.app)
         const csvView = this;
         const data = this.prepareData()
         this.result = data
         const api = grid.render({
             columnDefs: this.getColumnConfigurations(data.fields ?? []),
             defaultColDef: {
-                editable: this.enableEditing,
+                editable: this.settings.get('enableEditing'),
                 headerComponentParams: {
-                    enableMenu: this.enableEditing,
+                    enableMenu: this.settings.get('enableEditing'),
                     showColumnMenu: function (e: any) {
                         const menu = new Menu()
 
@@ -412,7 +412,7 @@ export class CSVView extends TextFileView {
                 this.updateRow(event.data)
             },
             onCellContextMenu: (e) => {
-                if (!this.enableEditing) {
+                if (!this.settings.get('enableEditing')) {
                     return
                 }
                 const menu = new Menu()

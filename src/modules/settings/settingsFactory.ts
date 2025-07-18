@@ -8,6 +8,12 @@ import { Settings } from "./Settings";
 export class SettingsFactory {
     async make(plugin: Plugin) {
         const settings = Object.assign({}, DEFAULT_SETTINGS, await plugin.loadData());
-        return new Settings(settings)
+        const obj =  new Settings(settings)
+
+        obj.onChange((settings) => {
+            plugin.saveData(settings)
+        })
+
+        return obj
     }
 }

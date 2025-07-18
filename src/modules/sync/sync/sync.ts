@@ -114,7 +114,7 @@ export class Sync {
     }
 
     async getTablesMappingForContext(sourceFileName: string) {
-        const tables = await this.tableMapLog.getByContext(sourceFileName)
+        const tables = await this.tableMapLog.getByContext(sourceFileName) as { alias_name: string, table_name: string }[]
         const map = tables.reduce((acc, t) => ({
             ...acc,
             [t.alias_name as string]: t.table_name

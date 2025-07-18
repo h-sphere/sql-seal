@@ -1,11 +1,11 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
-import { App, MarkdownRenderChild, Plugin } from "obsidian";
-import { Sync } from "../../modules/sync/sync/sync";
+import { App, MarkdownRenderChild } from "obsidian";
 import { transformQuery } from "../../sql/sqlTransformer";
-import { registerObservers } from "../../utils/registerObservers";
-import { displayError } from "../../utils/ui";
-import SqlSealPlugin from "../../main";
-import { SqlSealDatabase } from "../../modules/database/database";
+import { SqlSealDatabase } from "../../../database/database";
+import { Sync } from "../../../sync/sync/sync";
+import { registerObservers } from "../../../../utils/registerObservers";
+import { displayError } from "../../../../utils/ui";
+import { Settings } from "../../../settings/Settings";
 
 export class InlineProcessor extends MarkdownRenderChild {
     private registrator: OmnibusRegistrator;
@@ -15,7 +15,7 @@ export class InlineProcessor extends MarkdownRenderChild {
         private query: string,
         private sourcePath: string,
         private db: SqlSealDatabase,
-        private plugin: Plugin,
+        private settings: Settings,
         private app: App,
         private sync: Sync
     ) {
@@ -41,7 +41,7 @@ export class InlineProcessor extends MarkdownRenderChild {
             const transformedQuery = transformQuery(this.query, registeredTablesForContext);
 
             // FIXME: settings here instead of plugin
-            if (true/*this.plugin.settings.enableDynamicUpdates*/) {
+            if (this.settings.get('enableDynamicUpdates')) {
                 registerObservers({
                     bus: this.registrator,
                     tables: transformedQuery.mappedTables,

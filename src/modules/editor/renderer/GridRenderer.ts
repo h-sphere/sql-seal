@@ -2,11 +2,11 @@ import { createGrid, GridApi, GridOptions, themeQuartz } from "ag-grid-community
 import { merge } from "lodash";
 import { App, Plugin } from "obsidian";
 import { RendererConfig, RendererContext } from "./rendererRegistry";
-import { parse } from 'json5'
+import { parse } from 'json5';
+import { ModernCellParser } from "../../../cellParser/ModernCellParser";
 import { EventRef } from "obsidian";
-import { Settings } from "../modules/settings/Settings";
-import { ModernCellParser } from "../cellParser/ModernCellParser";
-import { ViewDefinition } from "../modules/editor/parser";
+import { Settings } from "../../settings/Settings";
+import { ViewDefinition } from "../parser";
 
 interface DataParam {
     data: Record<string, unknown>[],
@@ -35,6 +35,7 @@ export class GridRendererCommunicator {
     constructor(
         private el: HTMLElement,
         private config: Partial<GridOptions>,
+        private plugin: Plugin | null,
         private settings: Settings,
         private app: App,
         private cellParser?: ModernCellParser
@@ -131,7 +132,7 @@ export class GridRendererCommunicator {
             columnDefs: [],
             domLayout: 'autoHeight',
             enableCellTextSelection: true,
-            paginationPageSize: this.settings.get('gridItemsPerPage')
+            paginationPageSize: this.settings.get('gridItemsPerPage') ?? 10
             // ensureDomOrder: true
         }, this.config)
         this._gridApi = createGrid(
@@ -165,7 +166,7 @@ export class GridRendererCommunicator {
 }
 
 export class GridRenderer implements RendererConfig {
-    constructor(private app: App, private readonly settings: Settings) { }
+    constructor(private settings: Settings, private readonly plugin: Plugin | null, private readonly app: App) { }
     get viewDefinition(): ViewDefinition {
         return {
             name: this.rendererKey,
@@ -188,7 +189,7 @@ export class GridRenderer implements RendererConfig {
 
 
     render(config: Partial<GridOptions>, el: HTMLElement, { cellParser }: RendererContext) {
-        const communicator = new GridRendererCommunicator(el, config, this.settings, this.app, cellParser)
+        const communicator = new GridRendererCommunicator(el, config, this.plugin, this.settings, this.app, cellParser)
         return {
             render: (data: DataParam) => {
                 communicator.setData(data.columns ?? [], data.data)

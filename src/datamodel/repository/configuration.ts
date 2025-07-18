@@ -11,7 +11,7 @@ export class ConfigurationRepository extends Repository {
 
     public async getConfig(key: string) {
         try {
-            const config = await this.db.select('SELECT value FROM configuration WHERE id = @id', { id: key })
+            const config = (await this.db.select('SELECT value FROM configuration WHERE id = @id', { id: key }))!
             if (config.data && config.data.length) {
                 return config.data[0].value
             }

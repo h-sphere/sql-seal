@@ -3,15 +3,15 @@ import { RangeSetBuilder } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import { App, Plugin } from "obsidian";
 import { Sync } from "../modules/sync/sync/sync";
-import { SqlSealInlineHandler } from "../codeblockHandler/inline/InlineCodeHandler";
-import { InlineProcessor } from "../codeblockHandler/inline/InlineProcessor";
-import SqlSealPlugin from "../main";
 import { SqlSealDatabase } from "../modules/database/database";
+import { SqlSealInlineHandler } from "../modules/editor/codeblockHandler/inline/InlineCodeHandler";
+import { InlineProcessor } from "../modules/editor/codeblockHandler/inline/InlineProcessor";
+import { Settings } from "../modules/settings/Settings";
 
 export function createSqlSealEditorExtension(
     app: App,
     db: SqlSealDatabase,
-    plugin: Plugin,
+    settings: Settings,
     sync: Sync,
 ) {
     return ViewPlugin.fromClass(
@@ -20,7 +20,7 @@ export function createSqlSealEditorExtension(
             inlineHandler: SqlSealInlineHandler;
 
             constructor(view: EditorView) {
-                this.inlineHandler = new SqlSealInlineHandler(app, db, plugin, sync);
+                this.inlineHandler = new SqlSealInlineHandler(app, db, settings, sync);
                 this.decorations = this.buildDecorations(view);
             }
 

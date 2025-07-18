@@ -1,10 +1,10 @@
 // This is renderer for a very basic List view.
 import { App } from "obsidian";
 import { RendererConfig, RendererContext } from "./rendererRegistry";
+import { displayError } from "../../../utils/ui";
 import Handlebars from "handlebars";
-import { ViewDefinition } from "../modules/editor/parser";
-import { ParseResults } from "../cellParser/parseResults";
-import { displayError } from "../utils/ui";
+import { ParseResults } from "../../../cellParser/parseResults";
+import { ViewDefinition } from "../parser";
 
 interface TemplateRendererConfig {
     template: HandlebarsTemplateDelegate

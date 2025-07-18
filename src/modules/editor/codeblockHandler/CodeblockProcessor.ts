@@ -1,13 +1,14 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
-import { Sync } from "../modules/sync/sync/sync";
+import { Sync } from "../../sync/sync/sync";
 import { RendererRegistry, RenderReturn } from "../renderer/rendererRegistry";
+import { ParserResult, parseWithDefaults, TableDefinition } from "../parser";
+import { SqlSealDatabase } from "../../database/database";
+import { ModernCellParser } from "../../../cellParser/ModernCellParser";
+import { displayError, displayNotice } from "../../../utils/ui";
 import { transformQuery } from "../sql/sqlTransformer";
-import { displayError, displayNotice } from "../utils/ui";
-import { registerObservers } from "../utils/registerObservers";
-import { ParserResult, parseWithDefaults, TableDefinition } from "../grammar/parser";
-import { SqlSealDatabase } from "../modules/database/database";
-import { ModernCellParser } from "../cellParser/ModernCellParser";
+import { registerObservers } from "../../../utils/registerObservers";
+import { Settings } from "../../settings/Settings";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
 
@@ -24,6 +25,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         private rendererRegistry: RendererRegistry,
         private db: SqlSealDatabase,
         private cellParser: ModernCellParser,
+        private settings: Settings,
         private app: App,
         private sync: Sync) {
         super(el)
@@ -38,11 +40,11 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
             const defaults: ParserResult = {
                 flags: {
-                    refresh: true, // FIXME: reenable this.plugin.settings.enableDynamicUpdates,
+                    refresh: this.settings.get('enableDynamicUpdates'),
                     explain: false
                 },
                 query: '',
-                renderer: { options: '', type: 'GRID', /* FIXME: reenable settings here this.plugin.settings.defaultView.toUpperCase()*/ },
+                renderer: { options: '', type: this.settings.get('defaultView').toUpperCase() },
                 tables: []
             
             }

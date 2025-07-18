@@ -1,8 +1,8 @@
 import { App, Plugin, TFile } from "obsidian";
 import { AFileSyncTable } from "./abstractFileSyncTable";
 import { sanitise } from "../../utils/sanitiseColumn";
-import { SqlSealDatabase } from "../../database/database";
 import { difference } from "lodash";
+import { SqlSealDatabase } from "../../modules/database/database";
 
 
 export const FILES_TABLE_NAME = 'files'
@@ -56,7 +56,7 @@ export class FilesFileSyncTable extends AFileSyncTable {
         const newColumns = difference(newSetOfColumns, this.columns)
         if (newColumns.length) {
             await this.db.addColumns(FILES_TABLE_NAME, newColumns)
-            this.columns = await this.db.getColumns(FILES_TABLE_NAME)
+            this.columns = (await this.db.getColumns(FILES_TABLE_NAME)) ?? []
         }
     }
 
@@ -70,7 +70,7 @@ export class FilesFileSyncTable extends AFileSyncTable {
     }
 
     async onFileCreateBulk(files: Array<TFile>) {
-        this.columns = await this.db.getColumns(FILES_TABLE_NAME)
+        this.columns = (await this.db.getColumns(FILES_TABLE_NAME)) ?? []
 
         // One by one
         for (const file of files) {
@@ -81,7 +81,7 @@ export class FilesFileSyncTable extends AFileSyncTable {
 
     async onInit(): Promise<void> {
         this.db.createTableNoTypes(FILES_TABLE_NAME, ['id', 'name', 'path', 'created_at', 'modified_at', 'file_size'])
-        this.columns = await this.db.getColumns(FILES_TABLE_NAME)
+        this.columns = (await this.db.getColumns(FILES_TABLE_NAME)) ?? []
 
         // Indexes
         const toIndex = ['id', 'name', 'path']

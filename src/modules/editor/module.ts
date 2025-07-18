@@ -2,11 +2,12 @@ import { asClass, asFactory, buildContainer } from "@hypersphere/dity"
 import { App, Plugin } from "obsidian"
 import { SqlSealDatabase } from "../database/database"
 import { Sync } from "../sync/sync/sync"
-import { SqlSealCodeblockHandler } from "../../codeblockHandler/SqlSealCodeblockHandler"
-import { SqlSealInlineHandler } from "../../codeblockHandler/inline/InlineCodeHandler"
-import { RendererRegistry } from "../../renderer/rendererRegistry"
+import { RendererRegistry } from "./renderer/rendererRegistry"
 import { EditorInit } from "./init"
 import { ModernCellParser } from "../../cellParser/ModernCellParser"
+import { SqlSealCodeblockHandler } from "./codeblockHandler/SqlSealCodeblockHandler"
+import { SqlSealInlineHandler } from "./codeblockHandler/inline/InlineCodeHandler"
+import { Settings } from "../settings/Settings"
 
 export const editor = buildContainer(c => c
     .register({
@@ -20,7 +21,8 @@ export const editor = buildContainer(c => c
         db: SqlSealDatabase,
         plugin: Plugin,
         sync: Sync,
-        cellParser: ModernCellParser
+        cellParser: ModernCellParser,
+        settings: Settings
     }>()
 )
 

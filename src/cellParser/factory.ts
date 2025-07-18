@@ -4,9 +4,8 @@ import { LinkParser } from "./parser/link"
 import { ImageParser } from "./parser/image"
 import { CheckboxParser } from "./parser/checkbox"
 import { makeInjector } from "@hypersphere/dity"
-import { MainModule } from "../container"
-import { Database } from "sql.js"
-import { SqlSealDatabase } from "../database/database"
+import { MainModule } from "../modules/main/module"
+import { SqlSealDatabase } from "../modules/database/database"
 
 export const getCellParser = (app: App, create = createEl) => {
     const cellParser = new ModernCellParser()
@@ -15,8 +14,6 @@ export const getCellParser = (app: App, create = createEl) => {
     cellParser.register(new CheckboxParser(app, create))
     return cellParser
 }
-
-
 
 // FIXME: inject createEl
 @(makeInjector<MainModule>()([

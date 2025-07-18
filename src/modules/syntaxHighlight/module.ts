@@ -1,7 +1,7 @@
 import { asFactory, buildContainer } from "@hypersphere/dity";
 import { SyntaxHighlightInit } from "./init";
 import { App, Plugin } from "obsidian";
-import { RendererRegistry } from "../../renderer/rendererRegistry";
+import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 
 export const syntaxHighlight = buildContainer(c => c
     .externals<{

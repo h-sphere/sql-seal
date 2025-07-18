@@ -1,4 +1,4 @@
-import { SqlSealDatabase } from "./database";
+import { SqlSealDatabase } from "../modules/database/database"
 
 type Item<Columns extends string[]> = Record<Columns[number], string | number | undefined>
 
@@ -14,11 +14,17 @@ export class DatabaseTable<const Columns extends string[]> {
 
     async getAll() {
         const data = await this.db.select(`SELECT * FROM ${this.tableName}`, {})
+        if (!data) {
+            return []
+        }
         return data.data as Item<Columns>[]
     }
 
     async getByKey(key: Columns[number], value: string | number) {
         const data = await this.db.select(`SELECT * FROM ${this.tableName} WHERE ${key}=@value`, { '@value': value })
+        if (!data) {
+            return []
+        }
         return data.data as Item<Columns>[]
     }
 

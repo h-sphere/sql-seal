@@ -6,10 +6,11 @@ import { CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE, CSVView } from "../../view/CSVView"
 import { JSON_VIEW_EXTENSIONS, JSON_VIEW_TYPE, JsonView } from "../../view/JsonView";
 import { CellParser } from "../../../types-package/dist/src/cellParser";
 import { ModernCellParser } from "../../cellParser/ModernCellParser";
+import { Settings } from "./Settings";
 
-@(makeInjector<SettingsModule>()(['plugin', 'settingsTab', 'app', 'cellParser']))
+@(makeInjector<SettingsModule>()(['plugin', 'settingsTab', 'app', 'cellParser', 'settings']))
 export class SettingsInit {
-    async make(plugin: Plugin, settingsTab: SQLSealSettingsTab, app: App, cellParser: ModernCellParser) {
+    async make(plugin: Plugin, settingsTab: SQLSealSettingsTab, app: App, cellParser: ModernCellParser, settings: Settings) {
 
         const unregister = () => {
             app.workspace.detachLeavesOfType(CSV_VIEW_TYPE);
@@ -24,7 +25,7 @@ export class SettingsInit {
         const registerViews = () => {
             plugin.registerView(
                 CSV_VIEW_TYPE,
-                (leaf) => new CSVView(leaf, /*this.settings.enableEditing*/true, cellParser)
+                (leaf) => new CSVView(leaf, settings)
             );
             plugin.registerView(
                 JSON_VIEW_TYPE,
@@ -34,10 +35,10 @@ export class SettingsInit {
 
 
         const register = () => {
-            if (true /*settings.enableViewer*/) {
+            if (settings.get('enableViewer')) {
                 plugin.registerExtensions(CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE);
             }
-            if (/*settings.enableJSONViewer*/true) {
+            if (settings.get('enableJSONViewer')) {
                 plugin.registerExtensions(JSON_VIEW_EXTENSIONS, JSON_VIEW_TYPE)
             }
         }

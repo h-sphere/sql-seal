@@ -1,5 +1,5 @@
 import * as ohm from 'ohm-js';
-import { Flag } from '../renderer/rendererRegistry';
+import { Flag } from './renderer/rendererRegistry';
 
 export interface ViewDefinition {
     name: string,

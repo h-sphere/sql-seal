@@ -10,7 +10,8 @@ type InitFn = () => void
     'syntaxHighlight.init',
     'contextMenu.init',
     'sync.init',
-    'debug.init'
+    'debug.init',
+    'api.init'
 ]))
 export class Init {
     async make(
@@ -19,7 +20,8 @@ export class Init {
         highlighInit: InitFn,
         contextMenu: InitFn,
         syncInit: InitFn,
-        debugInit: InitFn
+        debugInit: InitFn,
+        apiInit: InitFn
     ) {
         return () => {
             console.log('INITIALISING')
@@ -30,6 +32,7 @@ export class Init {
             contextMenu()
             syncInit()
             debugInit()
+            apiInit()
         }
     }
 }

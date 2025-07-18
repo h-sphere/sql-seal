@@ -51,10 +51,10 @@ export class TableDefinitionsRepository extends Repository {
     }
 
     async getBySourceFile(sourceFile: string) {
-        const { data } = await this.db.select(
+        const { data } = (await this.db.select(
             `SELECT * FROM ${this.TABLE_NAME} WHERE source_file = @sourceFile`, 
             { sourceFile }
-        )
+        ))!
 
         if (!data.length) {
             return null
@@ -63,10 +63,10 @@ export class TableDefinitionsRepository extends Repository {
     }
 
     async getByRefreshId(refreshId: string) {
-        const { data } = await this.db.select(
+        const { data } = (await this.db.select(
             `SELECT * FROM ${this.TABLE_NAME} WHERE refresh_id= @refreshId`, 
             { refreshId }
-        )
+        ))!
 
         if (!data.length) {
             return null
@@ -79,7 +79,7 @@ export class TableDefinitionsRepository extends Repository {
     }
 
     async getAll() {
-        const { data } = await this.db.select(`SELECT * FROM ${this.TABLE_NAME}`, {})
+        const { data } = (await this.db.select(`SELECT * FROM ${this.TABLE_NAME}`, {}))!
         return data.map(d => ({
             ...d,
             type: d.type ?? 'file',
@@ -98,7 +98,7 @@ export class TableDefinitionsRepository extends Repository {
             updateData.arguments = JSON.stringify(fields.arguments);
         }
 
-        await this.db.db.updateData(this.TABLE_NAME, [{
+        await this.db.db!.updateData(this.TABLE_NAME, [{
             id,
             ...updateData
         }], 'id')

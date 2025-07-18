@@ -3,7 +3,7 @@ import { SyntaxHighlightModule } from "./module"
 import { EditorView, ViewPlugin } from "@codemirror/view";
 import { SQLSealViewPlugin } from "../../editorExtension/syntaxHighlight";
 import { App, Plugin } from "obsidian";
-import { RendererRegistry } from "../../renderer/rendererRegistry";
+import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 
 @(makeInjector<SyntaxHighlightModule, 'factory'>()([
     'app', 'rendererRegistry', 'plugin'

@@ -1,8 +1,8 @@
 // This is renderer for a very basic Table view.
 import { App } from "obsidian";
 import { RendererConfig, RendererContext } from "./rendererRegistry";
-import { ViewDefinition } from "../modules/editor/parser";
-import { displayError } from "../utils/ui";
+import { displayError } from "../../../utils/ui";
+import { ViewDefinition } from "../parser";
 
 interface HTMLRendererConfig {
     classNames: string[]
