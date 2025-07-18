@@ -1,13 +1,13 @@
-import { SqlSealDatabase } from "../database/database";
-import { TableAliasesRepository } from "./repository/tableAliases";
+import { TableAliasesRepository } from "../../../datamodel/repository/tableAliases";
 import { App, TAbstractFile, TFile, Vault } from "obsidian";
-import { FilepathHasher } from "../utils/hasher";
+import { FilepathHasher } from "../../../utils/hasher";
 import { Omnibus } from "@hypersphere/omnibus";
-import { SyncStrategyFactory } from "./syncStrategy/SyncStrategyFactory";
-import { ConfigurationRepository } from "./repository/configuration";
-import { TableDefinitionsRepository, TableDefinition } from "./repository/tableDefinitions";
-import { ParserTableDefinition } from "./syncStrategy/types";
+import { SyncStrategyFactory } from "../../../datamodel/syncStrategy/SyncStrategyFactory";
+import { ConfigurationRepository } from "../../../datamodel/repository/configuration";
+import { TableDefinitionsRepository, TableDefinition } from "../../../datamodel/repository/tableDefinitions";
+import { ParserTableDefinition } from "../../../datamodel/syncStrategy/types";
 import { uniq } from "lodash";
+import { SqlSealDatabase } from "../../database/database";
 
 
 const SQLSEAL_DATABASE_VERSION = 2;

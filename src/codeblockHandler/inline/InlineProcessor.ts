@@ -1,11 +1,11 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
-import { App, MarkdownRenderChild } from "obsidian";
-import { SqlSealDatabase } from "../../database/database";
-import { Sync } from "../../datamodel/sync";
+import { App, MarkdownRenderChild, Plugin } from "obsidian";
+import { Sync } from "../../modules/sync/sync/sync";
 import { transformQuery } from "../../sql/sqlTransformer";
 import { registerObservers } from "../../utils/registerObservers";
 import { displayError } from "../../utils/ui";
 import SqlSealPlugin from "../../main";
+import { SqlSealDatabase } from "../../modules/database/database";
 
 export class InlineProcessor extends MarkdownRenderChild {
     private registrator: OmnibusRegistrator;
@@ -15,7 +15,7 @@ export class InlineProcessor extends MarkdownRenderChild {
         private query: string,
         private sourcePath: string,
         private db: SqlSealDatabase,
-        private plugin: SqlSealPlugin,
+        private plugin: Plugin,
         private app: App,
         private sync: Sync
     ) {
@@ -40,7 +40,8 @@ export class InlineProcessor extends MarkdownRenderChild {
             const registeredTablesForContext = await this.sync.getTablesMappingForContext(this.sourcePath);
             const transformedQuery = transformQuery(this.query, registeredTablesForContext);
 
-            if (this.plugin.settings.enableDynamicUpdates) {
+            // FIXME: settings here instead of plugin
+            if (true/*this.plugin.settings.enableDynamicUpdates*/) {
                 registerObservers({
                     bus: this.registrator,
                     tables: transformedQuery.mappedTables,
@@ -66,10 +67,10 @@ export class InlineProcessor extends MarkdownRenderChild {
                 extension: file.extension,
             }
 
-            const { data, columns } = await this.db.select(
+            const { data, columns } = (await this.db.select(
                 transformedQuery.sql,
                 variables
-            );
+            ))!; // FIXME: better code here.
 
             this.el.empty()
             let value = data[0][columns[0]] ?? ''

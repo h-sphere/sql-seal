@@ -1,13 +1,13 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
-import { SqlSealDatabase } from "../database/database";
-import { Sync } from "../datamodel/sync";
+import { Sync } from "../modules/sync/sync/sync";
 import { RendererRegistry, RenderReturn } from "../renderer/rendererRegistry";
 import { transformQuery } from "../sql/sqlTransformer";
 import { displayError, displayNotice } from "../utils/ui";
-import SqlSealPlugin from "../main";
 import { registerObservers } from "../utils/registerObservers";
 import { ParserResult, parseWithDefaults, TableDefinition } from "../grammar/parser";
+import { SqlSealDatabase } from "../modules/database/database";
+import { ModernCellParser } from "../cellParser/ModernCellParser";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
 
@@ -23,7 +23,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
         private ctx: MarkdownPostProcessorContext,
         private rendererRegistry: RendererRegistry,
         private db: SqlSealDatabase,
-        private plugin: SqlSealPlugin,
+        private cellParser: ModernCellParser,
         private app: App,
         private sync: Sync) {
         super(el)
@@ -38,11 +38,11 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 
             const defaults: ParserResult = {
                 flags: {
-                    refresh: this.plugin.settings.enableDynamicUpdates,
+                    refresh: true, // FIXME: reenable this.plugin.settings.enableDynamicUpdates,
                     explain: false
                 },
                 query: '',
-                renderer: { options: '', type: this.plugin.settings.defaultView.toUpperCase() },
+                renderer: { options: '', type: 'GRID', /* FIXME: reenable settings here this.plugin.settings.defaultView.toUpperCase()*/ },
                 tables: []
             
             }
@@ -73,7 +73,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 .prepareRender(
                     results.renderer.type.toLowerCase(), results.renderer.options
                 )(rendererEl, {
-                    cellParser: this.plugin.cellParser,
+                    cellParser: this.cellParser,
                     sourcePath: this.ctx.sourcePath
                 })
 
@@ -128,7 +128,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
                 this.explainEl.textContent = result
             }
 
-            const { data, columns } = await this.db.select(transformedQuery, variables)
+            const { data, columns } = (await this.db.select(transformedQuery, variables))! // FIXME: check this
             this.renderer.render({ data, columns, flags: this.flags, frontmatter: variables })
         } catch (e) {
             this.renderer.error(e.toString())

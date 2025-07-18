@@ -1,5 +1,5 @@
 import { App, Plugin, TFile } from "obsidian";
-import { AFileSyncTable } from "./tables/abstractFileSyncTable";
+import { AFileSyncTable } from "../../../vaultSync/tables/abstractFileSyncTable";
 
 export class SealFileSync {
     private tablePlugins: Array<AFileSyncTable> = []

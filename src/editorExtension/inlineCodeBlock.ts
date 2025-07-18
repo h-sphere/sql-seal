@@ -1,17 +1,17 @@
 import { EditorView, ViewPlugin, ViewUpdate, DecorationSet, Decoration, WidgetType } from "@codemirror/view";
 import { RangeSetBuilder } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
-import { App } from "obsidian";
-import { SqlSealDatabase } from "../database/database";
-import { Sync } from "../datamodel/sync";
+import { App, Plugin } from "obsidian";
+import { Sync } from "../modules/sync/sync/sync";
 import { SqlSealInlineHandler } from "../codeblockHandler/inline/InlineCodeHandler";
 import { InlineProcessor } from "../codeblockHandler/inline/InlineProcessor";
 import SqlSealPlugin from "../main";
+import { SqlSealDatabase } from "../modules/database/database";
 
 export function createSqlSealEditorExtension(
     app: App,
     db: SqlSealDatabase,
-    plugin: SqlSealPlugin,
+    plugin: Plugin,
     sync: Sync,
 ) {
     return ViewPlugin.fromClass(

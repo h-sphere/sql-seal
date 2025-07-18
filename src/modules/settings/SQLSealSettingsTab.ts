@@ -1,4 +1,8 @@
+import { makeInjector } from '@hypersphere/dity';
 import { App, PluginSettingTab, Setting, Plugin } from 'obsidian';
+import { MainModule } from '../container';
+import { SettingsModule } from './module';
+import { Settings } from './Settings';
 
 export interface SQLSealSettings {
     enableViewer: boolean;
@@ -21,12 +25,13 @@ export const DEFAULT_SETTINGS: SQLSealSettings = {
 };
 
 
+@(makeInjector<SettingsModule>()(['app', 'plugin', 'settings']))
 export class SQLSealSettingsTab extends PluginSettingTab {
     plugin: Plugin;
     settings: SQLSealSettings;
     private onChangeFns: Array<(setting: SQLSealSettings) => void> = []
 
-    constructor(app: App, plugin: Plugin, settings: SQLSealSettings) {
+    constructor(app: App, plugin: Plugin, settings: Settings) {
         super(app, plugin);
         this.plugin = plugin;
         this.settings = settings;

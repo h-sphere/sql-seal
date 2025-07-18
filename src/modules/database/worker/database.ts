@@ -2,15 +2,15 @@ import * as Comlink from "comlink"
 // @ts-ignore
 import initSqlJs from '@jlongster/sql.js';
 // @ts-ignore
-import wasmBinary from '../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm'
+import wasmBinary from '../../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm'
 // @ts-ignore
 import { SQLiteFS } from 'absurd-sql';
 // @ts-ignore
-import IndexedDBBackend from '../../../node_modules/absurd-sql/dist/indexeddb-backend.js';
+import IndexedDBBackend from '../../../../node_modules/absurd-sql/dist/indexeddb-backend.js';
 import type { BindParams, Database, Statement } from "sql.js";
-import { sanitise } from "../../utils/sanitiseColumn";
 import { uniq, uniqBy } from "lodash";
-import { ColumnDefinition } from "../../utils/types";
+import { ColumnDefinition } from "../../../utils/types";
+import { sanitise } from "../../../utils/sanitiseColumn";
 
 
 function toObjectArray(stmt: Statement) {
@@ -196,9 +196,12 @@ export class WorkerDatabase {
 
     async connect() {
         try {
+            console.log('wasm binnary??', wasmBinary)
             const SQL = await initSqlJs({
                 wasmBinary: wasmBinary
             });
+
+            console.log('idb be', IndexedDBBackend, SQL)
 
             let sqlFS = new SQLiteFS(SQL.FS, new IndexedDBBackend(() => {
                 console.error('unable to write to indexedDb')

@@ -1,16 +1,20 @@
 import { App, MarkdownPostProcessorContext } from "obsidian"
-import { SqlSealDatabase } from "../database/database"
 import { RendererRegistry } from "../renderer/rendererRegistry"
-import { Sync } from "../datamodel/sync"
+import { Sync } from "../modules/sync/sync/sync"
 import { CodeblockProcessor } from "./CodeblockProcessor"
-import SqlSealPlugin from "../main"
+import { makeInjector } from "@hypersphere/dity"
+import { ModernCellParser } from "../cellParser/ModernCellParser"
+import { EditorModule } from "../modules/editor/module"
+import { SqlSealDatabase } from "../modules/database/database"
 
-
+@(makeInjector<EditorModule>()(
+    ['app', 'db', 'cellParser', 'sync', 'rendererRegistry']
+))
 export class SqlSealCodeblockHandler {
     constructor(
         private readonly app: App,
         private readonly db: SqlSealDatabase,
-        private readonly plugin: SqlSealPlugin,
+        private readonly cellParser: ModernCellParser,
         private sync: Sync,
         private rendererRegistry: RendererRegistry
     ) {
@@ -24,7 +28,7 @@ export class SqlSealCodeblockHandler {
                 ctx,
                 this.rendererRegistry,
                 this.db,
-                this.plugin,
+                this.cellParser,
                 this.app,
                 this.sync
             )

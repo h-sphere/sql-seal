@@ -1,6 +1,6 @@
 import { createGrid, GridApi, GridOptions, themeQuartz } from "ag-grid-community";
 import { merge } from "lodash";
-import { App } from "obsidian";
+import { App, Plugin } from "obsidian";
 import { RendererConfig, RendererContext } from "./rendererRegistry";
 import { parse } from 'json5'
 import { ViewDefinition } from "../grammar/parser";
@@ -35,7 +35,7 @@ export class GridRendererCommunicator {
     constructor(
         private el: HTMLElement,
         private config: Partial<GridOptions>,
-        private plugin: SqlSealPlugin | null,
+        private plugin: Plugin | null,
         private app: App,
         private cellParser?: ModernCellParser
     ) {
@@ -131,7 +131,7 @@ export class GridRendererCommunicator {
             columnDefs: [],
             domLayout: 'autoHeight',
             enableCellTextSelection: true,
-            paginationPageSize: this.plugin? this.plugin.settings.gridItemsPerPage : undefined,
+            paginationPageSize: this.plugin? 10 /*this.plugin.settings.gridItemsPerPage */ : undefined, // FIXME: restore settings
             // ensureDomOrder: true
         }, this.config)
         this._gridApi = createGrid(
@@ -165,7 +165,7 @@ export class GridRendererCommunicator {
 }
 
 export class GridRenderer implements RendererConfig {
-    constructor(private app: App, private readonly plugin: SqlSealPlugin | null) { }
+    constructor(private app: App, private readonly plugin: Plugin | null) { }
     get viewDefinition(): ViewDefinition {
         return {
             name: this.rendererKey,

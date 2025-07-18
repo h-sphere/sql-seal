@@ -55,6 +55,7 @@
     "@codemirror/language": "^6.11.1",
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.37.1",
+    "@hypersphere/dity": "^0.0.8",
     "@hypersphere/omnibus": "^0.1.6",
     "@jlongster/sql.js": "^1.6.7",
     "@types/jsonpath": "^0.2.4",

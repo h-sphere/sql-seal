@@ -1,14 +1,20 @@
-import { App, MarkdownPostProcessorContext } from "obsidian";
+import { App, MarkdownPostProcessorContext, Plugin } from "obsidian";
 import { InlineProcessor } from "./InlineProcessor";
-import { SqlSealDatabase } from "../../database/database";
-import { Sync } from "../../datamodel/sync";
+import { Sync } from "../../modules/sync/sync/sync";
 import SqlSealPlugin from "../../main";
+import { makeInjector } from "@hypersphere/dity";
+import { SqlSealDatabase } from "../../modules/database/database";
+import { EditorModule } from "../../modules/editor/module";
 
+
+@(makeInjector<EditorModule>()(
+    ['app', 'db', 'plugin', 'sync', 'rendererRegistry']
+))
 export class SqlSealInlineHandler {
     constructor(
         private readonly app: App,
         private readonly db: SqlSealDatabase,
-        private readonly plugin: SqlSealPlugin,
+        private readonly plugin: Plugin,
         private sync: Sync
     ) { }
 
