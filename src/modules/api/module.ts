@@ -1,13 +1,19 @@
 import { asFactory, buildContainer } from "@hypersphere/dity";
 import { ApiInit } from "./init";
 import { Plugin } from "obsidian";
+import { ModernCellParser } from "../../cellParser/ModernCellParser";
+import { SqlSealDatabase } from "../database/database";
+import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 
 export const apiModule = buildContainer(c => c
     .register({
         init: asFactory(ApiInit)
     })
     .externals<{
-        plugin: Plugin
+        plugin: Plugin,
+        cellParser: ModernCellParser,
+        db: SqlSealDatabase,
+        rendererRegistry: RendererRegistry
     }>()
 )
 

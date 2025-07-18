@@ -1,8 +1,11 @@
 import { Plugin } from "obsidian"
-import SqlSealPlugin from "../../../main";
 import { version } from '../../../../package.json'
-import { RendererConfig } from "../../editor/renderer/rendererRegistry";
+import { RendererConfig, RendererRegistry } from "../../editor/renderer/rendererRegistry";
 import { CellFunction } from "../../../cellParser/CellFunction";
+import { ModernCellParser } from "../../../cellParser/ModernCellParser";
+import { FilepathHasher } from "../../../utils/hasher";
+import { DatabaseTable } from "./table";
+import { SqlSealDatabase } from "../../database/database";
 
 
 export type PluginRegister = {
@@ -15,7 +18,12 @@ const API_VERSION = 4;
 
 export class SQLSealRegisterApi {
     registeredApis: Array<SQLSealApi> = []
-    constructor(sqlSealPlugin: Plugin) {
+    constructor(
+        sqlSealPlugin: Plugin,
+        private readonly cellParser: ModernCellParser,
+        private readonly rendererRegistry: RendererRegistry,
+        private readonly db: SqlSealDatabase
+    ) {
         sqlSealPlugin.register(() => {
             this.registeredApis.forEach(p => {
                 p.unregister()
@@ -32,14 +40,15 @@ export class SQLSealRegisterApi {
         return API_VERSION
     }
 
-    registerForPlugin(plugin: Plugin) {
-        const api = new SQLSealApi(plugin)
-        this.registeredApis.push(api)
-        return api
-    }
+    // registerForPlugin(plugin: Plugin) {
+    //     const api = new SQLSealApi(plugin)
+    //     this.registeredApis.push(api)
+    //     return api
+    // }
 
     registerForPluginNew(reg: PluginRegister) {
-        const api = new SQLSealApi(reg.plugin)
+        console.log('REG', reg)
+        const api = new SQLSealApi(reg.plugin, this.cellParser, this.rendererRegistry, this.db)
         this.registeredApis.push(api)
 
         // If plugin gets unregistered, we need to handle it.
@@ -47,6 +56,7 @@ export class SQLSealRegisterApi {
             api.unregister()
             this.registeredApis = this.registeredApis.filter(a => a !== api)
         })
+        return api
     }
 }
 
@@ -66,10 +76,23 @@ export class SQLSealApi {
     private functions: Array<CellFunction> = []
     private flags: Array<RegisteredFlag> = []
 
-    constructor(private readonly plugin: Plugin) {
+    constructor(
+        private readonly plugin: Plugin,
+        private readonly cellParser: ModernCellParser,
+        private readonly rendererRegistry: RendererRegistry,
+        private readonly db: SqlSealDatabase
+    ) {
         plugin.register(() => {
             this.unregister()
         })
+    }
+
+    get sqlSealVersion() {
+        return version
+    }
+
+    get apiVersion() {
+        return API_VERSION
     }
 
     registerView(name: string, viewClass: RendererConfig) {
@@ -77,35 +100,40 @@ export class SQLSealApi {
             name,
             viewClass
         })
-        // this.sqlSealPlugin.registerSQLSealView(name, viewClass)
+        this.rendererRegistry.register(name, viewClass)
     }
 
     registerCustomFunction(fn: CellFunction) {
         this.functions.push(fn)
-        // this.sqlSealPlugin.registerSQLSealFunction(fn)
+        this.cellParser.register(fn)
     }
 
-    registerTable<const columns extends string[]>(tableName: string, columns: columns) {
-        // return this.sqlSealPlugin.registerTable(this.plugin, tableName, columns)
+    async registerTable<const columns extends string[]>(name: string, columns: columns) {
+        const hash = await FilepathHasher.sha256(`${this.plugin.manifest.name}`)
+		const tableName = `external_table_${hash}_name`
+		const newTable = new DatabaseTable(this.db, tableName, columns)
+		await newTable.connect()
+		// FIXME: probably register this table in some type of map for the future use?
+		return newTable
     }
 
     registerFlag(flag: RegisteredFlag) {
         this.flags.push(flag)
-        // this.sqlSealPlugin.registerSQLSealFlag(flag)
+        this.rendererRegistry.registerFlag(flag)
     }
 
     unregister() {
         for(const view of this.views) {
-            // this.sqlSealPlugin.unregisterSQLSealView(view.name)
+            this.rendererRegistry.unregister(view.name)
         }
         this.views = []
 
         for(const fn of this.functions) {
-            // this.sqlSealPlugin.unregisterSQLSealFunction(fn.name)
+            this.cellParser.unregister(fn.name)
         }
 
         for(const flag of this.flags) {
-            // this.sqlSealPlugin.unregisterSQLSealFlag(flag.name)
+            this.rendererRegistry.unregisterFlag(flag.name)
         }
     }
 }

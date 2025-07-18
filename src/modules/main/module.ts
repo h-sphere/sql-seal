@@ -73,7 +73,10 @@ export const mainModule = buildContainer(c => c
         'debug.plugin': 'obsidian.plugin'
     })
     .resolve({
-        'api.plugin': 'obsidian.plugin'
+        'api.plugin': 'obsidian.plugin',
+        'api.cellParser': 'cellParser',
+        'api.db': 'db.db',
+        'api.rendererRegistry': 'editor.rendererRegistry'
     })
 )
 
