@@ -1,7 +1,7 @@
+import { isStringifiedArray } from "../../../utils/ui";
+import { SqlSealDatabase } from "../../database/database";
 import { CellFunction } from "./CellFunction";
 import { parse } from 'json5'
-import { isStringifiedArray } from '../utils/ui'
-import { SqlSealDatabase } from "../modules/database/database";
 
 export type UnregisterCallback = () => void;
 

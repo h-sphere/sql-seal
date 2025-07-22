@@ -1,5 +1,5 @@
-import { isStringifiedArray, renderStringifiedArray } from "../../utils/ui";
-import { isLinkLocal, isLinktext, removeExtension } from "../../utils/ui/helperFunctions";
+import { isStringifiedArray, renderStringifiedArray } from "../../../../utils/ui";
+import { isLinkLocal, isLinktext, removeExtension } from "../../../../utils/ui/helperFunctions";
 import { CellFunction } from "../CellFunction";
 import { App } from "obsidian";
 

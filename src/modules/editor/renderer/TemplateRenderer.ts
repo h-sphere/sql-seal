@@ -3,8 +3,8 @@ import { App } from "obsidian";
 import { RendererConfig, RendererContext } from "./rendererRegistry";
 import { displayError } from "../../../utils/ui";
 import Handlebars from "handlebars";
-import { ParseResults } from "../../../cellParser/parseResults";
 import { ViewDefinition } from "../parser";
+import { ParseResults } from "../../syntaxHighlight/cellParser/parseResults";
 
 interface TemplateRendererConfig {
     template: HandlebarsTemplateDelegate

@@ -1,11 +1,11 @@
 import { Plugin } from "obsidian"
 import { version } from '../../../../package.json'
 import { RendererConfig, RendererRegistry } from "../../editor/renderer/rendererRegistry";
-import { CellFunction } from "../../../cellParser/CellFunction";
-import { ModernCellParser } from "../../../cellParser/ModernCellParser";
 import { FilepathHasher } from "../../../utils/hasher";
 import { DatabaseTable } from "./table";
 import { SqlSealDatabase } from "../../database/database";
+import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
+import { CellFunction } from "../../syntaxHighlight/cellParser/CellFunction";
 
 
 export type PluginRegister = {
@@ -39,12 +39,6 @@ export class SQLSealRegisterApi {
     get apiVersion() {
         return API_VERSION
     }
-
-    // registerForPlugin(plugin: Plugin) {
-    //     const api = new SQLSealApi(plugin)
-    //     this.registeredApis.push(api)
-    //     return api
-    // }
 
     registerForPluginNew(reg: PluginRegister) {
         const api = new SQLSealApi(reg.plugin, this.cellParser, this.rendererRegistry, this.db)

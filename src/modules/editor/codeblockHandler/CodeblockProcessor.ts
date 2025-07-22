@@ -4,11 +4,11 @@ import { Sync } from "../../sync/sync/sync";
 import { RendererRegistry, RenderReturn } from "../renderer/rendererRegistry";
 import { ParserResult, parseWithDefaults, TableDefinition } from "../parser";
 import { SqlSealDatabase } from "../../database/database";
-import { ModernCellParser } from "../../../cellParser/ModernCellParser";
 import { displayError, displayNotice } from "../../../utils/ui";
 import { transformQuery } from "../sql/sqlTransformer";
 import { registerObservers } from "../../../utils/registerObservers";
 import { Settings } from "../../settings/Settings";
+import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
 

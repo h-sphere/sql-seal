@@ -2,11 +2,10 @@ import { makeInjector } from "@hypersphere/dity";
 import { SettingsModule } from "./module";
 import { App, Plugin } from "obsidian";
 import { SQLSealSettingsTab } from "./SQLSealSettingsTab";
-import { CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE, CSVView } from "../../view/CSVView";
-import { JSON_VIEW_EXTENSIONS, JSON_VIEW_TYPE, JsonView } from "../../view/JsonView";
-import { CellParser } from "../../../types-package/dist/src/cellParser";
-import { ModernCellParser } from "../../cellParser/ModernCellParser";
+import { CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE, CSVView } from "./view/CSVView";
+import { JSON_VIEW_EXTENSIONS, JSON_VIEW_TYPE, JsonView } from "./view/JsonView";
 import { Settings } from "./Settings";
+import type { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
 
 @(makeInjector<SettingsModule>()(['plugin', 'settingsTab', 'app', 'cellParser', 'settings']))
 export class SettingsInit {

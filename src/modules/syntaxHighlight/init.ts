@@ -1,9 +1,9 @@
 import { makeInjector } from "@hypersphere/dity"
 import { SyntaxHighlightModule } from "./module"
 import { EditorView, ViewPlugin } from "@codemirror/view";
-import { SQLSealViewPlugin } from "../../editorExtension/syntaxHighlight";
 import { App, Plugin } from "obsidian";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
+import { SQLSealViewPlugin } from "./editorExtension/syntaxHighlight";
 
 @(makeInjector<SyntaxHighlightModule, 'factory'>()([
     'app', 'rendererRegistry', 'plugin'

@@ -1,10 +1,9 @@
-import { asClass, asFactory, buildContainer } from '@hypersphere/dity'
+import { asFactory, buildContainer } from '@hypersphere/dity'
 import { App, Plugin, Vault } from 'obsidian'
 import { db } from '../database/module'
 import { editor } from '../editor/module'
 import { sync } from '../sync/module'
-import { CellParserFactory } from '../../cellParser/factory'
-import { SQLSealSettings, SQLSealSettingsTab } from '../settings/SQLSealSettingsTab'
+import { SQLSealSettings } from '../settings/SQLSealSettingsTab'
 import { Init } from './init'
 import { settingsModule } from '../settings/module'
 import { syntaxHighlight } from '../syntaxHighlight/module'
@@ -34,7 +33,6 @@ export const mainModule = buildContainer(c => c
         api: apiModule
     })
     .register({
-        cellParser: asFactory(CellParserFactory), // FIXME: move this to settings
         init: asFactory(Init)
     })
     .externals<{ settings: SQLSealSettings }>()
@@ -46,7 +44,7 @@ export const mainModule = buildContainer(c => c
         'editor.db': 'db.db',
         'editor.plugin': 'obsidian.plugin',
         'editor.sync': 'sync.syncBus',
-        'editor.cellParser': 'cellParser',
+        'editor.cellParser': 'syntaxHighlight.cellParser',
         'editor.settings': 'settings.settings'
     })
     .resolve({
@@ -58,7 +56,7 @@ export const mainModule = buildContainer(c => c
     .resolve({
         'settings.app': 'obsidian.app',
         'settings.plugin': 'obsidian.plugin',
-        'settings.cellParser': 'cellParser',
+        'settings.cellParser': 'syntaxHighlight.cellParser',
     })
     .resolve({
         'syntaxHighlight.app': 'obsidian.app',
@@ -74,7 +72,7 @@ export const mainModule = buildContainer(c => c
     })
     .resolve({
         'api.plugin': 'obsidian.plugin',
-        'api.cellParser': 'cellParser',
+        'api.cellParser': 'syntaxHighlight.cellParser',
         'api.db': 'db.db',
         'api.rendererRegistry': 'editor.rendererRegistry'
     })

@@ -4,8 +4,8 @@ import { LinkParser } from "./parser/link"
 import { ImageParser } from "./parser/image"
 import { CheckboxParser } from "./parser/checkbox"
 import { makeInjector } from "@hypersphere/dity"
-import { MainModule } from "../modules/main/module"
-import { SqlSealDatabase } from "../modules/database/database"
+import { MainModule } from "../../main/module"
+import { SqlSealDatabase } from "../../database/database"
 
 export const getCellParser = (app: App, create = createEl) => {
     const cellParser = new ModernCellParser()

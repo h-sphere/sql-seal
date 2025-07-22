@@ -3,10 +3,10 @@ import { merge } from "lodash";
 import { App, Plugin } from "obsidian";
 import { RendererConfig, RendererContext } from "./rendererRegistry";
 import { parse } from 'json5';
-import { ModernCellParser } from "../../../cellParser/ModernCellParser";
 import { EventRef } from "obsidian";
 import { Settings } from "../../settings/Settings";
 import { ViewDefinition } from "../parser";
+import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
 
 interface DataParam {
     data: Record<string, unknown>[],

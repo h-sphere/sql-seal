@@ -11,11 +11,11 @@ import {
   DecorationSet
 } from '@codemirror/view';
 
-import { RendererRegistry } from '../modules/editor/renderer/rendererRegistry';
 import { Range } from '@codemirror/state';
 import { Decorator, highlighterOperation } from '../grammar/highlighterOperation';
 import { FilePathWidget } from './widgets/FilePathWidget';
-import { SQLSealLangDefinition } from '../modules/editor/parser';
+import { RendererRegistry } from '../../editor/renderer/rendererRegistry';
+import { SQLSealLangDefinition } from '../../editor/parser';
 
 const markDecorations = {
   blockFlag: Decoration.mark({ class: 'cm-sqlseal-block-flag' }),

@@ -1,4 +1,4 @@
-import { ModernCellParser } from "../../../cellParser/ModernCellParser";
+import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
 import { ViewDefinition } from "../parser";
 
 export interface DataFormat {

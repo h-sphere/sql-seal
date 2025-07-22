@@ -1,6 +1,5 @@
 import { makeInjector } from "@hypersphere/dity";
 import { App, Plugin } from "obsidian";
-import { createSqlSealEditorExtension } from "../../editorExtension/inlineCodeBlock";
 import { SqlSealDatabase } from "../database/database";
 import { Sync } from "../sync/sync/sync";
 import { EditorModule } from "./module";
@@ -13,6 +12,7 @@ import { MarkdownRenderer } from "./renderer/MarkdownRenderer";
 import { Settings } from "../settings/Settings";
 import { SqlSealInlineHandler } from "./codeblockHandler/inline/InlineCodeHandler";
 import { SqlSealCodeblockHandler } from "./codeblockHandler/SqlSealCodeblockHandler";
+import { createSqlSealEditorExtension } from "../syntaxHighlight/editorExtension/inlineCodeBlock";
 
 @(makeInjector<EditorModule, 'factory'>()([
     'app', 'db', 'plugin', 'sync', 'inlineHandler', 'blockHandler', 'rendererRegistry', 'settings'

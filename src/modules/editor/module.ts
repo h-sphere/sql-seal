@@ -4,10 +4,10 @@ import { SqlSealDatabase } from "../database/database"
 import { Sync } from "../sync/sync/sync"
 import { RendererRegistry } from "./renderer/rendererRegistry"
 import { EditorInit } from "./init"
-import { ModernCellParser } from "../../cellParser/ModernCellParser"
 import { SqlSealCodeblockHandler } from "./codeblockHandler/SqlSealCodeblockHandler"
 import { SqlSealInlineHandler } from "./codeblockHandler/inline/InlineCodeHandler"
 import { Settings } from "../settings/Settings"
+import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser"
 
 export const editor = buildContainer(c => c
     .register({
