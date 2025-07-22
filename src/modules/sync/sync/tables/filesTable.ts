@@ -1,8 +1,8 @@
 import { App, Plugin, TFile } from "obsidian";
 import { AFileSyncTable } from "./abstractFileSyncTable";
-import { sanitise } from "../../utils/sanitiseColumn";
 import { difference } from "lodash";
-import { SqlSealDatabase } from "../../modules/database/database";
+import { sanitise } from "../../../../utils/sanitiseColumn";
+import { SqlSealDatabase } from "../../../database/database";
 
 
 export const FILES_TABLE_NAME = 'files'

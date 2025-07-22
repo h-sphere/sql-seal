@@ -1,7 +1,7 @@
 import { App } from "obsidian";
 import { TableDefinitionExternal } from "../repository/tableDefinitions";
 import { ParserTableDefinition } from "./types";
-import { ColumnDefinition } from "../../utils/types";
+import { ColumnDefinition } from "../../../utils/types";
 
 export abstract class ISyncStrategy {
     constructor(protected def: TableDefinitionExternal, protected app: App) {

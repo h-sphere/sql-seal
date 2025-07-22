@@ -1,4 +1,4 @@
-import { SqlSealDatabase } from "../../modules/database/database";
+import { SqlSealDatabase } from "../../database/database";
 
 export abstract class Repository {
     constructor(protected readonly db: SqlSealDatabase) { }

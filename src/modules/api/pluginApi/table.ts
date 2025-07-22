@@ -1,4 +1,4 @@
-import { SqlSealDatabase } from "../modules/database/database"
+import { SqlSealDatabase } from "../../database/database"
 
 type Item<Columns extends string[]> = Record<Columns[number], string | number | undefined>
 

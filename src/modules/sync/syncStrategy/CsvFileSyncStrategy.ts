@@ -1,11 +1,11 @@
 import { ISyncStrategy } from "./abstractSyncStrategy";
-import { sanitise } from "../../utils/sanitiseColumn";
 import { parse } from "papaparse";
-import { FilepathHasher } from "../../utils/hasher";
 import { TableDefinitionExternal } from "../repository/tableDefinitions";
 import { ParserTableDefinition } from "./types";
 import { App } from "obsidian";
-import { loadConfig } from "../../utils/csvConfig";
+import { FilepathHasher } from "../../../utils/hasher";
+import { sanitise } from "../../../utils/sanitiseColumn";
+import { loadConfig } from "../../../utils/csvConfig";
 
 const DEFAULT_FILE_HASH = ''
 

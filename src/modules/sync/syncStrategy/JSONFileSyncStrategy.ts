@@ -1,10 +1,10 @@
 import { App } from "obsidian";
 import { ISyncStrategy } from "./abstractSyncStrategy";
-import { FilepathHasher } from "../../utils/hasher";
 import { ParserTableDefinition } from "./types";
 import { parse } from 'json5';
 import { uniq } from "lodash";
 import * as jsonpath from 'jsonpath'
+import { FilepathHasher } from "../../../utils/hasher";
 
 const DEFAULT_FILE_HASH = ''
 

@@ -1,10 +1,10 @@
-import { FilepathHasher } from "../../utils/hasher";
 import { ISyncStrategy } from "./abstractSyncStrategy";
 import type { App } from "obsidian";
 import { Component, MarkdownRenderer, normalizePath } from "obsidian";
 import { ParserTableDefinition } from "./types";
 import { dirname, join } from "path";
-import { sanitise } from "../../utils/sanitiseColumn";
+import { FilepathHasher } from "../../../utils/hasher";
+import { sanitise } from "../../../utils/sanitiseColumn";
 
 const DEFAULT_FILE_HASH = ''
 
