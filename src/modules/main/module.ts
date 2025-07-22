@@ -60,6 +60,7 @@ export const mainModule = buildContainer(c => c
     })
     .resolve({
         'syntaxHighlight.app': 'obsidian.app',
+        'syntaxHighlight.db': 'db.db',
         'syntaxHighlight.plugin': 'obsidian.plugin',
         'syntaxHighlight.rendererRegistry': 'editor.rendererRegistry'
     })

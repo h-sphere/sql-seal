@@ -3,19 +3,21 @@ import { SyntaxHighlightInit } from "./init";
 import { App, Plugin } from "obsidian";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 import { CellParserFactory } from "./cellParser/factory";
+import { SqlSealDatabase } from "../database/database";
 
 export const syntaxHighlight = buildContainer((c) =>
 	c
 		.externals<{
 			app: App;
+			db: SqlSealDatabase;
 			rendererRegistry: RendererRegistry;
 			plugin: Plugin;
 		}>()
 		.register({
 			init: asFactory(SyntaxHighlightInit),
-			cellParser: asFactory(CellParserFactory)
+			cellParser: asFactory(CellParserFactory),
 		})
-		.exports("init", 'cellParser'),
+		.exports("init", "cellParser"),
 );
 
 export type SyntaxHighlightModule = typeof syntaxHighlight;

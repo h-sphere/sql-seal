@@ -6,6 +6,7 @@ import { CheckboxParser } from "./parser/checkbox"
 import { makeInjector } from "@hypersphere/dity"
 import { MainModule } from "../../main/module"
 import { SqlSealDatabase } from "../../database/database"
+import { SyntaxHighlightModule } from "../module"
 
 export const getCellParser = (app: App, create = createEl) => {
     const cellParser = new ModernCellParser()
@@ -15,10 +16,9 @@ export const getCellParser = (app: App, create = createEl) => {
     return cellParser
 }
 
-// FIXME: inject createEl
-@(makeInjector<MainModule>()([
-    'obsidian.app',
-    'db.db'
+@(makeInjector<SyntaxHighlightModule>()([
+    'app',
+    'db'
 ]))
 export class CellParserFactory {
     make(app: App, db: SqlSealDatabase, create: typeof createEl = createEl) {
