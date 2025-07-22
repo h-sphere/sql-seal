@@ -9,6 +9,7 @@ export const apiModule = buildContainer(c => c
     .register({
         init: asFactory(ApiInit)
     })
+    .exports('init')
     .externals<{
         plugin: Plugin,
         cellParser: ModernCellParser,

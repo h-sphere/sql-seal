@@ -11,7 +11,6 @@ import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 export class SyntaxHighlightInit {
     make(app: App, rendererRegistry: RendererRegistry, plugin: Plugin) {
         return () => {
-            console.log('Syntax Highlight Init')
             // FIXME: settings here.
             plugin.registerEditorExtension([
 			ViewPlugin.define(

@@ -16,6 +16,7 @@ export const settingsModule = buildContainer(c => c
         'settingsTab': asClass(SQLSealSettingsTab),
         init: asFactory(SettingsInit)
     })
+    .exports('settings', 'init')
 )
 
 export type SettingsModule = typeof settingsModule

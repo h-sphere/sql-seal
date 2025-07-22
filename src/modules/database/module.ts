@@ -7,6 +7,7 @@ export const db = buildContainer(c => c
         db: asFactory(DatabaseFactory)
     })
     .externals<{ app: App }>()
+    .exports('db')
 )
 
 export type DbModel = typeof db

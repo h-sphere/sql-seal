@@ -47,9 +47,10 @@ export class SQLSealRegisterApi {
     // }
 
     registerForPluginNew(reg: PluginRegister) {
-        console.log('REG', reg)
         const api = new SQLSealApi(reg.plugin, this.cellParser, this.rendererRegistry, this.db)
         this.registeredApis.push(api)
+
+        reg.run(api)
 
         // If plugin gets unregistered, we need to handle it.
         reg.plugin.register(() => {

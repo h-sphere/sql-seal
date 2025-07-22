@@ -196,12 +196,9 @@ export class WorkerDatabase {
 
     async connect() {
         try {
-            console.log('wasm binnary??', wasmBinary)
             const SQL = await initSqlJs({
                 wasmBinary: wasmBinary
             });
-
-            console.log('idb be', IndexedDBBackend, SQL)
 
             let sqlFS = new SQLiteFS(SQL.FS, new IndexedDBBackend(() => {
                 console.error('unable to write to indexedDb')

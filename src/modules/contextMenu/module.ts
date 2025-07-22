@@ -10,6 +10,7 @@ export const contextMenu = buildContainer(c =>
         app: App,
         plugin: Plugin
     }>()
+    .exports('init')
 )
 
 export type ContextMenuModule = typeof contextMenu

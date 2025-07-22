@@ -12,6 +12,7 @@ export const syntaxHighlight = buildContainer(c => c
     .register({
         init: asFactory(SyntaxHighlightInit)
     })
+    .exports('init')
 )
 
 export type SyntaxHighlightModule = typeof syntaxHighlight

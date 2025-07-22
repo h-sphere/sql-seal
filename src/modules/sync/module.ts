@@ -17,5 +17,6 @@ export const sync = buildContainer(c => c
         db: SqlSealDatabase,
         vault: Vault
     }>()
+    .exports('init', 'syncBus')
 )
 export type SyncModule = typeof sync

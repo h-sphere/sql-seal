@@ -7,6 +7,7 @@ export const debugModule = buildContainer(c =>
     .register({
         init: asFactory(DityGraph)
     })
+    .exports('init')
     .externals<{
         plugin: Plugin
     }>()

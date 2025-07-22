@@ -31,7 +31,6 @@ export class DityGraph {
         }
 
         return () => {
-            console.log('DITY GRAPH')
             plugin.registerView(VIEW_TYPE_EXAMPLE, leaf => new DityGraphView(leaf))
             plugin.addRibbonIcon('dice', 'Dity Graph', activateView)
 

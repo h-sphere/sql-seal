@@ -24,8 +24,6 @@ export class Init {
         apiInit: InitFn
     ) {
         return () => {
-            console.log('INITIALISING')
-            
             settingsInit()
             editorInit()
             highlighInit()

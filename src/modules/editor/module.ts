@@ -24,6 +24,7 @@ export const editor = buildContainer(c => c
         cellParser: ModernCellParser,
         settings: Settings
     }>()
+    .exports('rendererRegistry', 'init')
 )
 
 export type EditorModule = typeof editor
