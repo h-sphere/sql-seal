@@ -59,14 +59,26 @@ export class CsvFileSyncStrategy extends ISyncStrategy {
             header: true,
             dynamicTyping: false,
             skipEmptyLines: true,
-            transformHeader: sanitise
+            transformHeader: sanitise,
         })
 
         const config = await loadConfig(file, this.app.vault)
 
-        return { data: parsed.data, columns: parsed.meta.fields?.map(f => ({
-            name: f,
-            type: config.columnDefinitions[f]?.type ?? 'auto' as const
-        })) ?? [] }
+        const columns = parsed.meta.fields?.
+            filter(f => !config.columnDefinitions[f]?.isHidden)
+            .map(f => ({
+                name: f,
+                type: config.columnDefinitions[f]?.type ?? 'auto' as const
+            })) ?? []
+
+        const resultedData = parsed.data.map(d => {
+            const res: Record<string, any> = {}
+            for (const c of columns) {
+                res[c.name] = d[c.name]
+            }
+            return res
+        })
+
+        return { data: resultedData, columns }
     }
 }

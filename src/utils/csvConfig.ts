@@ -5,9 +5,15 @@ import { parse as jsonParse, stringify as jsonStringify } from 'json5'
 // export type ColumnType = 'auto' | 'number' | 'text'
 export type ColumnType = string
 
-interface ColumnDefinition {
+export interface ColumnDefinition {
     type: ColumnType
+    isHidden: boolean
 }
+
+export const DEFAULT_CONFIG = {
+    type: 'auto',
+    isHidden: false
+} satisfies ColumnDefinition
 
 export interface ConfigObject {
     columnDefinitions: {[key: string]: ColumnDefinition }
@@ -27,7 +33,13 @@ export const loadConfig = async (file: TFile, vault: Vault): Promise<ConfigObjec
     const loadedConfig = await vault.read(configFile)
     // decode
     const decoded = jsonParse(loadedConfig)
-    return decoded
+
+    // MAKE SURE ALL KEYS ARE LOWERCASE
+    const columnDefinitions = Object.fromEntries(Object.entries(decoded?.columnDefinitions ?? {}).map(([key, value]) => ([key.toLowerCase(), value])))
+    return {
+        ...decoded,
+        columnDefinitions
+    }
 }
 
 export const saveConfig = async (file: TFile, content: Object, vault: Vault) => {
