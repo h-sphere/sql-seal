@@ -2,6 +2,9 @@ import { makeInjector } from '@hypersphere/dity';
 import { App, PluginSettingTab, Setting, Plugin } from 'obsidian';
 import { SettingsModule } from './module';
 import { Settings } from './Settings';
+import { SettingsCSVControls } from './settingsTabSection/SettingsCSVControls';
+import { SettingsJsonControls } from './settingsTabSection/SettingsJsonControls';
+import { SettingsControls } from './settingsTabSection/SettingsControls';
 
 export interface SQLSealSettings {
     enableViewer: boolean;
@@ -36,48 +39,20 @@ export class SQLSealSettingsTab extends PluginSettingTab {
         this.settings = settings;
     }
 
+    private controls: SettingsControls[] = []
+
+    registerControls(...controls: SettingsControls[]) {
+        this.controls = controls
+    }
+
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: 'CSV File Viewer' });
+        this.controls.forEach(c => {
+            c.display(containerEl.createDiv())
+        })
 
-        new Setting(containerEl)
-            .setName('Enable CSV Viewer')
-            .setDesc('Enables CSV files in your vault and adds ability to display them in a grid.')
-            .addToggle(toggle => toggle
-                .setValue(this.settings.get('enableViewer'))
-                .onChange(async (value) => {
-                    this.settings.set('enableViewer', !!value)
-                    // await this.plugin.saveData(this.settings);
-                    this.display();
-                    // this.callChanges()
-                }));
-
-        new Setting(containerEl)
-            .setName('Enable CSV Editing')
-            .setDesc('Enables Editing functions in the CSV Viewer. This will add buttons to add columns, remove individual rows and columns; and edit each entry.')
-            .setDisabled(!this.settings.get('enableViewer'))
-            .addToggle(toggle => toggle
-                .setValue(this.settings.get('enableEditing'))
-                .onChange(async (value) => {
-                    this.settings.set('enableEditing', value)
-                    // await this.plugin.saveData(this.settings);
-                    // this.callChanges()
-                }));
-
-        containerEl.createEl('h3', { text: 'JSON File Viewer' });
-        new Setting(containerEl)
-            .setName('Enable JSON Viewer')
-            .setDesc('Enables JSON and JSON5 files in your files explorer and allows to preview them.')
-            .addToggle(toggle => toggle
-                .setValue(this.settings.get('enableJSONViewer'))
-                .onChange(async (value) => {
-                    this.settings.set('enableJSONViewer', !!value)
-                    // await this.plugin.saveData(this.settings);
-                    this.display();
-                    // this.callChanges()
-                }));
 
         containerEl.createEl('h3', { text: 'Behavior' });
         new Setting(containerEl)
