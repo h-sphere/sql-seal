@@ -1,4 +1,4 @@
-import { WorkspaceLeaf, TextFileView, Menu, MenuItem } from "obsidian";
+import { WorkspaceLeaf, TextFileView, Menu, MenuItem, IconName } from "obsidian";
 import { parse, unparse } from "papaparse";
 import {
 	GridRenderer,
@@ -13,6 +13,7 @@ import { CodeSampleModal } from "../modal/showCodeSample";
 import { DeleteConfirmationModal } from "../modal/deleteConfirmationModal";
 import { CSVColumnContextMenu } from "../menu/csvColumnContextMenu";
 import { AgColumn, Column } from "ag-grid-community";
+import { CSVViewMenuBar } from "./CSVViewMenuBar";
 
 const delay = (n: number) => new Promise((resolve) => setTimeout(resolve, n));
 
@@ -236,6 +237,10 @@ export class CSVView extends TextFileView {
 		}
 	}
 
+    getIcon(): IconName {
+        return 'table'
+    }
+
 	moveColumn(name: string, toIndex: number) {
 		let fields = this.result.fields as Array<string>;
 		fields = fields.filter((f) => f !== name);
@@ -307,6 +312,38 @@ export class CSVView extends TextFileView {
 
     showHidden: boolean = false;
 
+    private menu(container: HTMLElement) {
+
+        const buttonsRow = container.createDiv({
+            cls: "sql-seal-csv-viewer-buttons",
+        });
+
+        const menuBar = new CSVViewMenuBar(buttonsRow, this.settings, this.app)
+
+        const events = menuBar.events
+        
+        events.on('add-column', (columnName: string) => {
+            this.addNewColumn(columnName)
+        })
+
+        events.on('add-row', () => {
+				this.createRow();
+        })
+
+        events.on('generate-code', () => {
+            if (!this.file) {
+				return;
+			}
+			const modal = new CodeSampleModal(this.app, this.file);
+			modal.open();
+        })
+
+        events.on('toggle-hidden', (v) => {
+            this.showHidden = v
+			this.refreshTypes();
+        })
+    }
+
 	private async renderCSV() {
 		if (this.isLoading) {
 			if (this.api) {
@@ -320,56 +357,11 @@ export class CSVView extends TextFileView {
 		const csvEditorDiv = this.contentEl.createDiv({
 			cls: "sql-seal-csv-editor",
 		});
-
-		const buttonsRow = csvEditorDiv.createDiv({
-			cls: "sql-seal-csv-viewer-buttons",
-		});
 		await this.loadConfig();
-		if (this.settings.get("enableEditing")) {
-			const createColumn = buttonsRow.createEl("button", {
-				text: "Add Column",
-			});
-			const createRow = buttonsRow.createEl("button", { text: "Add Row" });
 
-			createColumn.addEventListener("click", (e) => {
-				e.preventDefault();
-				const modal = new RenameColumnModal(this.app, (res) => {
-					this.addNewColumn(res);
-				});
-				modal.open();
-			});
-
-			createRow.addEventListener("click", (e) => {
-				e.preventDefault();
-				this.createRow();
-			});
-		}
-		const generateSqlCode = buttonsRow.createEl("button", {
-			text: "Generate SQLSeal code",
-		});
-
-
-
-        const showHidden = buttonsRow.createEl('button', {
-            text: 'Show Hidden Columns'
-        })
-
-        showHidden.addEventListener('click', () => {
-            this.showHidden = !this.showHidden
-            showHidden.textContent = this.showHidden ? 'Hide Hidden Columns' : 'Show Hidden Columns'
-            this.refreshTypes()
-        })
+        this.menu(csvEditorDiv)
 
 		const gridEl = csvEditorDiv.createDiv({ cls: "sql-seal-csv-viewer" });
-
-		generateSqlCode.addEventListener("click", (e) => {
-			e.preventDefault();
-			if (!this.file) {
-				return;
-			}
-			const modal = new CodeSampleModal(this.app, this.file);
-			modal.open();
-		});
 
 		const grid = new GridRenderer(this.settings, null, this.app);
 		const csvView = this;

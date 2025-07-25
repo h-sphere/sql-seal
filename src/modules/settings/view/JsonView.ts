@@ -1,4 +1,4 @@
-import { WorkspaceLeaf, TextFileView, Menu } from 'obsidian';
+import { WorkspaceLeaf, TextFileView, Menu, IconName } from 'obsidian';
 import { parse, stringify } from 'json5'
 
 export const JSON_VIEW_TYPE = "sqlseal-json-viewer";
@@ -31,6 +31,10 @@ export class JsonView extends TextFileView {
 
     async onClose() {
         // Cleanup if needed
+    }
+
+    getIcon(): IconName {
+        return 'file-json'
     }
 
     async setViewData(data: string, clear: boolean): Promise<void> {
