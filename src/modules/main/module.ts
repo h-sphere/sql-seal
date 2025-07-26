@@ -81,7 +81,8 @@ export const mainModule = buildContainer(c => c
     })
     .resolve({
         'globalTables.plugin': 'obsidian.plugin',
-        'globalTables.app': 'obsidian.app'
+        'globalTables.app': 'obsidian.app',
+        'globalTables.sync': 'sync.syncBus'
     })
 )
 

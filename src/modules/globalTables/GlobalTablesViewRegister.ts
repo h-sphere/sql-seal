@@ -4,13 +4,14 @@ import { addIcon, App, Plugin, WorkspaceLeaf } from "obsidian";
 import { GLOBAL_TABLES_VIEW_TYPE, GlobalTablesView } from "./GlobalTablesView";
 // @ts-ignore: Handled by esbuild
 import SQLSealIcon from './sqlseal-bw.svg'
+import { Sync } from "../sync/sync/sync";
 
 
 @(makeInjector<GlobalTablesModule, 'factory'>()(
-    ['plugin', 'app']
+    ['plugin', 'app', 'sync']
 ))
 export class GlobalTablesViewRegister {
-    make(plugin: Plugin, app: App) {
+    make(plugin: Plugin, app: App, sync: Sync) {
 
         const activateView = async () => {
             const { workspace } = plugin.app;
@@ -32,7 +33,7 @@ export class GlobalTablesViewRegister {
         }
 
         return () => {
-            plugin.registerView(GLOBAL_TABLES_VIEW_TYPE, leaf => new GlobalTablesView(leaf, app.vault))
+            plugin.registerView(GLOBAL_TABLES_VIEW_TYPE, leaf => new GlobalTablesView(leaf, app.vault, sync))
 
 
             // SQLSeal Icon

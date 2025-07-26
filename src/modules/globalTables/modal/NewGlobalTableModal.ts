@@ -61,7 +61,7 @@ export class NewGlobalTableModal extends Modal {
 				drop.addOptions({
 					csv: "CSV",
 					json: "JSON",
-					"md-table": "Markdown Table",
+					// "md-table": "Markdown Table",
 				})
                 .setValue(this.data.config.type)
                 .onChange(v => {
@@ -96,6 +96,7 @@ export class NewGlobalTableModal extends Modal {
                 this.renderCsvSection()
                 break
             case 'json':
+                this.renderJsonSection()
                 break
             case 'md-table':
                 break
@@ -107,9 +108,26 @@ export class NewGlobalTableModal extends Modal {
     renderCsvSection() {
         const filename = new Setting(this.typeSectionEl!)
         .setName('Filename')
-        const autocomplete = new AutocompleteInput(filename.controlEl, this.app.vault)
+        const autocomplete = new AutocompleteInput(filename.controlEl, this.app.vault, ['csv'])
         autocomplete.bus.on('change', (path) => {
             this.data.config.filename = path
         })
+    }
+
+    renderJsonSection() {
+        const filename = new Setting(this.typeSectionEl!)
+        .setName('Filename')
+        const autocomplete = new AutocompleteInput(filename.controlEl, this.app.vault, ['json', 'json5'])
+        autocomplete.bus.on('change', (path) => {
+            this.data.config.filename = path
+        })
+
+        const xpath = new Setting(this.typeSectionEl!)
+            .setName('Selector')
+            .addText(c => c.setPlaceholder('$.[0]')
+            .onChange(e => {
+                (this.data.config as JsonConfig).xpath = e
+            }))
+
     }
 }

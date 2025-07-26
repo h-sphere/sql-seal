@@ -2,6 +2,7 @@ import { asFactory, buildContainer } from "@hypersphere/dity";
 import { InitFactory } from "./InitFactory";
 import { App, Plugin } from "obsidian";
 import { GlobalTablesViewRegister } from "./GlobalTablesViewRegister";
+import { Sync } from "../sync/sync/sync";
 
 export const globalTables = buildContainer(c => 
     c.register({
@@ -10,7 +11,8 @@ export const globalTables = buildContainer(c =>
     })
     .externals<{
         plugin: Plugin,
-        app: App
+        app: App,
+        sync: Sync
     }>()
     .exports('init')
 )

@@ -8,7 +8,7 @@ interface DropdownValue {
 }
 
 export class AutocompleteInput {
-    constructor(parent: HTMLElement, private vault: Vault) {
+    constructor(parent: HTMLElement, private vault: Vault, private extensions: string[]) {
         const c = parent.createDiv({ cls: 'sqlseal-autocomplete-container'})
         this.selectedEl = c.createEl('div', { cls: 'selected-el'})
         this.selectedElText = this.selectedEl.createSpan()
@@ -74,9 +74,8 @@ export class AutocompleteInput {
     }
 
     getFilesForInput(inp: string): DropdownValue[] {
-        console.log('ALL FILES', this.vault.getFiles())
         return this.vault.getFiles()
-            .filter(f => f.extension === 'csv')
+            .filter(f => this.extensions.includes(f.extension))
             .filter(f => f.path.includes(inp))
             .map(f => ({ name: f.name, path: f.parent?.path ?? '', originalFile: f }))
     }

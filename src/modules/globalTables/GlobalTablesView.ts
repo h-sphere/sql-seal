@@ -7,12 +7,21 @@ import { createGrid, GridApi, themeQuartz } from "ag-grid-community";
 import { ConfigCellRenderer } from "./cells/ConfigCell";
 import { StatsRenderer } from "./cells/StatsRenderer";
 import { ActionCellRenderer } from "./cells/ActionCell";
+import { Sync } from "../sync/sync/sync";
+import { ParserTableDefinition } from "../sync/syncStrategy/types";
+import { throttle } from "lodash";
 
 export const GLOBAL_TABLES_VIEW_TYPE = "sqlseal-global-tables";
 
+const GLOBAL_SOURCE_FILE = "/";
+
 export class GlobalTablesView extends ItemView {
 	config: FileConfig<TableConfiguration>;
-	constructor(leaf: WorkspaceLeaf, vault: Vault) {
+	constructor(
+		leaf: WorkspaceLeaf,
+		vault: Vault,
+		public sync: Sync,
+	) {
 		super(leaf);
 		this.config = new FileConfig("__globalviews.sqlseal", vault);
 	}
@@ -29,7 +38,7 @@ export class GlobalTablesView extends ItemView {
 		return "logo-sqlseal";
 	}
 
-    api: GridApi | null = null
+	api: GridApi | null = null;
 
 	async onOpen() {
 		const container = this.containerEl.children[1];
@@ -40,11 +49,12 @@ export class GlobalTablesView extends ItemView {
 		const menuBar = new MenuBar(el, this.app);
 
 		await this.config.load();
+		for (const conf of this.gridData) {
+			this.sync.registerTable(this.getTableDefinition(conf));
+		}
 
-		menuBar.events.on("new-table", async (data) => {
-			console.log("New table creation requested", data);
-			await this.config.insert(data);
-            this.refresh()
+		menuBar.events.on("new-table", (data) => {
+			this.addElement(data);
 		});
 
 		// el.createDiv({ text: 'HELLO FROM SQLSEAL GLOBAL TABLES VIEW' })
@@ -67,47 +77,130 @@ export class GlobalTablesView extends ItemView {
 			detailRowAutoHeight: true,
 			paginationAutoPageSize: true,
 			rowData: this.gridData,
-            suppressMoveWhenColumnDragging: true,
-            suppressRowDrag: true,
-            suppressCellFocus: true,
-            suppressMaintainUnsortedOrder: true,
-            suppressDragLeaveHidesColumns: true,
-            suppressMoveWhenRowDragging: true,
+			suppressMoveWhenColumnDragging: true,
+			suppressRowDrag: true,
+			suppressCellFocus: true,
+			suppressMaintainUnsortedOrder: true,
+			suppressDragLeaveHidesColumns: true,
+			suppressMoveWhenRowDragging: true,
 			defaultColDef: {
 				resizable: false,
-                sortable: false,
-                rowDrag: false,
-                suppressMovable: true
+				sortable: false,
+				rowDrag: false,
+				suppressMovable: true,
+				flex: 1,
 			},
 			autoSizeStrategy: {
 				type: "fitGridWidth",
 			},
 			columnDefs: [
 				{ field: "name" },
-				{ field: "config.type" },
+				{ field: "config.type", minWidth: 50 },
 				{ field: "config", cellRenderer: ConfigCellRenderer },
-				{ field: "name", cellRenderer: StatsRenderer, headerName: "Stats"  },
-                { cellRenderer: ActionCellRenderer, headerName: "Actions" }
+				{
+					field: "name",
+					cellRenderer: StatsRenderer,
+					headerName: "Stats",
+					minWidth: 200,
+				},
+				{ cellRenderer: ActionCellRenderer, headerName: "Actions" },
 			],
-            context: this
+			context: this,
 		});
+
+		this.setupResizeObserver(gridEl);
 	}
 
+	// Vibe Coded.
+	private smartResize() {
+        if (!this.api) return;
+        
+        const api = this.api
+        const columnApi = this.api
+        const containerWidth = this.containerEl.clientWidth;
+        
+        // First, auto-size all columns based on content
+        const allColumnIds = columnApi.getColumns()?.map(col => col.getColId()) || [];
+        api.autoSizeColumns(allColumnIds);
+        
+        // Calculate total width needed
+        const totalContentWidth = columnApi.getColumns()
+            ?.reduce((sum, col) => sum + col.getActualWidth(), 0) || 0;
+        
+        // If content fits in container, optionally expand to fill
+        if (totalContentWidth < containerWidth * 0.8) {
+            // Content fits comfortably, you can choose to:
+            // Option A: Leave as-is (content-based sizing)
+            // Option B: Expand to fill container
+            api.sizeColumnsToFit();
+        }
+        // If content is wider than container, keep auto-sized widths
+        // This will enable horizontal scrolling automatically
+    }
+
 	get gridData() {
-		console.log("ITEMS", this.config.items);
 		return this.config.items;
 	}
 
-    async deleteElement(e: TableConfiguration) {
-        await this.config.remove(e)
-        this.refresh()
-    }
+	async addElement(data: TableConfiguration) {
+		await this.config.insert(data);
+		switch (data.config.type) {
+			case "csv":
+			case "json":
+				await this.sync.registerTable(this.getTableDefinition(data));
+				break;
+			case "md-table":
+				console.log("NOT IMPLEMENTED YET", data);
+		}
+		this.refresh();
+	}
 
-    refresh() {
-        this.api?.setGridOption("rowData", this.gridData);
-    }
+	getTableDefinition(data: TableConfiguration): ParserTableDefinition {
+		switch (data.config.type) {
+			case "csv":
+				return {
+					tableAlias: data.name,
+					sourceFile: GLOBAL_SOURCE_FILE,
+					type: "file",
+					arguments: [data.config.filename],
+				};
+			case 'json':
+				return {
+					tableAlias: data.name,
+					sourceFile: GLOBAL_SOURCE_FILE,
+					type: "file",
+					arguments: [data.config.filename, data.config.xpath ? data.config.xpath : '$'],
+				}
+			case "md-table":
+				throw new Error("Not implemented");
+		}
+	}
+
+	async deleteElement(e: TableConfiguration) {
+		await this.config.remove(e);
+		const def = this.getTableDefinition(e);
+		await this.sync.unregisterTable(def);
+		this.refresh();
+	}
+
+	refresh() {
+		this.api?.setGridOption("rowData", this.gridData);
+	}
 
 	async onClose() {
-		// Clean up if needed
+		if (this.resizeObserver) {
+			this.resizeObserver.disconnect();
+		}
+		if (this.api) {
+			this.api.destroy();
+		}
+	}
+	private resizeObserver: ResizeObserver;
+
+	private setupResizeObserver(gridContainer: HTMLElement) {
+		const fn = throttle(() => this.smartResize(), 100)
+		this.resizeObserver = new ResizeObserver(fn);
+
+		this.resizeObserver.observe(gridContainer);
 	}
 }
