@@ -5,8 +5,9 @@ export class EditorMenuBar {
     bus = new BusBuilder()
         .register('play', args<[]>())
         .register('structure', args<[ButtonComponent]>())
+        .register('globals', args<[]>())
         .build()
-    constructor(private showStructureButton: boolean = false) {
+    constructor(private fileDatabasePreview: boolean = false) {
 
     }
 
@@ -22,7 +23,7 @@ export class EditorMenuBar {
         })
         .onClick(() => this.bus.trigger('play'))
 
-        if (this.showStructureButton) {
+        if (this.fileDatabasePreview) {
             const b = new ButtonComponent(container)
             .setIcon('database')
             .setClass('sqlseal-menubar-button')
@@ -32,7 +33,20 @@ export class EditorMenuBar {
             })
             .onClick(() => {
                 const but = b
-                this.bus.trigger('structure', but)
+                this.bus.trigger('structure', but as any)
+            })
+        }
+
+        container.createDiv({ cls: 'separator' })
+
+        if (!this.fileDatabasePreview) {
+            // global button
+            const b = new ButtonComponent(container)
+            .setIcon('bolt')
+            .setClass('sqlseal-menubar-button')
+            .setTooltip('Global Tables', { delay: 1, placement: 'bottom' })
+            .onClick(() => {
+                this.bus.trigger('globals')
             })
         }
     }

@@ -1,6 +1,6 @@
 import { makeInjector } from "@hypersphere/dity";
 import { ExplorerModule } from "./module";
-import { App, Plugin, WorkspaceLeaf } from "obsidian";
+import { addIcon, App, Plugin, WorkspaceLeaf } from "obsidian";
 import { SqlSealDatabase } from "../database/database";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
@@ -11,6 +11,10 @@ import { ViewPlugin } from "@codemirror/view";
 import { ViewPluginGeneratorType } from "../syntaxHighlight/viewPluginGenerator";
 import { FILE_DATABASE_VIEW, FileDatabaseExplorerView } from "./FileDatabaseExplorerView";
 import { DatabaseManager } from "./database/databaseManager";
+import { activateView } from "./activateView";
+
+// @ts-ignore: Handled by esbuild
+import SQLSealIcon from "./sqlseal-bw.svg";
 
 @(makeInjector<ExplorerModule, "factory">()([
 	"plugin",
@@ -36,27 +40,6 @@ export class InitFactory {
 		dbManager: DatabaseManager
 	) {
 
-        // FIXME: abstract this and GlobalTablesViewRegister
-		const activateView = async (name: string) => {
-			const { workspace } = plugin.app;
-
-			let leaf: WorkspaceLeaf | null = null;
-			const leaves = workspace.getLeavesOfType(name);
-
-			if (leaves.length > 0) {
-				// A leaf with our view already exists, use that
-				leaf = leaves[0];
-			} else {
-				leaf = workspace.getLeaf("tab");
-				if (!leaf) {
-					return;
-				}
-				await leaf.setViewState({ type: name, active: true });
-			}
-
-			// "Reveal" the leaf in case it is in a collapsed sidebar
-			workspace.revealLeaf(leaf);
-		};
 		return () => {
 			plugin.registerView(
 				"sqlseal-explorer-view",
@@ -71,8 +54,9 @@ export class InitFactory {
 						viewPluginGenerator
 					),
 			);
-			plugin.addRibbonIcon("dice", "SQLSeal Explorer", () =>
-				activateView("sqlseal-explorer-view"),
+			addIcon("logo-sqlseal", SQLSealIcon);
+			plugin.addRibbonIcon("logo-sqlseal", "SQLSeal Explorer", () =>
+				activateView(plugin.app, "sqlseal-explorer-view"),
 			);
 
 
@@ -82,6 +66,14 @@ export class InitFactory {
 			})
 
 			plugin.registerExtensions(['sqlite'], FILE_DATABASE_VIEW)
+
+			plugin.addCommand({
+				id: 'sqlseal-command-explorer',
+				name: 'Open SQLSeal Explorer',
+				icon: 'logo-sqlseal',
+				callback: () => activateView(app, 'sqlseal-explorer-view')
+				
+			})
 
 		};
 	}

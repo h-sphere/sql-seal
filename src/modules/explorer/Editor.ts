@@ -5,6 +5,10 @@ import { ViewPluginGeneratorType } from "../syntaxHighlight/viewPluginGenerator"
 import { EditorMenuBar } from "./EditorMenuBar";
 import { MemoryDatabase } from "./database/memoryDatabase";
 import { SchemaVisualiser } from "./schemaVisualiser/SchemaVisualiser";
+import { activateView } from "./activateView";
+import { App } from "obsidian";
+import { GLOBAL_TABLES_VIEW_TYPE } from "../globalTables/GlobalTablesView";
+import { GridApi } from "ag-grid-community";
 
 type CodeblockProcessorWrapper = (
 	el: HTMLElement,
@@ -17,6 +21,7 @@ export class Editor {
 	constructor(
 		private codeblockProcessorGenerator: CodeblockProcessorWrapper,
 		private viewPluginGenerator: ViewPluginGeneratorType,
+		private app: App,
 		private query: string = DEFAULT_QUERY,
 		private db: MemoryDatabase | null = null
 	) {}
@@ -55,7 +60,6 @@ export class Editor {
         });
 
         events.on('structure', (b) => {
-            console.log('SHOWING STRUCTURE')
 			if (structure.checkVisibility({ checkVisibilityCSS: true })) {
 				// structure visible
 				structure.hide()
@@ -69,6 +73,10 @@ export class Editor {
 				(b as any).setIcon('table')
 			}
         })
+
+		events.on('globals', () => {
+			activateView(this.app, GLOBAL_TABLES_VIEW_TYPE)
+		})
 	}
 
 	createCodeblockProcessor(el: HTMLElement, source: string) {
@@ -112,10 +120,15 @@ export class Editor {
 		]);
 	}
 
-	play() {
+	async play() {
 		this.query = this.editor.state.doc.toString();
 		if (this.codeblockElement) {
-			this.createCodeblockProcessor(this.codeblockElement, this.query);
+			const processor = await this.createCodeblockProcessor(this.codeblockElement, this.query);
+			// const renderer = processor.renderer
+			// if ('communicator' in renderer && 'gridApi' in (renderer as any)['communicator']) {
+			// 	const api: GridApi = (renderer.communicator as any).gridApi
+			// 	api.setGridOption('paginationAutoPageSize', true)
+			// }
 		}
 	}
 }

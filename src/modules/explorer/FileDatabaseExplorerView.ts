@@ -79,7 +79,7 @@ export class FileDatabaseExplorerView extends FileView {
 			return processor
         }
 
-        const editor = new Editor(codeblockProcessorGenerator, this.viewPluginGenerator, INITIAL_QUERY, this.db)
+        const editor = new Editor(codeblockProcessorGenerator, this.viewPluginGenerator,this.app, INITIAL_QUERY, this.db)
 
         editor.render(this.contentEl)
 
