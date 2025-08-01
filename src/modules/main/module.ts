@@ -11,6 +11,7 @@ import { contextMenu } from '../contextMenu/module'
 import { debugModule } from '../debug/module'
 import { apiModule } from '../api/module'
 import { globalTables } from '../globalTables/module'
+import { explorer } from '../explorer/module'
 
 const obsidian = buildContainer(c => c
     .externals<{
@@ -32,7 +33,8 @@ export const mainModule = buildContainer(c => c
         contextMenu,
         debug: debugModule,
         api: apiModule,
-        globalTables
+        globalTables,
+        explorer
     })
     .register({
         init: asFactory(Init)
@@ -83,6 +85,16 @@ export const mainModule = buildContainer(c => c
         'globalTables.plugin': 'obsidian.plugin',
         'globalTables.app': 'obsidian.app',
         'globalTables.sync': 'sync.syncBus'
+    })
+    .resolve({
+        'explorer.app': 'obsidian.app',
+        'explorer.cellParser': 'syntaxHighlight.cellParser',
+        'explorer.db': 'db.db',
+        'explorer.settings': 'settings.settings',
+        'explorer.plugin': 'obsidian.plugin',
+        'explorer.rendererRegistry': 'editor.rendererRegistry',
+        'explorer.sync': 'sync.syncBus',
+        'explorer.viewPluginGenerator': 'syntaxHighlight.viewPluginGenerator'
     })
 )
 

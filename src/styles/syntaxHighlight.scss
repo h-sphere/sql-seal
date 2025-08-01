@@ -97,7 +97,7 @@
     color: #6ff77a;
 }
 
-:is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table)::before {
+:is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table, .cm-sqlseal-explorer)::before {
     background-color: var(--color);
     width: 5px;
     top: -3px;
@@ -110,4 +110,22 @@
 
 .cm-indent + :is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table)::before {
     display: none;
+}
+
+.cm-sqlseal-explorer .cm-line {
+    position: relative;
+}
+
+.cm-sqlseal-explorer :is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table)::before {
+    left: -3px;
+}
+
+.cm-sqlseal-explorer .cm-focused {
+    outline: none;
+}
+
+.cm-sqlseal-explorer .cm-editor {
+    border-left-width: 0;
+    background: var(--color-base-20);
+    padding: 8px;
 }

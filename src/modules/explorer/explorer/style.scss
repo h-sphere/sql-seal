@@ -1,0 +1,50 @@
+@use '../schemaVisualiser/schemaVisualiser.scss';
+
+.sqlseal-explorer-container {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+.sqlseal-explorer-grid-container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    gap: 1em;
+    height: 100%;
+    width: 100%;
+    padding: 1em;
+}
+
+.sqlseal-explorer-code {
+    // background: orange;
+}
+
+.sqlseal-explorer-render {
+    // background: red;
+    overflow: scroll;
+}
+
+.sqlseal-menubar-container {
+    padding: 0.2em 1em;
+}
+
+.sqlseal-menubar-button {
+    border: 0;
+    --input-shadow: none;
+}
+
+.sqlseal-explorer-right-pane {
+    display: grid;
+    container-type: inline-size;
+//     place-content: center;
+//     align-content: stretch;
+//     grid-template-rows: 100%;
+//     width: 100%;
+//     height: 100%;
+    & > * {
+//         width: 100%;
+//         height: 100%;
+        grid-area: 1 / 1;
+    }
+}

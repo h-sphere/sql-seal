@@ -26,11 +26,12 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 		private source: string,
 		private ctx: MarkdownPostProcessorContext,
 		private rendererRegistry: RendererRegistry,
-		private db: SqlSealDatabase,
+		private db: Pick<SqlSealDatabase, 'select' | 'explain'>,
 		private cellParser: ModernCellParser,
 		private settings: Settings,
 		private app: App,
 		private sync: Sync,
+		private tq: typeof transformQuery = transformQuery
 	) {
 		super(el);
 
@@ -118,7 +119,8 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 			const registeredTablesForContext =
 				await this.sync.getTablesMappingForContext(this.sourceKey);
 
-			const res = transformQuery(this.query, registeredTablesForContext);
+			// Transforming Query
+			const res = this.tq(this.query, registeredTablesForContext);
 			const transformedQuery = res.sql;
 
 			if (this.flags.refresh) {

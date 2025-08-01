@@ -13,7 +13,7 @@ import { ColumnDefinition } from "../../../utils/types";
 import { sanitise } from "../../../utils/sanitiseColumn";
 
 
-function toObjectArray(stmt: Statement) {
+export function toObjectArray(stmt: Statement) {
     const ret = []
     while (stmt.step()) {
         ret.push(stmt.getAsObject())
