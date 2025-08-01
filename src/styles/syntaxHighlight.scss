@@ -116,6 +116,24 @@
     position: relative;
 }
 
+.cm-sqlseal-overlay {
+    border: 1px solid #AAA;
+    padding: 1em;
+    border-radius: 5px;
+}
+
+.cm-sqlseal-overlay .cm-line {
+    position: relative;
+}
+
+.cm-sqlseal-overlay .cm-editor {
+    outline: none;
+}
+
+.sqlseal-modal-copycode .setting-item {
+    border: 0;
+}
+
 .cm-sqlseal-explorer :is(.cm-sqlseal-block-query, .cm-sqlseal-block-view, .cm-sqlseal-block-flag, .cm-sqlseal-block-table)::before {
     left: -3px;
 }

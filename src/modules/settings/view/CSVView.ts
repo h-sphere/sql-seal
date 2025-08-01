@@ -14,6 +14,7 @@ import { DeleteConfirmationModal } from "../modal/deleteConfirmationModal";
 import { CSVColumnContextMenu } from "../menu/csvColumnContextMenu";
 import { AgColumn, Column } from "ag-grid-community";
 import { CSVViewMenuBar } from "./CSVViewMenuBar";
+import { ViewPluginGeneratorType } from "../../syntaxHighlight/viewPluginGenerator";
 
 const delay = (n: number) => new Promise((resolve) => setTimeout(resolve, n));
 
@@ -28,6 +29,7 @@ export class CSVView extends TextFileView {
 	constructor(
 		leaf: WorkspaceLeaf,
 		private readonly settings: Settings,
+		private readonly viewPluginGenerator: ViewPluginGeneratorType
 	) {
 		super(leaf);
 	}
@@ -334,7 +336,7 @@ export class CSVView extends TextFileView {
             if (!this.file) {
 				return;
 			}
-			const modal = new CodeSampleModal(this.app, this.file);
+			const modal = new CodeSampleModal(this.app, this.file, this.viewPluginGenerator);
 			modal.open();
         })
 

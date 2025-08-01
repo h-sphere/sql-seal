@@ -2,8 +2,6 @@ import { makeInjector } from '@hypersphere/dity';
 import { App, PluginSettingTab, Setting, Plugin } from 'obsidian';
 import { SettingsModule } from './module';
 import { Settings } from './Settings';
-import { SettingsCSVControls } from './settingsTabSection/SettingsCSVControls';
-import { SettingsJsonControls } from './settingsTabSection/SettingsJsonControls';
 import { SettingsControls } from './settingsTabSection/SettingsControls';
 
 export interface SQLSealSettings {

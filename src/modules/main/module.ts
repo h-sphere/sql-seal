@@ -61,6 +61,7 @@ export const mainModule = buildContainer(c => c
         'settings.app': 'obsidian.app',
         'settings.plugin': 'obsidian.plugin',
         'settings.cellParser': 'syntaxHighlight.cellParser',
+        'settings.viewPluginGenerator': 'syntaxHighlight.viewPluginGenerator'
     })
     .resolve({
         'syntaxHighlight.app': 'obsidian.app',
