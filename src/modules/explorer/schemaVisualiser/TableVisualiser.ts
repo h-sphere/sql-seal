@@ -2,6 +2,8 @@ export interface ColumnInfo {
     name: string
     type: string
 }
+
+// Legacy interface - kept for backward compatibility
 export interface TableInfo {
     name: string
     columns: ColumnInfo[]

@@ -1,3 +1,4 @@
+// Legacy styles - kept for backward compatibility
 .sqlseal-tv-container {
     gap: 1em;
 }
@@ -26,4 +27,362 @@
     flex-direction: row;
     gap: 1em;
     justify-content: space-between;
+}
+
+// New Mermaid-based schema visualizer styles
+.sqlseal-mermaid-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--background-primary);
+    
+    svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    
+    // Interactive elements
+    [id^="entity-"] {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+            opacity: 0.8;
+        }
+        
+        &.highlighted {
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+        }
+    }
+    
+    // Relationship lines and arrows - make them more visible
+    .er.relationshipLine {
+        stroke: var(--text-accent) !important;
+        stroke-width: 2px !important;
+        opacity: 0.8;
+    }
+    
+    // Relationship labels
+    .er.relationshipLabel {
+        fill: var(--text-accent) !important;
+        font-family: var(--font-interface);
+        font-size: 11px !important;
+        font-weight: 500;
+    }
+    
+    // Arrow markers for relationships
+    .er marker {
+        fill: var(--text-accent) !important;
+        stroke: var(--text-accent) !important;
+    }
+    
+    // Entity boxes
+    .er.entityBox {
+        fill: var(--background-secondary);
+        stroke: var(--background-modifier-border);
+        stroke-width: 1px;
+    }
+    
+    // Entity labels
+    .er.entityLabel {
+        fill: var(--text-normal);
+        font-family: var(--font-interface);
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    // Attribute text
+    .er.attributeBoxEven,
+    .er.attributeBoxOdd {
+        fill: var(--background-primary-alt);
+        stroke: var(--background-modifier-border);
+    }
+    
+    .er.attributeBoxEven {
+        fill: var(--background-primary);
+    }
+    
+    // Enhance cardinality symbols (crow's foot notation)
+    .er .cardinality text {
+        fill: var(--text-accent) !important;
+        font-family: var(--font-interface);
+        font-size: 14px !important;
+        font-weight: bold;
+    }
+    
+    // Ensure all relationship elements are visible
+    path[id*="relationship"] {
+        stroke: var(--text-accent) !important;
+        stroke-width: 2px !important;
+        marker-end: url(#arrowhead) !important;
+    }
+    
+    // Style the actual relationship paths
+    g[id*="relationship"] path {
+        stroke: var(--text-accent) !important;
+        stroke-width: 2px !important;
+        fill: none !important;
+    }
+    
+    // Make sure arrowheads are visible
+    defs marker path {
+        fill: var(--text-accent) !important;
+        stroke: var(--text-accent) !important;
+    }
+}
+
+// Pan and zoom controls - minimalist bottom right
+.sqlseal-zoom-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    z-index: 10;
+
+    .sqlseal-zoom-btn {
+        width: 28px;
+        height: 28px;
+        background: var(--background-primary);
+        border: 1px solid var(--background-modifier-border);
+        border-radius: 4px;
+        color: var(--text-normal);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+            background: var(--background-modifier-hover);
+            border-color: var(--text-accent);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        &:active {
+            transform: translateY(0) scale(0.95);
+        }
+    }
+
+    .sqlseal-zoom-display {
+        font-size: 10px;
+        color: var(--text-muted);
+        font-family: var(--font-monospace);
+        padding: 2px 6px;
+        background: var(--background-primary);
+        border: 1px solid var(--background-modifier-border);
+        border-radius: 4px;
+        margin-left: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        min-width: 42px;
+        text-align: center;
+        font-weight: 500;
+    }
+}
+
+// Make the mermaid container relative for absolute positioning of controls
+.sqlseal-mermaid-container {
+    position: relative;
+
+    svg {
+        // Enable smooth transitions for pan/zoom
+        transition: none; // Disable transitions during interaction
+        
+        // Cursor styles for interaction states
+        &.grabbing {
+            cursor: grabbing !important;
+        }
+    }
+
+    .pan-zoom-group {
+        transform-origin: 0 0;
+    }
+}
+
+// Modal styles for table details
+.sqlseal-table-details-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    
+    .sqlseal-modal-content {
+        background: var(--background-primary);
+        border: 1px solid var(--background-modifier-border);
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 80vw;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+        
+        h3, h4 {
+            color: var(--text-normal);
+            margin: 0 0 16px 0;
+        }
+        
+        h4 {
+            margin-top: 24px;
+            font-size: 1.1em;
+        }
+    }
+    
+    .sqlseal-modal-close {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-muted);
+        padding: 4px 8px;
+        border-radius: 4px;
+        
+        &:hover {
+            background: var(--background-modifier-hover);
+            color: var(--text-normal);
+        }
+    }
+}
+
+// Table styles for modal content
+.sqlseal-columns-table,
+.sqlseal-fk-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-family: var(--font-interface);
+    
+    th, td {
+        border: 1px solid var(--background-modifier-border);
+        padding: 8px 12px;
+        text-align: left;
+    }
+    
+    th {
+        background: var(--background-secondary);
+        font-weight: 600;
+        color: var(--text-normal);
+    }
+    
+    td {
+        background: var(--background-primary);
+        color: var(--text-normal);
+    }
+    
+    tr:nth-child(even) td {
+        background: var(--background-primary-alt);
+    }
+}
+
+// Error message styling
+.sqlseal-error {
+    color: var(--text-error);
+    padding: 16px;
+    text-align: center;
+    font-style: italic;
+}
+
+// Fallback schema styles
+.sqlseal-fallback-schema {
+    padding: 16px;
+    font-family: var(--font-interface);
+    
+    h3 {
+        color: var(--text-normal);
+        margin: 0 0 20px 0;
+        text-align: center;
+    }
+    
+    .sqlseal-empty-schema {
+        color: var(--text-muted);
+        text-align: center;
+        font-style: italic;
+        padding: 40px;
+    }
+}
+
+.sqlseal-fallback-table {
+    margin-bottom: 24px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    overflow: hidden;
+    
+    .sqlseal-fallback-table-title {
+        background: var(--background-secondary);
+        color: var(--text-normal);
+        margin: 0;
+        padding: 12px 16px;
+        font-size: 1.1em;
+        font-weight: 600;
+        border-bottom: 1px solid var(--background-modifier-border);
+    }
+    
+    .sqlseal-fallback-fk-title {
+        color: var(--text-normal);
+        margin: 16px 16px 8px 16px;
+        font-size: 0.95em;
+        font-weight: 600;
+    }
+    
+    .sqlseal-fallback-fk-list {
+        margin: 0 16px 16px 16px;
+        padding-left: 20px;
+        
+        li {
+            color: var(--text-muted);
+            font-size: 0.9em;
+            margin-bottom: 4px;
+            font-family: var(--font-monospace);
+        }
+    }
+}
+
+.sqlseal-fallback-columns-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    
+    th, td {
+        border: none;
+        border-bottom: 1px solid var(--background-modifier-border);
+        padding: 8px 16px;
+        text-align: left;
+        font-size: 0.9em;
+    }
+    
+    th {
+        background: var(--background-primary-alt);
+        font-weight: 600;
+        color: var(--text-normal);
+        font-size: 0.85em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    td {
+        background: var(--background-primary);
+        color: var(--text-normal);
+    }
+    
+    tr:nth-child(even) td {
+        background: var(--background-primary-alt);
+    }
+    
+    tr:last-child td {
+        border-bottom: none;
+    }
 }
