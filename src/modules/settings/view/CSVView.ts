@@ -12,7 +12,7 @@ import { RenameColumnModal } from "../modal/renameColumnModal";
 import { CodeSampleModal } from "../modal/showCodeSample";
 import { DeleteConfirmationModal } from "../modal/deleteConfirmationModal";
 import { CSVColumnContextMenu } from "../menu/csvColumnContextMenu";
-import { AgColumn, Column } from "ag-grid-community";
+import { AgColumn } from "ag-grid-community";
 
 const delay = (n: number) => new Promise((resolve) => setTimeout(resolve, n));
 
