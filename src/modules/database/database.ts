@@ -96,6 +96,11 @@ export class SqlSealDatabase {
         return this.db?.getColumns(tableName)
     }
 
+    async count(tableName: string) {
+        const data = await this.db?.select(`SELECT COUNT(*) as count FROM ${tableName}`, {})
+        return data?.data[0]['count']
+    }
+
     async addColumns(tableName: string, newColumns: string[]) {
         return this.db?.addColumns(tableName, newColumns)
     }

@@ -10,6 +10,7 @@ import { syntaxHighlight } from '../syntaxHighlight/module'
 import { contextMenu } from '../contextMenu/module'
 import { debugModule } from '../debug/module'
 import { apiModule } from '../api/module'
+import { globalTables } from '../globalTables/module'
 
 const obsidian = buildContainer(c => c
     .externals<{
@@ -30,7 +31,8 @@ export const mainModule = buildContainer(c => c
         syntaxHighlight,
         contextMenu,
         debug: debugModule,
-        api: apiModule
+        api: apiModule,
+        globalTables
     })
     .register({
         init: asFactory(Init)
@@ -76,6 +78,11 @@ export const mainModule = buildContainer(c => c
         'api.cellParser': 'syntaxHighlight.cellParser',
         'api.db': 'db.db',
         'api.rendererRegistry': 'editor.rendererRegistry'
+    })
+    .resolve({
+        'globalTables.plugin': 'obsidian.plugin',
+        'globalTables.app': 'obsidian.app',
+        'globalTables.sync': 'sync.syncBus'
     })
 )
 

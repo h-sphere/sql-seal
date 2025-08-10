@@ -1,0 +1,58 @@
+.sqlseal-autocomplete-container {
+    position: relative;
+    width: 100%;
+
+    & input[type="text"] {
+        width: 100%;
+    }
+}
+
+.sqlseal-autocomplete-dropdown {
+    position: absolute;
+    top: 100%; left: 0;
+    margin-top: 0.5em;
+    right: 0;
+    text-align: left;
+    background: white;
+    max-height: 200px;
+    overflow-y: scroll;
+    border-radius: 5px;
+    box-shadow: 0 3px 5px #CCC;
+}
+
+
+.modal-overflow {
+    overflow: visible;
+    // --dialog-width: 1000px;
+}
+
+.sqlseal-dropdown-el {
+    padding: 4px 16px 4px 8px;
+    border-top: 1px solid #EEE;
+    overflow: hidden;
+    &:first-child {
+        border-top: 0;
+    }
+
+    &:hover {
+        background: #a8c4ef;
+    }
+}
+
+.sqlseal-dropdown-el-name {
+    font-weight: bold;
+    font-size: 0.9em;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    overflow: hidden;
+    text-wrap: nowrap;
+}
+
+.sqlseal-dropdown-el-path {
+    opacity: 0.9;
+    font-size: 0.7em;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    overflow: hidden;
+    text-wrap: nowrap;
+}

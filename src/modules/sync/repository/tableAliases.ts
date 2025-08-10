@@ -19,7 +19,14 @@ export class TableAliasesRepository extends Repository {
     }
 
     async deleteMapping(id: string) {
-        this.db.deleteData(this.TABLE_NAME, [{ id: id }], 'id')
+        await this.db.deleteData(this.TABLE_NAME, [{ id: id }], 'id')
+    }
+
+    async deleteMappingByNames(aliasName: string, sourceFileName: string) {
+        const data = await this.getByAlias(sourceFileName, aliasName)
+        if (data) {
+            await this.db.deleteData(this.TABLE_NAME, [{ id: data.id }], 'id')
+        }
     }
 
     private async createTable() {

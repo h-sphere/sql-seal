@@ -11,7 +11,8 @@ type InitFn = () => void
     'contextMenu.init',
     'sync.init',
     'debug.init',
-    'api.init'
+    'api.init',
+    'globalTables.init'
 ]))
 export class Init {
     async make(
@@ -21,7 +22,8 @@ export class Init {
         contextMenu: InitFn,
         syncInit: InitFn,
         debugInit: InitFn,
-        apiInit: InitFn
+        apiInit: InitFn,
+        globalTablesInit: InitFn
     ) {
         return () => {
             settingsInit()
@@ -29,8 +31,9 @@ export class Init {
             highlighInit()
             contextMenu()
             syncInit()
-            debugInit()
+            // debugInit()
             apiInit()
+            globalTablesInit()
         }
     }
 }

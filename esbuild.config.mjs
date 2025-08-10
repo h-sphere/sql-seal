@@ -37,7 +37,7 @@ const wasmPlugin = {
                 loader: 'js',
             };
         });
-    },
+    }
 };
 
 // Plugin to inject worker code
@@ -108,6 +108,9 @@ const context = await esbuild.context({
     sourcemap: prod ? false : "inline",
     treeShaking: true,
     outfile: "main.js",
+    loader: {
+        '.svg': 'text'
+    },
     plugins: [
         wasmPlugin,
         workerPlugin

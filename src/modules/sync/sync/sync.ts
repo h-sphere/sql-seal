@@ -63,6 +63,8 @@ export class Sync {
 
         // START SYNCING
         this.startSync()
+
+        await this.refreshGlobalMappings()
     }
 
     async syncFileByName(fileName: string) {
@@ -113,6 +115,17 @@ export class Sync {
         await this.tableDefinitionsRepo.insert(log)
     }
 
+    private globalTables: Record<string, string> = {}
+
+    async refreshGlobalMappings() {
+        const globalMappings = await this.tableMapLog.getByContext('/') as { alias_name: string, table_name: string }[]
+        this.globalTables = Object.fromEntries(globalMappings.map(g => [g.alias_name, g.table_name]))
+    }
+
+    get globalTablesMapping() {
+        return this.globalTables
+    }
+
     async getTablesMappingForContext(sourceFileName: string) {
         const tables = await this.tableMapLog.getByContext(sourceFileName) as { alias_name: string, table_name: string }[]
         const map = tables.reduce((acc, t) => ({
@@ -120,11 +133,14 @@ export class Sync {
             [t.alias_name as string]: t.table_name
         }), {})
 
+        // FIXME: adding globals here.
+
         return {
             ...map,
+            ...this.globalTablesMapping,
             files: 'files',
             tasks: 'tasks',
-            tags: 'tags'
+            tags: 'tags',
         }
     }
 
@@ -170,6 +186,27 @@ export class Sync {
                     source_file_name: reg.sourceFile
                 })
             }
+        }
+
+        if (reg.sourceFile === '/') {
+            await this.refreshGlobalMappings()
+        }
+    }
+
+    unregisterTable(reg: ParserTableDefinition) {
+        return this.tableMapLog.deleteMappingByNames(reg.tableAlias, reg.sourceFile)
+    }
+
+    async getStats(sourceFileName: string, table: string) {
+        const tab = await this.tableMapLog.getByAlias(sourceFileName, table)
+        if (!tab) {
+            return { rows: 0, columns: 0 }
+        }
+        const columns = await this.db.getColumns(tab.table_name)
+        const rows = await this.db.count(tab.table_name)
+        return {
+            rows,
+            columns: columns ? columns.length : 0
         }
     }
 
