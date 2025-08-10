@@ -1,8 +1,215 @@
-/* AG GRID CUSTOMS */
+/* AG GRID CUSTOMS - Enhanced Modern Styling */
+
+/* Checkbox styling */
 .ag-checkbox-input {
     opacity: 1 !important;
+    accent-color: var(--color-accent);
+    transform: scale(1.1);
 }
 
-.sqlseal-hidden-column {
-    opacity: 0.5;
+.ag-checkbox-input:checked {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+/* Context menu styling */
+.ag-menu {
+    background: var(--background-secondary) !important;
+    border: 1px solid var(--background-modifier-border) !important;
+    border-radius: var(--radius-m) !important;
+    box-shadow: var(--shadow-s) !important;
+    padding: var(--size-2-2) !important;
+    
+    .ag-menu-option {
+        color: var(--text-normal) !important;
+        padding: var(--size-2-2) var(--size-4-3) !important;
+        border-radius: var(--radius-s) !important;
+        transition: all 150ms ease-in-out;
+        
+        &:hover {
+            background: var(--background-modifier-hover) !important;
+            color: var(--text-normal) !important;
+        }
+        
+        &.ag-menu-option-active {
+            background: var(--color-accent) !important;
+            color: var(--text-on-accent) !important;
+        }
+    }
+    
+    .ag-menu-separator {
+        border-top: 1px solid var(--background-modifier-border) !important;
+        margin: var(--size-2-1) 0 !important;
+    }
+}
+
+/* Column filter styling */
+.ag-filter {
+    background: var(--background-secondary) !important;
+    border: 1px solid var(--background-modifier-border) !important;
+    border-radius: var(--radius-m) !important;
+    
+    .ag-filter-body-wrapper {
+        padding: var(--size-4-3) !important;
+    }
+    
+    .ag-input-field-input {
+        background: var(--background-primary) !important;
+        color: var(--text-normal) !important;
+        border: 1px solid var(--background-modifier-border) !important;
+        border-radius: var(--radius-s) !important;
+        padding: var(--size-2-2) var(--size-2-3) !important;
+        
+        &:focus {
+            outline: 2px solid var(--color-accent) !important;
+            outline-offset: -1px !important;
+            border-color: var(--color-accent) !important;
+        }
+    }
+}
+
+/* Tooltip styling */
+.ag-tooltip {
+    background: var(--background-secondary) !important;
+    color: var(--text-normal) !important;
+    border: 1px solid var(--background-modifier-border) !important;
+    border-radius: var(--radius-s) !important;
+    font-size: var(--font-ui-smaller) !important;
+    padding: var(--size-2-2) var(--size-2-3) !important;
+    box-shadow: var(--shadow-s) !important;
+}
+
+/* Selection styling */
+.ag-theme-quartz .ag-row.ag-row-selected {
+    background: var(--background-modifier-active-hover) !important;
+    border-left: 3px solid var(--color-accent) !important;
+    
+    .ag-cell {
+        background: transparent !important;
+    }
+}
+
+/* Column resize handle */
+.ag-theme-quartz .ag-header-cell-resize {
+    &::after {
+        background: var(--color-accent) !important;
+        opacity: 0.6;
+        width: 2px !important;
+    }
+    
+    &:hover::after {
+        opacity: 1;
+    }
+}
+
+/* Sort indicators */
+.ag-theme-quartz .ag-header-cell {
+    .ag-sort-ascending-icon,
+    .ag-sort-descending-icon {
+        color: var(--color-accent) !important;
+        font-weight: bold;
+    }
+}
+
+/* Loading overlay */
+.ag-overlay-loading-wrapper {
+    background: rgba(var(--mono-rgb-0), 0.8) !important;
+    backdrop-filter: blur(4px);
+    
+    .ag-overlay-loading-center {
+        background: var(--background-secondary) !important;
+        color: var(--text-normal) !important;
+        border-radius: var(--radius-m) !important;
+        padding: var(--size-4-4) !important;
+        box-shadow: var(--shadow-s) !important;
+    }
+}
+
+/* No rows overlay */
+.ag-overlay-no-rows-wrapper {
+    background: transparent !important;
+    
+    .ag-overlay-no-rows-center {
+        color: var(--text-muted) !important;
+        font-style: italic;
+    }
+}
+
+/* Column drop zones */
+.ag-column-drop {
+    background: var(--background-secondary) !important;
+    border: 1px dashed var(--background-modifier-border) !important;
+    border-radius: var(--radius-s) !important;
+    color: var(--text-muted) !important;
+    
+    &.ag-column-drop-not-empty {
+        border-style: solid !important;
+        border-color: var(--color-accent) !important;
+    }
+}
+
+/* Header menu button */
+.ag-theme-quartz .ag-header-cell-menu-button {
+    color: var(--text-muted) !important;
+    transition: color 150ms ease-in-out;
+    
+    &:hover {
+        color: var(--color-accent) !important;
+    }
+}
+
+/* Custom scrollbars */
+.ag-theme-quartz {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-bg);
+    
+    &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    &::-webkit-scrollbar-track {
+        background: var(--scrollbar-bg);
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb-bg);
+        border-radius: 4px;
+        
+        &:hover {
+            background: var(--scrollbar-active-thumb-bg);
+        }
+    }
+}
+
+/* Enhanced focus styles */
+.ag-theme-quartz .ag-cell:focus-within {
+    box-shadow: inset 0 0 0 2px var(--color-accent) !important;
+    border-radius: var(--radius-s);
+}
+
+/* Modern dark theme overrides */
+.theme-dark {
+    .ag-theme-quartz {
+        --ag-row-hover-color: rgba(255, 255, 255, 0.05);
+        --ag-selected-row-background-color: rgba(var(--color-accent-rgb), 0.2);
+        
+        .ag-row:hover {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 
+                        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+        }
+    }
+}
+
+/* Modern light theme overrides */  
+.theme-light {
+    .ag-theme-quartz {
+        --ag-row-hover-color: rgba(0, 0, 0, 0.03);
+        --ag-selected-row-background-color: rgba(var(--color-accent-rgb), 0.15);
+        
+        .ag-row:hover {
+            box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05), 
+                        inset 0 -1px 0 rgba(0, 0, 0, 0.02);
+        }
+    }
 }
