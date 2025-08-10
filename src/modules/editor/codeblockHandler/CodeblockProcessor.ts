@@ -184,10 +184,11 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 		const canvasViews = this.app.workspace.getLeavesOfType("canvas");
 
 		for (const leaf of canvasViews) {
-            const nodes = JSON.parse(leaf.view.data).nodes
-            const node = nodes.filter(n => n.text).find(n => n.text.contains(this.source))
+            const canvasView = leaf.view as any; // Canvas view has data and file properties not exposed in base View type
+            const nodes = JSON.parse(canvasView.data).nodes
+            const node = nodes.filter((n: any) => n.text).find((n: any) => n.text.contains(this.source))
             if (node) {
-                this.cachedName = leaf.view.file.path
+                this.cachedName = canvasView.file.path
                 return this.cachedName as string
             }
 		}

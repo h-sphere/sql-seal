@@ -16,7 +16,7 @@ export class StatsRenderer implements ICellRendererComp {
       this.sync()
     }
 
-  public async init(params: ICellRendererParams<TableConfiguration, string, GlobalTablesView>) {
+  public init(params: ICellRendererParams<TableConfiguration, string, GlobalTablesView>): void {
     const { value, data, context } = params;
     this.context = context
     this.data = data!
@@ -30,11 +30,11 @@ export class StatsRenderer implements ICellRendererComp {
     requestAnimationFrame(async () => { this.sync() })
 
     // Watching for the changes
-    this.setupWatchers(context, data!)
+    this.setupWatchersAsync(context, data!)
 
   }
 
-  async setupWatchers(context: GlobalTablesView, data: TableConfiguration) {
+  async setupWatchersAsync(context: GlobalTablesView, data: TableConfiguration) {
     this.reg = context.sync.getRegistrator()
     this.eventName = await context.sync.getEventNameForAlias('/', data!.name)
     this.reg.on(this.eventName, this.syncFn)
