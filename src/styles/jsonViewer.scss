@@ -1,0 +1,270 @@
+// JSON Viewer Styles
+.sqlseal-json-viewer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+
+  .sqlseal-file-warning {
+    padding: 16px;
+    background: var(--background-modifier-cover);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    
+    .sqlseal-warning-text {
+      color: var(--text-warning);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .sqlseal-analyze-btn {
+      background: var(--interactive-accent);
+      color: var(--text-on-accent);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      
+      &:hover:not(:disabled) {
+        background: var(--interactive-accent-hover);
+      }
+      
+      &:disabled {
+        background: var(--interactive-normal);
+        color: var(--text-muted);
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .sqlseal-json-input-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    
+    label {
+      font-weight: 600;
+      color: var(--text-normal);
+      font-size: 14px;
+    }
+    
+    input {
+      padding: 8px 12px;
+      border: 1px solid var(--background-modifier-border);
+      border-radius: 6px;
+      background: var(--background-primary);
+      color: var(--text-normal);
+      font-family: var(--font-monospace);
+      font-size: 13px;
+      
+      &:focus {
+        outline: none;
+        border-color: var(--interactive-accent);
+        box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+      }
+      
+      &::placeholder {
+        color: var(--text-muted);
+      }
+    }
+  }
+
+  .sqlseal-json-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    overflow: hidden;
+  }
+
+  .sqlseal-json-panel,
+  .sqlseal-table-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    background: var(--background-primary);
+    
+    h3 {
+      margin: 0;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--background-modifier-border);
+      background: var(--background-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-normal);
+    }
+  }
+
+  .sqlseal-json-display {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+    
+    pre {
+      margin: 0;
+      font-family: var(--font-monospace);
+      font-size: 12px;
+      line-height: 1.4;
+      
+      code {
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        
+        // JSON syntax highlighting
+        .json-key {
+          color: var(--color-blue);
+          font-weight: 600;
+        }
+        
+        .json-string {
+          color: var(--color-green);
+        }
+        
+        .json-number {
+          color: var(--color-orange);
+        }
+        
+        .json-boolean {
+          color: var(--color-purple);
+        }
+        
+        .json-null {
+          color: var(--text-muted);
+          font-style: italic;
+        }
+      }
+    }
+  }
+
+  .sqlseal-table-display {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+    
+    .sqlseal-preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      
+      th {
+        background: var(--background-secondary);
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 2px solid var(--background-modifier-border);
+        font-weight: 600;
+        color: var(--text-normal);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      
+      td {
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--background-modifier-border-hover);
+        color: var(--text-normal);
+        vertical-align: top;
+        
+        &.sqlseal-null-cell {
+          color: var(--text-muted);
+          font-style: italic;
+        }
+        
+        &.sqlseal-object-cell {
+          font-family: var(--font-monospace);
+          color: var(--text-accent);
+          font-size: 11px;
+          max-width: 200px;
+          word-break: break-all;
+        }
+      }
+      
+      tr:hover {
+        background: var(--background-secondary);
+      }
+    }
+    
+    .sqlseal-row-info {
+      margin-top: 12px;
+      padding: 8px;
+      background: var(--background-secondary);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  }
+
+  .sqlseal-error,
+  .sqlseal-info,
+  .sqlseal-placeholder,
+  .sqlseal-loading {
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+
+  .sqlseal-error {
+    background: var(--background-modifier-error);
+    color: var(--text-error);
+    border: 1px solid var(--background-modifier-error-border);
+  }
+
+  .sqlseal-info {
+    background: var(--background-modifier-cover);
+    color: var(--text-muted);
+    border: 1px solid var(--background-modifier-border);
+  }
+  
+  .sqlseal-placeholder {
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    border: 1px solid var(--background-modifier-border);
+    text-align: center;
+    font-style: italic;
+  }
+  
+  .sqlseal-loading {
+    background: var(--background-modifier-cover);
+    color: var(--text-accent);
+    border: 1px solid var(--interactive-accent);
+    text-align: center;
+    position: relative;
+    
+    &::after {
+      content: '';
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-left: 8px;
+      border: 2px solid var(--text-accent);
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+// Loading spinner animation
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive design for smaller screens
+@media (max-width: 1000px) {
+  .sqlseal-json-viewer .sqlseal-json-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: 300px 1fr;
+  }
+}
