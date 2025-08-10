@@ -52,7 +52,7 @@ const workerPlugin = {
         build.onLoad({ filter: /.*/, namespace: 'worker-code' }, async () => {
             // Build worker code
             const result = await esbuild.build({
-                entryPoints: ['src/database/worker/database.ts'],
+                entryPoints: ['src/modules/database/worker/database.ts'],
                 bundle: true,
                 write: false,
                 format: 'iife',

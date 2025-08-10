@@ -1,5 +1,5 @@
-import type { SQLSealRegisterApi, SQLSealApi  } from '../../src/pluginApi/sqlSealApi'
-import { RendererConfig } from '../../src/renderer/rendererRegistry'
+import type { SQLSealRegisterApi, SQLSealApi  } from '../../src/modules/api/pluginApi/sqlSealApi'
+import { RendererConfig } from '../../src/modules/editor/renderer/rendererRegistry'
 
 
 export type {
