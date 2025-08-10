@@ -130,7 +130,7 @@ export class GridRendererCommunicator {
             loadThemeGoogleFonts: false,
             rowData: [],
             columnDefs: [],
-            domLayout: 'autoHeight',
+            domLayout: 'autoHeight', // This can be overridden by config
             enableCellTextSelection: true,
             paginationPageSize: this.settings.get('gridItemsPerPage') ?? 10
             // ensureDomOrder: true

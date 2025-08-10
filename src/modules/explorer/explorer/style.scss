@@ -23,7 +23,9 @@
 
 .sqlseal-explorer-render {
     // background: red;
-    overflow: scroll;
+    overflow: hidden; // Changed from scroll to hidden - AG Grid will handle its own scrolling
+    height: 100%; // Ensure the container has a defined height
+    min-height: 400px; // Minimum height for proper pagination
 }
 
 .sqlseal-menubar-container {
@@ -44,27 +46,27 @@
     display: grid;
     container-type: inline-size;
     height: 100%;
-//     place-content: center;
-//     align-content: stretch;
-//     grid-template-rows: 100%;
-//     width: 100%;
-//     height: 100%;
+    overflow: hidden; // Prevent the pane itself from expanding
     & > * {
-//         width: 100%;
-//         height: 100%;
         grid-area: 1 / 1;
         height: 100%;
+        overflow: hidden; // Ensure child elements don't expand beyond bounds
     }
 }
 
 .sqlseal-explorer-right-pane {
+    // AG Grid styling for explorer context
+    & .sqlseal-grid-wrapper {
+        height: 100%;
+        overflow: hidden;
+        
+        & > .ag-theme-quartz {
+            height: 100%;
+        }
+    }
 
     & .ag-root-wrapper {
         height: 100%;
-    }
-
-    & .ag-root-wrapper-body {
-        flex: 1;
     }
 
     & .ag-paging-page-size {
