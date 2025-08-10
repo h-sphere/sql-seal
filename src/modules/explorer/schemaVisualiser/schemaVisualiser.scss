@@ -1,0 +1,29 @@
+.sqlseal-tv-container {
+    gap: 1em;
+}
+
+.sqlseal-tv-table {
+    display: inline-block;
+    border: 1px solid black;
+    margin-right: 1em;
+    margin-bottom: 1em;
+}
+
+.sqlseal-tv-table-name {
+    padding: 0.5em 1em;
+    background: #DDD;
+    border-bottom: 2px solid black;
+}
+
+.sqlseal-tv-columns {
+    list-style: none;
+    margin: 0;
+    padding: 0.5em 1em;
+}
+
+.sqlseal-tv-columns li {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    justify-content: space-between;
+}

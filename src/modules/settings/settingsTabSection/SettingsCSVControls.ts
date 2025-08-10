@@ -5,9 +5,14 @@ import {
 } from "../utils/viewInspector";
 import { SettingsControls } from "./SettingsControls";
 import { CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE, CSVView } from "../view/CSVView";
+import { ViewPluginGeneratorType } from "../../syntaxHighlight/viewPluginGenerator";
 
 export class SettingsCSVControls extends SettingsControls {
 	private registeredView: string | null = null;
+
+	constructor(settings: Settings, app: App, plugin: Plugin, private viewPluginGenerator: ViewPluginGeneratorType) {
+		super(settings, app, plugin)
+	}
 
 	register() {
 		if (this.settings.get("enableViewer")) {
@@ -19,7 +24,7 @@ export class SettingsCSVControls extends SettingsControls {
 
 			this.plugin.registerView(
 				CSV_VIEW_TYPE,
-				(leaf) => new CSVView(leaf, this.settings),
+				(leaf) => new CSVView(leaf, this.settings, this.viewPluginGenerator),
 			);
 			this.plugin.registerExtensions(CSV_VIEW_EXTENSIONS, CSV_VIEW_TYPE);
 		}
