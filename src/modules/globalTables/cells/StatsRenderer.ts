@@ -16,7 +16,7 @@ export class StatsRenderer implements ICellRendererComp {
       this.sync()
     }
 
-  public async init(params: ICellRendererParams<TableConfiguration, string, GlobalTablesView>) {
+  public init(params: ICellRendererParams<TableConfiguration, string, GlobalTablesView>) {
     const { value, data, context } = params;
     this.context = context
     this.data = data!

@@ -47,7 +47,6 @@ export class Editor {
 		this.createCodeblockProcessor(this.codeblockElement, this.query);
 
 		if (this.db) {
-			// Use enhanced schema visualizer with memory database
 			const vis = new SchemaVisualiser(this.db)
 			vis.show(structure)
 		} else {
