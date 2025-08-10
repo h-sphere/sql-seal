@@ -72,6 +72,7 @@
     "jsonpath": "^1.1.1",
     "lodash": "^4.17.21",
     "markdown-table-ts": "^1.0.3",
+    "mermaid": "11.4.0",
     "ohm-js": "^17.1.0",
     "papaparse": "^5.5.3",
     "sql-parser-cst": "^0.33.1",

@@ -47,9 +47,7 @@ export class Editor {
 		this.createCodeblockProcessor(this.codeblockElement, this.query);
 
 		if (this.db) {
-			// rendering structure
-			const schema = this.db.getSchema()
-			const vis = new SchemaVisualiser(schema)
+			const vis = new SchemaVisualiser(this.db)
 			vis.show(structure)
 		} else {
 		}
