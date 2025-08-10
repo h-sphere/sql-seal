@@ -5,12 +5,14 @@ import {
 	GridRendererCommunicator,
 } from "../../editor/renderer/GridRenderer";
 import { errorNotice } from "../../../utils/notice";
-import { ConfigObject, loadConfig, saveConfig } from "src/utils/csvConfig";
+import { ColumnDefinition, ConfigObject, DEFAULT_CONFIG, loadConfig, saveConfig } from "src/utils/csvConfig";
 import { ColumnType } from "../../../utils/types";
 import { Settings } from "../Settings";
 import { RenameColumnModal } from "../modal/renameColumnModal";
 import { CodeSampleModal } from "../modal/showCodeSample";
 import { DeleteConfirmationModal } from "../modal/deleteConfirmationModal";
+import { CSVColumnContextMenu } from "../menu/csvColumnContextMenu";
+import { AgColumn } from "ag-grid-community";
 
 const delay = (n: number) => new Promise((resolve) => setTimeout(resolve, n));
 
@@ -158,14 +160,25 @@ export class CSVView extends TextFileView {
 		return "auto";
 	}
 
+    getColumnConfig(columnName: string) {
+        if (this.config.columnDefinitions[columnName]) {
+            return this.config.columnDefinitions[columnName]
+        }
+        return { ...DEFAULT_CONFIG } 
+    }
+
 	async changeColumnType(columnName: string, type: ColumnType) {
+        return await this.setConfig(columnName, { type })
+	}
+
+    async setConfig(columnName: string, config: Partial<ColumnDefinition>) {
 		const prev = this.config.columnDefinitions[columnName] ?? {};
-		this.config.columnDefinitions[columnName] = {
+        this.config.columnDefinitions[columnName] = {
 			...prev,
-			type: type,
+			...config,
 		};
 		await this.saveConfig();
-	}
+    }
 
 	async loadConfig() {
 		while (!this.file) {
@@ -179,25 +192,34 @@ export class CSVView extends TextFileView {
 	}
 
 	private getColumnConfigurations(columns: string[]) {
-		return columns.map((f) => {
+		return columns
+        .filter(f => this.showHidden || !this.getColumnConfig(f).isHidden)
+        .map((f) => {
 			if (!this.config) {
 				return {
 					field: f,
 				};
 			}
-			const def = this.config.columnDefinitions[f]?.type;
-			if (!def || def === "auto") {
-				return { field: f };
+            const config = this.getColumnConfig(f)
+            const type = config.type
+            const cellStyle = { opacity: config.isHidden ? 0.5 : 1 }
+            const result = {
+                field: f,
+                cellStyle,
+                headerClass: config.isHidden ? 'sqlseal-hidden-column' : ''
+            }
+			if (!type || type === "auto") {
+				return result;
 			}
-			if (def === "date") {
+			if (type === "date") {
 				return {
-					field: f,
+					...result,
 					cellDataType: "dateString",
 				};
 			}
 			return {
-				field: f,
-				cellDataType: def,
+				...result,
+				cellDataType: type,
 			};
 		});
 	}
@@ -283,6 +305,8 @@ export class CSVView extends TextFileView {
 
 	isLoading: boolean = false;
 
+    showHidden: boolean = false;
+
 	private async renderCSV() {
 		if (this.isLoading) {
 			if (this.api) {
@@ -323,6 +347,19 @@ export class CSVView extends TextFileView {
 		const generateSqlCode = buttonsRow.createEl("button", {
 			text: "Generate SQLSeal code",
 		});
+
+
+
+        const showHidden = buttonsRow.createEl('button', {
+            text: 'Show Hidden Columns'
+        })
+
+        showHidden.addEventListener('click', () => {
+            this.showHidden = !this.showHidden
+            showHidden.textContent = this.showHidden ? 'Hide Hidden Columns' : 'Show Hidden Columns'
+            this.refreshTypes()
+        })
+
 		const gridEl = csvEditorDiv.createDiv({ cls: "sql-seal-csv-viewer" });
 
 		generateSqlCode.addEventListener("click", (e) => {
@@ -346,69 +383,9 @@ export class CSVView extends TextFileView {
 					headerComponentParams: {
 						enableMenu: this.settings.get("enableEditing"),
 						showColumnMenu: function (e: any) {
-							const menu = new Menu();
-
-							menu.addItem((item) => {
-								item.setTitle("Rename Column");
-								item.onClick(() => {
-									const modal = new RenameColumnModal(csvView.app, (res) => {
-										csvView.renameColumn(
-											this.column.userProvidedColDef.field,
-											res,
-										);
-									});
-									modal.open();
-								});
-							});
-
-							menu.addItem((item) => {
-								item.setTitle("Delete Column");
-								item.onClick(() => {
-									const colName = this.column.userProvidedColDef.field;
-									const modal = new DeleteConfirmationModal(
-										csvView.app,
-										`column ${colName}`,
-										() => {
-											csvView.deleteColumn(colName);
-										},
-									);
-									modal.open();
-								});
-							});
-
-							// FIXME: rework it to submenus.
-							menu.addSeparator();
-							menu.addItem((item) => {
-								// item.setDisabled(true)
-								item.setTitle("Data Type");
-								// item.setIsLabel(true)
-								const ipfSubmenu = (item as any).setSubmenu();
-								const types = [
-									"auto",
-									"text",
-									"number",
-									"boolean",
-									"date",
-								] as ColumnType[];
-
-								const colName = this.column.userProvidedColDef.field;
-
-								const current = csvView.getColumnType(colName);
-								types.forEach((type) => {
-									ipfSubmenu.addItem((subItem: MenuItem) => {
-										const checkbox = type === current ? "✓ " : "";
-										subItem.setTitle(checkbox + type);
-										subItem.onClick(() => {
-											csvView.changeColumnType(colName, type);
-											csvView.refreshTypes();
-											csvView.loadDataIntoGrid();
-										});
-									});
-								});
-							});
-
-							const pos = e.getBoundingClientRect();
-							menu.showAtPosition({ x: pos.x, y: pos.y + 20 });
+							const menu = new CSVColumnContextMenu(csvView, this.column as AgColumn)
+                    		const pos = e.getBoundingClientRect();
+                            menu.show({ x: pos.x, y: pos.y + 20 })
 						},
 					},
 				},
