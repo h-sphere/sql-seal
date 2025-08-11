@@ -59,6 +59,7 @@
     "@hypersphere/dity-graph": "^0.0.8",
     "@hypersphere/omnibus": "^0.1.6",
     "@jlongster/sql.js": "^1.6.7",
+    "@sqlite.org/sqlite-wasm": "3.50.3-build1",
     "@types/jsonpath": "^0.2.4",
     "@vanakat/plugin-api": "^0.2.1",
     "absurd-sql": "^0.0.54",
@@ -70,6 +71,9 @@
     "handlebars": "^4.7.8",
     "json5": "^2.2.3",
     "jsonpath": "^1.1.1",
+    "kysely": "^0.28.5",
+    "kysely-wasm": "^1.2.1",
+    "kysely-wasqlite-worker": "^1.2.1",
     "lodash": "^4.17.21",
     "markdown-table-ts": "^1.0.3",
     "mermaid": "11.4.0",
@@ -78,6 +82,7 @@
     "sql-parser-cst": "^0.33.1",
     "unidecode": "^1.1.0",
     "util": "^0.12.5",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "wa-sqlite": "^1.0.0"
   }
 }

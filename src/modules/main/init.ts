@@ -1,5 +1,6 @@
 import { makeInjector } from "@hypersphere/dity";
 import { MainModule } from "./module";
+import { Plugin } from "obsidian";
 
 type InitFn = () => void
 
@@ -28,6 +29,7 @@ export class Init {
         explorerInit: InitFn
     ) {
         return () => {
+            
             settingsInit()
             editorInit()
             highlighInit()
@@ -37,6 +39,9 @@ export class Init {
             apiInit()
             globalTablesInit()
             explorerInit()
+            
+            console.log('🚀 SQL Seal initialized with wa-sqlite test command available');
+            console.log('📋 Use Ctrl/Cmd+P -> "Test wa-sqlite Implementation" to test wa-sqlite');
         }
     }
 }

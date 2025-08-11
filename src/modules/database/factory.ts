@@ -1,10 +1,10 @@
 import { App } from "obsidian";
 import { SqlSealDatabase } from "./database";
 import { makeInjector } from "@hypersphere/dity";
-import { DbModel } from "./module";
+import { DatabaseModule } from "./module";
 
 
-@(makeInjector<DbModel, 'factory'>()([
+@(makeInjector<DatabaseModule, 'factory'>()([
     'app'
 ]))
 export class DatabaseFactory {

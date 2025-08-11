@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  updated-sql.js: link:../../../Library/pnpm/global/5/node_modules/updated-sql.js
+
 importers:
 
   .:
@@ -32,6 +35,9 @@ importers:
       '@jlongster/sql.js':
         specifier: ^1.6.7
         version: 1.6.7
+      '@sqlite.org/sqlite-wasm':
+        specifier: 3.50.3-build1
+        version: 3.50.3-build1
       '@types/jsonpath':
         specifier: ^0.2.4
         version: 0.2.4
@@ -65,6 +71,15 @@ importers:
       jsonpath:
         specifier: ^1.1.1
         version: 1.1.1
+      kysely:
+        specifier: ^0.28.5
+        version: 0.28.5
+      kysely-wasm:
+        specifier: ^1.2.1
+        version: 1.2.1(kysely@0.28.5)
+      kysely-wasqlite-worker:
+        specifier: ^1.2.1
+        version: 1.2.1(@subframe7536/sqlite-wasm@0.5.6)(kysely@0.28.5)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -92,6 +107,9 @@ importers:
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
+      wa-sqlite:
+        specifier: ^1.0.0
+        version: 1.0.0
     devDependencies:
       '@changesets/cli':
         specifier: ^2.29.4
@@ -1225,6 +1243,13 @@ packages:
 
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
+
+  '@sqlite.org/sqlite-wasm@3.50.3-build1':
+    resolution: {integrity: sha512-NU+I7KJ5kpMZNyZtJ9hOLlhQHJAA3fJhtkE7kf3C0SlGg4ayz6AkqxcaDcR4qOsrz1XP2+yM1yORaLCt55XDQg==}
+    hasBin: true
+
+  '@subframe7536/sqlite-wasm@0.5.6':
+    resolution: {integrity: sha512-uvVJPXGUZNXp2vN19LcPEZTaDO/+r/IE/OazhczaSq95puPX/7xaEQAter3U3viK1WHdGnMfqltPj6QqRMK/2g==}
 
   '@szmarczak/http-timer@4.0.6':
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
@@ -3071,6 +3096,26 @@ packages:
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
 
+  kysely-generic-sqlite@1.2.1:
+    resolution: {integrity: sha512-/Bs3/Uktn04nQ9g/4oSphLMEtSHkS5+j5hbKjK5gMqXQfqr/v3V3FKtoN4pLTmo2W35hNdrIpQnBukGL1zZc6g==}
+    peerDependencies:
+      kysely: '>=0.26'
+
+  kysely-wasm@1.2.1:
+    resolution: {integrity: sha512-VXzSiTu6gDmfZdCIq04hFWucvTepcgurIP+dlCONF+p3jFU3cHhEvVN1X+TUlMHt1/7t9Q/2Vr9JyxLOxv4WIw==}
+    peerDependencies:
+      kysely: '>=0.26'
+
+  kysely-wasqlite-worker@1.2.1:
+    resolution: {integrity: sha512-9tXz4RldOXXFrfSTGQ5hLRX8hxbA8LskW04CMJ1unkcDz64JeuqueVDSo2pcNaq/9YcmRnGv3L7nVgca7Jm5Zg==}
+    peerDependencies:
+      '@subframe7536/sqlite-wasm': '>=0.5.0'
+      kysely: '>=0.26'
+
+  kysely@0.28.5:
+    resolution: {integrity: sha512-rlB0I/c6FBDWPcQoDtkxi9zIvpmnV5xoIalfCMSMCa7nuA6VGA3F54TW9mEgX4DVf10sXAWCF5fDbamI/5ZpKA==}
+    engines: {node: '>=20.0.0'}
+
   langium@3.0.0:
     resolution: {integrity: sha512-+Ez9EoiByeoTu/2BXmEaZ06iPNXM6thWJp02KfBO/raSMyCJ4jw7AkWWa+zBCTm0+Tw1Fj9FOxdqSskyN5nAwg==}
     engines: {node: '>=16.0.0'}
@@ -4335,6 +4380,9 @@ packages:
   w3c-keyname@2.2.8:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
 
+  wa-sqlite@1.0.0:
+    resolution: {integrity: sha512-Kyybo5/BaJp76z7gDWGk2J6Hthl4NIPsE+swgraEjy3IY6r5zIR02wAs1OJH4XtJp1y3puj3Onp5eMGS0z7nUA==}
+
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
 
@@ -4392,6 +4440,9 @@ packages:
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+
+  zen-mitt@3.1.0:
+    resolution: {integrity: sha512-I0KUcnQb9rnx1/Cu9xtlJPj2e2r+yb3putg2Tjx9mjY2pVTnAzH4N/KwnIpnG+RQCz3VPj33NftGis4ug5s/2g==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -5621,6 +5672,10 @@ snapshots:
   '@sinonjs/fake-timers@10.3.0':
     dependencies:
       '@sinonjs/commons': 3.0.1
+
+  '@sqlite.org/sqlite-wasm@3.50.3-build1': {}
+
+  '@subframe7536/sqlite-wasm@0.5.6': {}
 
   '@szmarczak/http-timer@4.0.6':
     dependencies:
@@ -7862,6 +7917,24 @@ snapshots:
 
   kolorist@1.8.0: {}
 
+  kysely-generic-sqlite@1.2.1(kysely@0.28.5):
+    dependencies:
+      kysely: 0.28.5
+
+  kysely-wasm@1.2.1(kysely@0.28.5):
+    dependencies:
+      kysely: 0.28.5
+      kysely-generic-sqlite: 1.2.1(kysely@0.28.5)
+
+  kysely-wasqlite-worker@1.2.1(@subframe7536/sqlite-wasm@0.5.6)(kysely@0.28.5):
+    dependencies:
+      '@subframe7536/sqlite-wasm': 0.5.6
+      kysely: 0.28.5
+      kysely-generic-sqlite: 1.2.1(kysely@0.28.5)
+      zen-mitt: 3.1.0
+
+  kysely@0.28.5: {}
+
   langium@3.0.0:
     dependencies:
       chevrotain: 11.0.3
@@ -9102,6 +9175,8 @@ snapshots:
 
   w3c-keyname@2.2.8: {}
 
+  wa-sqlite@1.0.0: {}
+
   walker@1.0.8:
     dependencies:
       makeerror: 1.0.12
@@ -9164,5 +9239,7 @@ snapshots:
       yargs-parser: 21.1.1
 
   yocto-queue@0.1.0: {}
+
+  zen-mitt@3.1.0: {}
 
   zwitch@2.0.4: {}

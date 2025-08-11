@@ -6,6 +6,7 @@ import {
 	provideGlobalGridOptions,
 } from "ag-grid-community";
 import { mainModule } from "./modules/main/module";
+import { sql } from "kysely";
 
 // Register all community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -28,6 +29,10 @@ export default class SqlSealPlugin extends Plugin {
 
 		const init = await this.container.get("init");
 		init();
+
+		const db = await (await this.container.get('db.provider')).get()
+		const data = await db.selectNoFrom(sql<string>`sqlite_version()`).execute()
+		console.log(data)
 	}
 
 	onunload() {}
