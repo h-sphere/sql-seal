@@ -1,4 +1,4 @@
-import { App, Setting } from "obsidian";
+import { App, Plugin, Setting } from "obsidian";
 import { Settings } from "../Settings";
 import { SettingsControls } from "./SettingsControls";
 import { checkTypeViewAvaiability } from "../utils/viewInspector";
@@ -7,9 +7,14 @@ import {
 	JSON_VIEW_TYPE,
 	JsonView,
 } from "../view/JsonView";
+import { ViewPluginGeneratorType } from "../../syntaxHighlight/viewPluginGenerator";
 
 export class SettingsJsonControls extends SettingsControls {
 	private registeredView: string | null = null;
+
+	constructor(settings: Settings, app: App, plugin: Plugin, private viewPluginGenerator: ViewPluginGeneratorType) {
+		super(settings, app, plugin);
+	}
 
 	register() {
 		if (this.settings.get("enableJSONViewer")) {
@@ -20,7 +25,7 @@ export class SettingsJsonControls extends SettingsControls {
 				return;
 			}
 
-			this.plugin.registerView(JSON_VIEW_TYPE, (leaf) => new JsonView(leaf));
+			this.plugin.registerView(JSON_VIEW_TYPE, (leaf) => new JsonView(leaf, this.viewPluginGenerator));
 			this.plugin.registerExtensions(JSON_VIEW_EXTENSIONS, JSON_VIEW_TYPE);
 		}
 	}
