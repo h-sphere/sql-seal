@@ -12,6 +12,7 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "strict": true,
     "types": [
       "jest"
     ],

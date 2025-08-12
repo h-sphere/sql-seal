@@ -1,16 +1,22 @@
 import { Kysely } from "kysely";
-import { Database } from "./schema";
+import { DatabaseSchema } from "./schema";
 import { OfficialWasmDialect } from "kysely-wasm";
 import sqlite3InitModule from "@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm/sqlite3-bundler-friendly.mjs";
+import {  Database} from '@sqlite.org/sqlite-wasm'
 import { App, Vault } from "obsidian";
 import { makeInjector } from "@hypersphere/dity";
 import { DatabaseModule } from "../module";
 import { sanitise } from "../../../utils/sanitiseColumn";
 
+interface DbMapEntry {
+	database: any
+	kysely: Kysely<any>
+}
+
 @(makeInjector<DatabaseModule>()(["app"]))
 export class DatabaseProvider {
 	constructor(private app: App) {}
-	private databases: Map<string, Kysely<any>> = new Map();
+	private databases: Map<string, DbMapEntry> = new Map();
 
 	private _sqlite3: any = null;
 	private async sqlite3() {
@@ -29,7 +35,7 @@ export class DatabaseProvider {
 
 	async get<F extends string | null>(
 		filename: F,
-	): Promise<F extends null ? Kysely<Database> : Kysely<unknown>> {
+	): Promise<F extends null ? Kysely<DatabaseSchema> : Kysely<unknown>> {
 		const key = filename ?? "GLOBAL";
 
 		const db = this.databases.get(key);
@@ -38,6 +44,8 @@ export class DatabaseProvider {
 		}
 
 		const path = this.prefix + "___" + key;
+
+		let rawDatabase: Database | null = null
 
 		try {
 			// Create dialect using official SQLite WASM
@@ -49,16 +57,22 @@ export class DatabaseProvider {
 					}
 					const dbPath = path;
 
-					return new sqlite3.DB(dbPath, "ct");
+					const db = new sqlite3.DB(dbPath, "ct");
+					rawDatabase = db
+					return db
 				},
 			});
 
+
 			// Create Kysely instance
-			const db = new Kysely<Database>({
+			const kysely = new Kysely<any>({
 				dialect,
 			});
 
-			this.databases.set(key, db);
+			this.databases.set(key, {
+				kysely,
+				database: rawDatabase
+			});
 			return db as any;
 		} catch (error) {
 			console.error("Error creating SQLite WASM database:", error);
@@ -67,8 +81,29 @@ export class DatabaseProvider {
 	}
 
     async getGlobal() {
-        return this.get(null)
+        const db = await this.get(null)
+		const tables = await db.introspection.getTables()
+		if (!tables.length) {
+			// Generating schema
+
+		}
     }
+
+	async getRawDatabaseAccess(filename: string | null = null) {
+		await this.get(filename)
+		return this.databases.get(filename ?? 'GLOBAL')!.database
+	}
+
+	createGlobalTables(db: Kysely<any>) {
+		db.schema
+			.createTable('files')
+			.addColumn('id', 'text')
+			.addColumn('name', 'text')
+			.addColumn('path', 'text')
+			.addColumn('created_at', 'datetime', c => c.defaultTo('now'))
+			.addColumn('modified_at', 'datetime')
+			.addColumn('file_size', 'numeric')
+	}
 
 	async close() {
 		return Promise.all(
