@@ -65,11 +65,12 @@ export class ExplorerView extends ItemView {
 			await processor.onload();
 
 
-			// Resizing
+			// Resizing and layout configuration for explorer
 			const renderer = processor.renderer
 			if ('communicator' in renderer && 'gridApi' in (renderer as any)['communicator']) {
 				const api: GridApi = (renderer.communicator as any).gridApi
 				api.setGridOption('paginationAutoPageSize', true)
+				api.setGridOption('domLayout', 'normal') // Override autoHeight for proper pagination
 			}
 
 			await processor.render();

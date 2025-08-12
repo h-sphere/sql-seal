@@ -1,4 +1,5 @@
 import { FileView, IconName, MarkdownPostProcessorContext, Menu, TextFileView, TFile, WorkspaceLeaf } from "obsidian";
+import { GridApi } from "ag-grid-community";
 import { MemoryDatabase } from "./database/memoryDatabase";
 import { DatabaseManager } from "./database/databaseManager";
 import { TableInfo } from "./schemaVisualiser/TableVisualiser";
@@ -75,6 +76,15 @@ export class FileDatabaseExplorerView extends FileView {
                 this.sync,
             );
             await processor.onload();
+
+            // Resizing and layout configuration for explorer
+            const renderer = processor.renderer
+            if ('communicator' in renderer && 'gridApi' in (renderer as any)['communicator']) {
+                const api: GridApi = (renderer.communicator as any).gridApi
+                api.setGridOption('paginationAutoPageSize', true)
+                api.setGridOption('domLayout', 'normal') // Override autoHeight for proper pagination
+            }
+
 			await processor.render();
 			return processor
         }
