@@ -11,8 +11,18 @@ SELECT * FROM ${tableName}
 LIMIT 100
 \`\`\``
 
+const jsonQuery = (tableName: string, path: string, jsonPath: string) => {
+    const escapedJsonPath = jsonPath.replace(/"/g, '\\"');
+    return `\`\`\`sqlseal
+TABLE ${tableName} = file(${path}, "${escapedJsonPath}")
+
+SELECT * FROM ${tableName}
+LIMIT 100
+\`\`\``;
+}
+
 export class CodeSampleModal extends Modal {
-    constructor(app: App, private file: TFile, private viewPluginGenerator: ViewPluginGeneratorType) {
+    constructor(app: App, private file: TFile, private viewPluginGenerator: ViewPluginGeneratorType, private jsonPath?: string) {
         super(app);
     }
 
@@ -24,7 +34,10 @@ export class CodeSampleModal extends Modal {
 
         // Setup actual editor here
         const tableName = sanitise(this.file.basename)
-        const q = query(tableName, this.file.path)
+        const isJsonFile = this.file.extension === 'json' || this.file.extension === 'json5';
+        const q = isJsonFile && this.jsonPath 
+            ? jsonQuery(tableName, this.file.path, this.jsonPath)
+            : query(tableName, this.file.path)
 
         const state = EditorState.create({
 			doc: q,

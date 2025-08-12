@@ -17,7 +17,7 @@ export class SettingsInit {
 		viewPluginGenerator: ViewPluginGeneratorType
 	) {
 		const csvControl = new SettingsCSVControls(settings, app, plugin, viewPluginGenerator);
-		const jsonControl = new SettingsJsonControls(settings, app, plugin);
+		const jsonControl = new SettingsJsonControls(settings, app, plugin, viewPluginGenerator);
 
 		const controls = [csvControl, jsonControl];
 
