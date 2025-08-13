@@ -25,7 +25,8 @@ export const explorer = buildContainer((c) =>
             rendererRegistry: RendererRegistry,
             plugin: Plugin,
             viewPluginGenerator: ViewPluginGeneratorType
-        }>(),
+        }>()
+        .exports('init'),
 );
 
 export type ExplorerModule = typeof explorer;

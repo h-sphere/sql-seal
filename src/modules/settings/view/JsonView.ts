@@ -175,12 +175,15 @@ class UIBuilder {
     createInputSection(container: HTMLElement, currentPath: string, isDisabled: boolean): HTMLInputElement {
         const inputSection = container.createDiv({ cls: 'sqlseal-json-input-section' });
         inputSection.createEl('label', { text: 'JSONPath Query:' });
-        return inputSection.createEl('input', {
+        const input = inputSection.createEl('input', {
             type: 'text',
             value: currentPath,
-            placeholder: '$.users[*] or $.data.items[?(@.active)]',
-            disabled: isDisabled
+            placeholder: '$.users[*] or $.data.items[?(@.active)]'
         });
+        if (isDisabled) {
+            input.disabled = true;
+        }
+        return input;
     }
     
     createContentPanels(container: HTMLElement): { 
@@ -198,7 +201,7 @@ class UIBuilder {
         return { jsonContainer, tableContainer };
     }
     
-    createGenerateCodeButton(container: HTMLElement, onGenerate: () => void): HTMLElement {
+    createGenerateCodeButton(container: HTMLElement, onGenerate: () => void): HTMLButtonElement {
         const buttonContainer = container.createDiv({ cls: 'sqlseal-button-container' });
         
         const buttonComponent = new ButtonComponent(buttonContainer);
@@ -340,7 +343,7 @@ export class JsonView extends TextFileView {
         }
         
         this.generateCodeButton = this.uiBuilder.createGenerateCodeButton(mainContainer, () => this.generateSQLSealCode());
-        if (this.isLargeFile && !this.isAnalyzed) {
+        if (this.isLargeFile && !this.isAnalyzed && this.generateCodeButton) {
             this.generateCodeButton.style.display = 'none';
         }
         
