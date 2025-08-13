@@ -1,6 +1,8 @@
 import { TFile } from "obsidian";
 import { MemoryDatabase } from "./memoryDatabase";
+// @ts-ignore
 import wasmBinary from '../../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm'
+// @ts-ignore
 import initSqlJs from '@jlongster/sql.js';
 
 export class DatabaseManager {

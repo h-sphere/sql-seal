@@ -49,16 +49,6 @@ export class SchemaVisualiser {
                 stroke: '#666',
                 fill: '#f9f9f9',
                 fontSize: 12,
-                // Relationship line styling
-                relationshipLabelColor: '#333',
-                relationshipLabelBackground: '#fff',
-                relationshipLabelBorder: '#666',
-                // Make relationships more visible
-                primaryColor: '#4a90e2',
-                primaryTextColor: '#333',
-                primaryBorderColor: '#666',
-                lineColor: '#666',
-                arrowheadColor: '#666',
                 // Force full width usage
                 useMaxWidth: true
             },
