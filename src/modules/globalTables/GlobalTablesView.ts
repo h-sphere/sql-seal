@@ -23,7 +23,7 @@ export class GlobalTablesView extends ItemView {
 		public sync: Sync,
 	) {
 		super(leaf);
-		this.config = new FileConfig("__globalviews.sqlseal", vault);
+		this.config = new FileConfig("__globalviews.sqlsealconfig", vault);
 	}
 
 	getViewType() {

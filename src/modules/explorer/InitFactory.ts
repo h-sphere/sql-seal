@@ -9,7 +9,7 @@ import { Settings } from "../settings/Settings";
 import { ExplorerView } from "./explorer/ExplorerView";
 import { ViewPlugin } from "@codemirror/view";
 import { ViewPluginGeneratorType } from "../syntaxHighlight/viewPluginGenerator";
-import { FILE_DATABASE_VIEW, FileDatabaseExplorerView } from "./FileDatabaseExplorerView";
+import { SQLSEAL_FILE_VIEW, SQLSealFileView } from "./SQLSealFileView";
 import { DatabaseManager } from "./database/databaseManager";
 import { activateView } from "./activateView";
 
@@ -59,13 +59,13 @@ export class InitFactory {
 				activateView(plugin.app, "sqlseal-explorer-view"),
 			);
 
-
-			// Register for extenion
-			plugin.registerView(FILE_DATABASE_VIEW, (leaf) => {
-				return new FileDatabaseExplorerView(leaf, dbManager, viewPluginGenerator, rendererRegistry, cellParser, settings, sync)
+			// Register unified SQLSeal file view for both SQL and database files
+			plugin.registerView(SQLSEAL_FILE_VIEW, (leaf) => {
+				return new SQLSealFileView(leaf, dbManager, viewPluginGenerator, rendererRegistry, cellParser, settings, sync, db)
 			})
 
-			plugin.registerExtensions(['sqlite'], FILE_DATABASE_VIEW)
+			// Register extensions for SQLSeal file view
+			plugin.registerExtensions(['sql', 'sqlseal', 'sqlite', 'db'], SQLSEAL_FILE_VIEW)
 
 			plugin.addCommand({
 				id: 'sqlseal-command-explorer',

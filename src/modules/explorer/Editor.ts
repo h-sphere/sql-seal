@@ -129,4 +129,21 @@ export class Editor {
 			// }
 		}
 	}
+
+	getCurrentQuery(): string {
+		return this.editor?.state.doc.toString() || this.query;
+	}
+
+	setQuery(newQuery: string) {
+		this.query = newQuery;
+		if (this.editor) {
+			this.editor.dispatch({
+				changes: {
+					from: 0,
+					to: this.editor.state.doc.length,
+					insert: newQuery
+				}
+			});
+		}
+	}
 }
