@@ -145,7 +145,7 @@ export class SQLSealFileView extends TextFileView {
 
             // Resizing and layout configuration for explorer
             const renderer = processor.renderer;
-            if ('communicator' in renderer && 'gridApi' in (renderer as any)['communicator']) {
+            if (renderer && 'communicator' in renderer && 'gridApi' in (renderer as any)['communicator']) {
                 const api: GridApi = (renderer.communicator as any).gridApi;
                 api.setGridOption('paginationAutoPageSize', true);
                 api.setGridOption('domLayout', 'normal'); // Override autoHeight for proper pagination
