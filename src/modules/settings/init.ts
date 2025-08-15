@@ -5,6 +5,7 @@ import { SQLSealSettingsTab } from "./SQLSealSettingsTab";
 import { Settings } from "./Settings";
 import { SettingsCSVControls } from "./settingsTabSection/SettingsCSVControls";
 import { SettingsJsonControls } from "./settingsTabSection/SettingsJsonControls";
+import { SettingsSQLControls } from "./settingsTabSection/SettingsSQLControls";
 import { ViewPluginGeneratorType } from "../syntaxHighlight/viewPluginGenerator";
 
 @(makeInjector<SettingsModule>()(["plugin", "settingsTab", "app", "settings", "viewPluginGenerator"]))
@@ -18,8 +19,9 @@ export class SettingsInit {
 	) {
 		const csvControl = new SettingsCSVControls(settings, app, plugin, viewPluginGenerator);
 		const jsonControl = new SettingsJsonControls(settings, app, plugin, viewPluginGenerator);
+		const sqlControl = new SettingsSQLControls(settings, app, plugin);
 
-		const controls = [csvControl, jsonControl];
+		const controls = [csvControl, jsonControl, sqlControl];
 
 		settingsTab.registerControls(...controls);
 
