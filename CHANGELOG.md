@@ -1,5 +1,15 @@
 # Releases
 
+## 1.0.0
+
+### Major Changes
+
+- c4278c2: adding support for .sql and .sqlseal files
+
+### Minor Changes
+
+- ce1da3f: added variable editor to the SQLSealExplorer - now if your query uses @variables they will automatically show up below the code so you can set their values.
+
 ## 0.38.0
 
 ### Minor Changes
