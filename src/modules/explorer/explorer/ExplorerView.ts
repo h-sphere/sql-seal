@@ -28,6 +28,7 @@ export class ExplorerView extends ItemView {
 		super(leaf);
 	}
 	private editor: EditorView;
+	private sqlSealEditor: Editor;
 	getViewType() {
 		return "sqlseal-explorer-view";
 	}
@@ -42,11 +43,11 @@ export class ExplorerView extends ItemView {
 		const content = this.contentEl;
 
 
-		const codeblockProcessorGenerator = async (el: HTMLElement, source: string) => {
+		const codeblockProcessorGenerator = async (el: HTMLElement, source: string, variables?: Record<string, any>) => {
 			const ctx: MarkdownPostProcessorContext = {
 			docId: "",
 			sourcePath: "",
-			frontmatter: {},
+			frontmatter: variables || {},
 		} as any;
 
 			const processor = new CodeblockProcessor(
@@ -75,8 +76,14 @@ export class ExplorerView extends ItemView {
 			return processor
 		}
 
-		const editor = new Editor(codeblockProcessorGenerator, this.viewPluginGenerator, this.app)
+		this.sqlSealEditor = new Editor(codeblockProcessorGenerator, this.viewPluginGenerator, this.app, undefined, undefined, false, this.rendererRegistry)
 
-		editor.render(content)
+		this.sqlSealEditor.render(content)
+	}
+
+	async onClose() {
+		if (this.sqlSealEditor) {
+			this.sqlSealEditor.cleanup();
+		}
 	}
 }

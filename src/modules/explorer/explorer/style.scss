@@ -12,13 +12,25 @@
     display: grid;
     grid-template-columns: 50% 50%;
     gap: 1em;
-    height: 100%;
     width: 100%;
     padding: 1em;
+    height: 100%;
+    overflow: hidden;
 }
 
 .sqlseal-explorer-code {
-    // background: orange;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    
+    .cm-sqlseal-explorer {
+        flex: 1;
+        min-height: 0; // Allow flex item to shrink
+        overflow: hidden;
+        height: 100%;
+        max-height: 100%;
+    }
 }
 
 .sqlseal-explorer-render {
@@ -80,4 +92,67 @@
     & .ag-paging-panel {
         justify-content: center;
     }
+}
+
+// Variable input interface styles
+.sqlseal-variables-container {
+    margin-top: 8px;
+    padding: 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    background-color: var(--background-secondary);
+    display: none;
+    flex-shrink: 0; // Don't shrink below content size
+    max-height: 40vh; // Limit maximum height to prevent overflow
+    overflow-y: auto; // Allow scrolling if too many variables
+}
+
+.sqlseal-variables-header h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-normal);
+}
+
+.sqlseal-variables-inputs {
+    display: flex;
+    flex-direction: column;
+}
+
+.sqlseal-variable-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.sqlseal-variable-field:last-child {
+    margin-bottom: 0;
+}
+
+.sqlseal-variable-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-family: var(--font-monospace);
+    white-space: nowrap;
+    min-width: fit-content;
+    flex-shrink: 0;
+}
+
+.sqlseal-variable-input {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 13px;
+    min-width: 0; // Allow input to shrink
+}
+
+.sqlseal-variable-input:focus {
+    outline: none;
+    border-color: var(--interactive-accent);
+    box-shadow: 0 0 0 2px var(--interactive-accent-hover);
 }
