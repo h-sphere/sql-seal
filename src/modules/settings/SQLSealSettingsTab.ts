@@ -8,6 +8,7 @@ export interface SQLSealSettings {
     enableViewer: boolean;
     enableEditing: boolean;
     enableJSONViewer: boolean;
+    enableSQLViewer: boolean;
     enableDynamicUpdates: boolean;
     enableSyntaxHighlighting: boolean;
     defaultView: 'grid' | 'markdown' | 'html';
@@ -18,6 +19,7 @@ export const DEFAULT_SETTINGS: SQLSealSettings = {
     enableViewer: true,
     enableEditing: true,
     enableJSONViewer: true,
+    enableSQLViewer: true,
     enableDynamicUpdates: true,
     enableSyntaxHighlighting: true,
     defaultView: 'grid',

@@ -64,8 +64,7 @@ export class InitFactory {
 				return new SQLSealFileView(leaf, dbManager, viewPluginGenerator, rendererRegistry, cellParser, settings, sync, db)
 			})
 
-			// Register extensions for SQLSeal file view
-			plugin.registerExtensions(['sql', 'sqlseal', 'sqlite', 'db'], SQLSEAL_FILE_VIEW)
+			// Extensions for SQLSeal file view are registered by SettingsSQLControls
 
 			plugin.addCommand({
 				id: 'sqlseal-command-explorer',
