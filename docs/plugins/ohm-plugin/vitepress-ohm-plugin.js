@@ -1,7 +1,7 @@
 // .vitepress/ohmMarkdownPlugin.js
 import * as ohm from 'ohm-js'
-import { SQLSealLangDefinition } from '../../../src/grammar/parser'
-import { highlighterOperation } from '../../../src/grammar/highlighterOperation'
+import { SQLSealLangDefinition } from '../../../src/modules/editor/parser'
+import { highlighterOperation } from '../../../src/modules/syntaxHighlight/grammar/highlighterOperation'
 
 const parser = (sql) => {
     const defaultViews = [
