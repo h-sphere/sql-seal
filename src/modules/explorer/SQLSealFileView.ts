@@ -55,7 +55,14 @@ export class SQLSealFileView extends TextFileView {
 
     getViewData(): string {
         if (this.editor) {
-            return this.editor.getCurrentQuery();
+            // CRITICAL: Only return full content with variables for SQL text files
+            // NEVER modify SQLite database files
+            if (this.file && (this.file.extension === 'sql' || this.file.extension === 'sqlseal')) {
+                return this.editor.getFullContent();
+            } else {
+                // For database files, return clean query only
+                return this.editor.getCurrentQuery();
+            }
         }
         return this.fileContent;
     }
@@ -104,11 +111,11 @@ export class SQLSealFileView extends TextFileView {
     }
 
     private async render(initialQuery: string) {
-        const codeblockProcessorGenerator = async (el: HTMLElement, source: string) => {
+        const codeblockProcessorGenerator = async (el: HTMLElement, source: string, variables?: Record<string, any>) => {
             const ctx: MarkdownPostProcessorContext = {
                 docId: "",
                 sourcePath: this.file?.path || "",
-                frontmatter: {},
+                frontmatter: variables || {},
             } as any;
 
             // Create a database adapter to handle both MemoryDatabase and SqlSealDatabase
@@ -148,12 +155,17 @@ export class SQLSealFileView extends TextFileView {
             return processor;
         };
 
+        // Determine if this is a text file that should support variables
+        const isTextFile = Boolean(this.file && (this.file.extension === 'sql' || this.file.extension === 'sqlseal'));
+        
         this.editor = new Editor(
             codeblockProcessorGenerator,
             this.viewPluginGenerator,
             this.app,
             initialQuery,
-            this.fileDb // Pass the file database (only for sqlite files)
+            this.fileDb, // Pass the file database (only for sqlite files)
+            isTextFile, // Only enable variables for SQL text files
+            this.rendererRegistry // Pass renderer registry for OHM parsing
         );
 
         // Override the editor's play function to include save functionality
@@ -211,7 +223,26 @@ export class SQLSealFileView extends TextFileView {
         return 'database';
     }
 
+    async save(): Promise<void> {
+        // CRITICAL: NEVER save database files - only save SQL text files
+        if (!this.file) return;
+        
+        const ext = this.file.extension.toLowerCase();
+        if (ext === 'sqlite' || ext === 'db') {
+            console.warn('[SQLSeal] Prevented saving database file:', this.file.path);
+            return; // Do not save database files
+        }
+        
+        // Only save SQL text files
+        if (ext === 'sql' || ext === 'sqlseal') {
+            await super.save();
+        }
+    }
+
     async onClose() {
         // MemoryDatabase doesn't need explicit disconnection
+        if (this.editor) {
+            this.editor.cleanup();
+        }
     }
 }

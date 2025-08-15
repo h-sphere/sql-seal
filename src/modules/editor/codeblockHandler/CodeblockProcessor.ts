@@ -146,12 +146,20 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 				};
 			}
 
+			// Merge with context frontmatter (used for Explorer variables)
+			variables = {
+				...variables,
+				...this.ctx.frontmatter,
+			};
+
+
 			if (this.flags.explain) {
 				// Rendering explain
 				const result = await this.db.explain(transformedQuery, variables);
 				this.explainEl.textContent = result;
 			}
 
+			
 			const { data, columns } = (await this.db.select(
 				transformedQuery,
 				variables,
