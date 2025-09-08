@@ -10,7 +10,6 @@ type InitFn = () => void
     'syntaxHighlight.init',
     'contextMenu.init',
     'sync.init',
-    'debug.init',
     'api.init',
     'globalTables.init',
     'explorer.init'
@@ -22,7 +21,6 @@ export class Init {
         highlighInit: InitFn,
         contextMenu: InitFn,
         syncInit: InitFn,
-        debugInit: InitFn,
         apiInit: InitFn,
         globalTablesInit: InitFn,
         explorerInit: InitFn
@@ -33,7 +31,6 @@ export class Init {
             highlighInit()
             contextMenu()
             syncInit()
-            // debugInit()
             apiInit()
             globalTablesInit()
             explorerInit()

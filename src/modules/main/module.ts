@@ -8,7 +8,6 @@ import { Init } from './init'
 import { settingsModule } from '../settings/module'
 import { syntaxHighlight } from '../syntaxHighlight/module'
 import { contextMenu } from '../contextMenu/module'
-import { debugModule } from '../debug/module'
 import { apiModule } from '../api/module'
 import { globalTables } from '../globalTables/module'
 import { explorer } from '../explorer/module'
@@ -31,7 +30,6 @@ export const mainModule = buildContainer(c => c
         settings: settingsModule,
         syntaxHighlight,
         contextMenu,
-        debug: debugModule,
         api: apiModule,
         globalTables,
         explorer
@@ -72,9 +70,6 @@ export const mainModule = buildContainer(c => c
     .resolve({
         'contextMenu.app': 'obsidian.app',
         'contextMenu.plugin': 'obsidian.plugin'
-    })
-    .resolve({
-        'debug.plugin': 'obsidian.plugin'
     })
     .resolve({
         'api.plugin': 'obsidian.plugin',
