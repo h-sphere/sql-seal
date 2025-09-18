@@ -1,22 +1,16 @@
-import { asFactory, buildContainer } from "@hypersphere/dity"
-import { FileSyncFactory } from "./fileSyncController/fileSyncFactory"
+import { Registrator } from "@hypersphere/dity"
 import { App, Plugin, Vault } from "obsidian"
-import { SyncFactory } from "./sync/syncFactory"
+import { syncBusFactory } from "./sync/syncFactory"
 import { SqlSealDatabase } from "../database/database"
-import { SyncInit } from "./sync/init"
+import { syncInit } from "./sync/init"
+import { fileSyncFactory } from "./fileSyncController/fileSyncFactory"
 
-export const sync = buildContainer(c => c
-    .register({
-        fileSync: asFactory(FileSyncFactory),
-        syncBus: asFactory(SyncFactory),
-        init: asFactory(SyncInit)
-    })
-    .externals<{
-        app: App,
-        plugin: Plugin,
-        db: SqlSealDatabase,
-        vault: Vault
-    }>()
-    .exports('init', 'syncBus')
-)
-export type SyncModule = typeof sync
+export const sync = new Registrator()
+    .import<'app', App>()
+    .import<'plugin', Plugin>()
+    .import<'db', Promise<SqlSealDatabase>>()
+    .import<'vault', Vault>()
+    .register('syncBus', d => d.fn(syncBusFactory).inject('db', 'vault', 'app'))
+    .register('fileSync', d => d.fn(fileSyncFactory).inject('app', 'plugin', 'db', 'syncBus'))
+    .register('init', d => d.fn(syncInit).inject('app', 'fileSync'))
+    .export('init', 'syncBus')
