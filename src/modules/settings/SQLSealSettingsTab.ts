@@ -1,4 +1,3 @@
-import { makeInjector } from '@hypersphere/dity';
 import { App, PluginSettingTab, Setting, Plugin } from 'obsidian';
 import { SettingsModule } from './module';
 import { Settings } from './Settings';
@@ -27,7 +26,6 @@ export const DEFAULT_SETTINGS: SQLSealSettings = {
 };
 
 
-@(makeInjector<SettingsModule>()(['app', 'plugin', 'settings']))
 export class SQLSealSettingsTab extends PluginSettingTab {
     plugin: Plugin;
     // settings: SQLSealSettings;
@@ -121,4 +119,8 @@ export class SQLSealSettingsTab extends PluginSettingTab {
         this.settings.onChange(fn)
         // this.onChangeFns.push(fn)
     }
+}
+
+export const settingsTabFactory = (app: App, plugin: Plugin, settings: Settings) => {
+    return new SQLSealSettingsTab(app, plugin, settings)
 }

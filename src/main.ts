@@ -19,16 +19,12 @@ export default class SqlSealPlugin extends Plugin {
 	async onload() {
 		// CONTAINER
 		this.container = mainModule
-			.resolve({
-				"obsidian.app": this.app,
-				"obsidian.plugin": this,
-				"obsidian.vault": this.app.vault,
-			})
-			.build();
+			.resolve('obsidian.app', d => d.value(this.app))
+			.resolve('obsidian.plugin', d => d.value(this))
+			.resolve('obsidian.vault', d => d.value(this.app.vault))
+			.build()
 
-		const init = await this.container.get("init");
-		init();
+		const init = await this.container.get("init")
+		init()
 	}
-
-	onunload() {}
 }

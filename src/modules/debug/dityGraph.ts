@@ -1,11 +1,6 @@
-import { makeInjector } from "@hypersphere/dity";
-import { DebugModule } from "./module";
 import { Plugin, WorkspaceLeaf } from "obsidian";
 import { DityGraphView, VIEW_TYPE_EXAMPLE } from "./DityGraphView";
 
-@(makeInjector<DebugModule, 'factory'>()(
-    ['plugin']
-))
 export class DityGraph {
     make(plugin: Plugin) {
 

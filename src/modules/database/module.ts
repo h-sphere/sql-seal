@@ -1,13 +1,8 @@
-import { asFactory, buildContainer } from "@hypersphere/dity";
+import { Registrator } from "@hypersphere/dity";
 import { App } from "obsidian";
-import { DatabaseFactory } from "./factory";
+import { databaseFactory } from "./factory";
 
-export const db = buildContainer(c => c
-    .register({
-        db: asFactory(DatabaseFactory)
-    })
-    .externals<{ app: App }>()
-    .exports('db')
-)
-
-export type DbModel = typeof db
+export const db = new Registrator()
+.import<'app', App>()
+.register('db', d => d.fn(databaseFactory).inject('app'))
+.export('db')

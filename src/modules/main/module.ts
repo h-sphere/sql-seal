@@ -1,10 +1,10 @@
-import { asFactory, buildContainer } from '@hypersphere/dity'
+import { Registrator } from '@hypersphere/dity'
 import { App, Plugin, Vault } from 'obsidian'
 import { db } from '../database/module'
 import { editor } from '../editor/module'
 import { sync } from '../sync/module'
 import { SQLSealSettings } from '../settings/SQLSealSettingsTab'
-import { Init } from './init'
+import { mainInit } from './init'
 import { settingsModule } from '../settings/module'
 import { syntaxHighlight } from '../syntaxHighlight/module'
 import { contextMenu } from '../contextMenu/module'
@@ -12,86 +12,76 @@ import { apiModule } from '../api/module'
 import { globalTables } from '../globalTables/module'
 import { explorer } from '../explorer/module'
 
-const obsidian = buildContainer(c => c
-    .externals<{
-        app: App,
-        plugin: Plugin,
-        vault: Vault
-    }>()
-)
+const obsidian = new Registrator({ logger: console.log })
+.import<'app', App>()
+.import<'plugin', Plugin>()
+.import<'vault', Vault>()
+.export('app', 'plugin', 'vault')
 
 
-export const mainModule = buildContainer(c => c
-    .submodules({
-        obsidian,
-        db,
-        editor,
-        sync,
-        settings: settingsModule,
-        syntaxHighlight,
-        contextMenu,
-        api: apiModule,
-        globalTables,
-        explorer
-    })
-    .register({
-        init: asFactory(Init)
-    })
-    .externals<{ settings: SQLSealSettings }>()
-    .resolve({
-        'db.app': 'obsidian.app',
-    })
-    .resolve({
-        'editor.app': 'obsidian.app', // THESE SHOULD BE INVALID NOW
-        'editor.db': 'db.db',
-        'editor.plugin': 'obsidian.plugin',
-        'editor.sync': 'sync.syncBus',
-        'editor.cellParser': 'syntaxHighlight.cellParser',
-        'editor.settings': 'settings.settings'
-    })
-    .resolve({
-        'sync.app': 'obsidian.app',
-        'sync.db': 'db.db',
-        'sync.plugin': 'obsidian.plugin',
-        'sync.vault': 'obsidian.vault',
-    })
-    .resolve({
-        'settings.app': 'obsidian.app',
-        'settings.plugin': 'obsidian.plugin',
-        'settings.cellParser': 'syntaxHighlight.cellParser',
-        'settings.viewPluginGenerator': 'syntaxHighlight.viewPluginGenerator'
-    })
-    .resolve({
-        'syntaxHighlight.app': 'obsidian.app',
-        'syntaxHighlight.db': 'db.db',
-        'syntaxHighlight.plugin': 'obsidian.plugin',
-        'syntaxHighlight.rendererRegistry': 'editor.rendererRegistry'
-    })
-    .resolve({
-        'contextMenu.app': 'obsidian.app',
-        'contextMenu.plugin': 'obsidian.plugin'
-    })
-    .resolve({
-        'api.plugin': 'obsidian.plugin',
-        'api.cellParser': 'syntaxHighlight.cellParser',
-        'api.db': 'db.db',
-        'api.rendererRegistry': 'editor.rendererRegistry'
-    })
-    .resolve({
-        'globalTables.plugin': 'obsidian.plugin',
-        'globalTables.app': 'obsidian.app',
-        'globalTables.sync': 'sync.syncBus'
-    })
-    .resolve({
-        'explorer.app': 'obsidian.app',
-        'explorer.cellParser': 'syntaxHighlight.cellParser',
-        'explorer.db': 'db.db',
-        'explorer.settings': 'settings.settings',
-        'explorer.plugin': 'obsidian.plugin',
-        'explorer.rendererRegistry': 'editor.rendererRegistry',
-        'explorer.sync': 'sync.syncBus',
-        'explorer.viewPluginGenerator': 'syntaxHighlight.viewPluginGenerator'
-    })
-)
+export const mainModule = new Registrator()
+.module('obsidian', obsidian)
+.module('db', db)
+.module('editor', editor)
+.module('sync', sync)
+.module('settings', settingsModule)
+.module('syntaxHighlight', syntaxHighlight)
+.module('contextMenu', contextMenu)
+.module('api', apiModule)
+.module('globalTables', globalTables)
+.module('explorer', explorer)
+.register('init', d => d.fn(mainInit).inject(
+    'settings.init',
+    'editor.init',
+    'syntaxHighlight.init',
+    'contextMenu.init',
+    'sync.init',
+    'api.init',
+    'globalTables.init',
+    'explorer.init'
+))
+.link('db.app', 'obsidian.app')
 
-export type MainModule = typeof mainModule
+.link('editor.app', 'obsidian.app')
+.link('editor.db', 'db.db')
+.link('editor.plugin', 'obsidian.plugin')
+.link('editor.sync', 'sync.syncBus')
+.link('editor.cellParser', 'syntaxHighlight.cellParser')
+.link('editor.settings', 'settings.settings')
+
+.link('sync.app', 'obsidian.app')
+.link('sync.db', 'db.db')
+.link('sync.plugin', 'obsidian.plugin')
+.link('sync.vault', 'obsidian.vault')
+
+.link('settings.app', 'obsidian.app')
+.link('settings.plugin', 'obsidian.plugin')
+.link('settings.viewPluginGenerator', 'syntaxHighlight.viewPluginGenerator')
+.link('settings.cellParser', 'syntaxHighlight.cellParser')
+
+.link('syntaxHighlight.app', 'obsidian.app')
+.link('syntaxHighlight.db', 'db.db')
+.link('syntaxHighlight.plugin', 'obsidian.plugin')
+.link('syntaxHighlight.rendererRegistry', 'editor.rendererRegistry')
+
+.link('contextMenu.app', 'obsidian.app')
+.link('contextMenu.plugin', 'obsidian.plugin')
+
+.link('api.plugin', 'obsidian.plugin')
+.link('api.cellParser', 'syntaxHighlight.cellParser')
+.link('api.db', 'db.db')
+.link('api.rendererRegistry', 'editor.rendererRegistry')
+
+.link('globalTables.app', 'obsidian.app')
+.link('globalTables.plugin', 'obsidian.plugin')
+.link('globalTables.sync', 'sync.syncBus')
+
+.link('explorer.app', 'obsidian.app')
+.link('explorer.plugin', 'obsidian.plugin')
+.link('explorer.cellParser', 'syntaxHighlight.cellParser')
+.link('explorer.db', 'db.db')
+.link('explorer.viewPluginGenerator', 'syntaxHighlight.viewPluginGenerator')
+.link('explorer.sync', 'sync.syncBus')
+.link('explorer.rendererRegistry', 'editor.rendererRegistry')
+.link('explorer.settings', 'settings.settings')
+
