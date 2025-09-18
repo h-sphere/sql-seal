@@ -1,5 +1,11 @@
 # Releases
 
+## 0.39.1
+
+### Patch Changes
+
+- 53ffe93: internal: updated how modules are being defined
+
 ## 0.39.0
 
 ### Minor Changes
