@@ -19,5 +19,8 @@ export const mainInit = (
 		apiInit();
 		globalTablesInit();
 		explorerInit();
+
+        console.log('🚀 SQL Seal initialized with wa-sqlite test command available');
+        console.log('📋 Use Ctrl/Cmd+P -> "Test wa-sqlite Implementation" to test wa-sqlite');
 	};
 };

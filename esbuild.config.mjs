@@ -16,6 +16,7 @@ if you want to view the source, please visit the github repository of this plugi
 const wasmPlugin = {
     name: 'wasm',
     setup(build) {
+        // Handle .wasm files
         build.onResolve({ filter: /\.wasm$/ }, args => {
             if (args.resolveDir === '') return;
             return {
@@ -34,6 +35,52 @@ const wasmPlugin = {
                     const wasmBinary = Uint8Array.from(atob(wasmBase64), c => c.charCodeAt(0));
                     export default wasmBinary;
                 `,
+                loader: 'js',
+            };
+        });
+
+        // Handle SQLite bundler-friendly module
+        build.onResolve({ filter: /sqlite3-bundler-friendly\.mjs$/ }, args => {
+            if (args.path.startsWith('@sqlite.org/sqlite-wasm')) {
+                // Resolve to the actual file path in node_modules
+                return {
+                    path: join(process.cwd(), 'node_modules', args.path),
+                    namespace: 'sqlite-bundler',
+                };
+            }
+            return {
+                path: join(args.resolveDir, args.path),
+                namespace: 'sqlite-bundler',
+            };
+        });
+
+        build.onLoad({ filter: /sqlite3-bundler-friendly\.mjs$/, namespace: 'sqlite-bundler' }, async (args) => {
+            const moduleContents = readFileSync(args.path, 'utf8');
+            const wasmPath = args.path.replace('sqlite3-bundler-friendly.mjs', 'sqlite3.wasm');
+            const wasmContents = readFileSync(wasmPath);
+            const wasmBase64 = wasmContents.toString('base64');
+            
+            // Replace the findWasmBinary function to return embedded WASM
+            const modifiedContents = moduleContents
+                // Replace the entire findWasmBinary function
+                .replace(
+                    /function\s+findWasmBinary\s*\(\s*\)\s*\{[\s\S]*?return\s+new\s+URL\s*\(\s*['"`]sqlite3\.wasm['"`]\s*,\s*import\.meta\.url\s*\)\.href\s*;?\s*\}/g,
+                    `function findWasmBinary() {
+                        return "data:application/wasm;base64,${wasmBase64}";
+                    }`
+                )
+                // Also replace any direct new URL(...) patterns as fallback
+                .replace(
+                    /new\s+URL\s*\(\s*['"`]sqlite3\.wasm['"`]\s*,\s*import\.meta\.url\s*\)\.href/g,
+                    `"data:application/wasm;base64,${wasmBase64}"`
+                )
+                .replace(
+                    /new\s+URL\s*\(\s*['"`]sqlite3\.wasm['"`]\s*,\s*import\.meta\.url\s*\)/g,
+                    `"data:application/wasm;base64,${wasmBase64}"`
+                );
+            
+            return {
+                contents: modifiedContents,
                 loader: 'js',
             };
         });
