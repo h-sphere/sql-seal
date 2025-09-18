@@ -23,7 +23,7 @@ export class GlobalTablesView extends ItemView {
 		public sync: Sync,
 	) {
 		super(leaf);
-		this.config = new FileConfig("__globalviews.sqlseal", vault);
+		this.config = new FileConfig("__globalviews.sqlsealconfig", vault);
 	}
 
 	getViewType() {
@@ -39,6 +39,7 @@ export class GlobalTablesView extends ItemView {
 	}
 
 	api: GridApi | null = null;
+	private themeObserver: MutationObserver | null = null;
 
 	async onOpen() {
 		const container = this.containerEl.children[1];
@@ -60,17 +61,10 @@ export class GlobalTablesView extends ItemView {
 		// el.createDiv({ text: 'HELLO FROM SQLSEAL GLOBAL TABLES VIEW' })
 
 		const gridEl = c.createDiv({ cls: "sql-seal-csv-viewer" });
-		const myTheme = themeQuartz.withParams({
-			borderRadius: 0,
-			browserColorScheme: "light",
-			headerFontSize: 14,
-			headerRowBorder: false,
-			headerVerticalPaddingScale: 1,
-			rowBorder: false,
-			spacing: 16,
-			wrapperBorder: false,
-			wrapperBorderRadius: 0,
-		});
+		
+		// Get theme-aware AG Grid theme
+		const currentTheme = this.getCurrentTheme();
+		const myTheme = themeQuartz.withParams(this.getThemeParams(currentTheme));
 
 		this.api = createGrid(gridEl, {
 			theme: myTheme,
@@ -109,6 +103,7 @@ export class GlobalTablesView extends ItemView {
 		});
 
 		this.setupResizeObserver(gridEl);
+		this.setupThemeObserver();
 	}
 
 	// Vibe Coded.
@@ -187,9 +182,56 @@ export class GlobalTablesView extends ItemView {
 		this.api?.setGridOption("rowData", this.gridData);
 	}
 
+	private getCurrentTheme() {
+		return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+	}
+
+	private getThemeParams(theme: 'dark' | 'light') {
+		return {
+			borderRadius: 0,
+			browserColorScheme: theme,
+			backgroundColor: "var(--color-primary)",
+			chromeBackgroundColor: {
+				ref: "foregroundColor",
+				mix: 0.07,
+				onto: "backgroundColor"
+			},
+			foregroundColor: "var(--text-normal)",
+			headerFontSize: 14,
+			headerRowBorder: false,
+			headerVerticalPaddingScale: 1,
+			rowBorder: false,
+			spacing: 16,
+			wrapperBorder: false,
+			wrapperBorderRadius: 0,
+		};
+	}
+
+	private updateGridTheme() {
+		if (!this.api) return;
+		
+		const currentTheme = this.getCurrentTheme();
+		const newTheme = themeQuartz.withParams(this.getThemeParams(currentTheme));
+		this.api.setGridOption('theme', newTheme);
+	}
+
+	private setupThemeObserver() {
+		this.themeObserver = new MutationObserver(() => {
+			this.updateGridTheme();
+		});
+		
+		this.themeObserver.observe(document.body, {
+			attributes: true,
+			attributeFilter: ['class']
+		});
+	}
+
 	async onClose() {
 		if (this.resizeObserver) {
 			this.resizeObserver.disconnect();
+		}
+		if (this.themeObserver) {
+			this.themeObserver.disconnect();
 		}
 		if (this.api) {
 			this.api.destroy();

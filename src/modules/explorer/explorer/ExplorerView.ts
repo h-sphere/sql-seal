@@ -8,11 +8,9 @@ import {
 import { CodeblockProcessor } from "../../editor/codeblockHandler/CodeblockProcessor";
 import { SqlSealDatabase } from "../../database/database";
 import { RendererRegistry } from "../../editor/renderer/rendererRegistry";
-import { CellParser } from "../../../../types-package/dist/src/cellParser";
 import { Settings } from "../../settings/Settings";
 import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
 import { Sync } from "../../sync/sync/sync";
-import { Language } from "@codemirror/language";
 import { ViewPluginGeneratorType } from "../../syntaxHighlight/viewPluginGenerator";
 import { Editor } from "../Editor";
 import { GridApi } from "ag-grid-community";
@@ -30,6 +28,7 @@ export class ExplorerView extends ItemView {
 		super(leaf);
 	}
 	private editor: EditorView;
+	private sqlSealEditor: Editor;
 	getViewType() {
 		return "sqlseal-explorer-view";
 	}
@@ -44,11 +43,11 @@ export class ExplorerView extends ItemView {
 		const content = this.contentEl;
 
 
-		const codeblockProcessorGenerator = async (el: HTMLElement, source: string) => {
+		const codeblockProcessorGenerator = async (el: HTMLElement, source: string, variables?: Record<string, any>) => {
 			const ctx: MarkdownPostProcessorContext = {
 			docId: "",
 			sourcePath: "",
-			frontmatter: {},
+			frontmatter: variables || {},
 		} as any;
 
 			const processor = new CodeblockProcessor(
@@ -65,19 +64,26 @@ export class ExplorerView extends ItemView {
 			await processor.onload();
 
 
-			// Resizing
+			// Resizing and layout configuration for explorer
 			const renderer = processor.renderer
 			if ('communicator' in renderer && 'gridApi' in (renderer as any)['communicator']) {
 				const api: GridApi = (renderer.communicator as any).gridApi
 				api.setGridOption('paginationAutoPageSize', true)
+				api.setGridOption('domLayout', 'normal') // Override autoHeight for proper pagination
 			}
 
 			await processor.render();
 			return processor
 		}
 
-		const editor = new Editor(codeblockProcessorGenerator, this.viewPluginGenerator, this.app)
+		this.sqlSealEditor = new Editor(codeblockProcessorGenerator, this.viewPluginGenerator, this.app, undefined, undefined, false, this.rendererRegistry)
 
-		editor.render(content)
+		this.sqlSealEditor.render(content)
+	}
+
+	async onClose() {
+		if (this.sqlSealEditor) {
+			this.sqlSealEditor.cleanup();
+		}
 	}
 }

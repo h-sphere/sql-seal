@@ -1,16 +1,8 @@
 import { App } from "obsidian";
 import { SqlSealDatabase } from "./database";
-import { makeInjector } from "@hypersphere/dity";
-import { DatabaseModule } from "./module";
 
-
-@(makeInjector<DatabaseModule, 'factory'>()([
-    'app'
-]))
-export class DatabaseFactory {
-    async make(app: App) {
-        const db = new SqlSealDatabase(app)
-        await db.connect()
-        return db
-    }
+export const databaseFactory = async (app: App) => {
+    const db = new SqlSealDatabase(app)
+    await db.connect()
+    return db
 }

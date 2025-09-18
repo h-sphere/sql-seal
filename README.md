@@ -27,7 +27,12 @@ You can define multiple tables in a single snippet. You can also point to the ta
 For more comprehensive documentation head to [hypersphere.blog/sql-seal](https://hypersphere.blog/sql-seal).
 
 # Disclaimer
-The plugin authors do not take any resposibility for any potential data loss. Always backup your files before usage. That said, plugin does not modify any files in the Vault so you should be fine :)
+The plugin authors do not take any responsibility for any potential data loss. Always backup your files before usage. This plugin may modify files in your vault in the following situations (the list might not be exhaustive):
+
+- **.sql and .sqlseal files**: Variable values are saved as comments at the end of these files
+- **Markdown files**: When interacting with task using `tasks` table, the plugin will update source markdown files.
+
+Please ensure you have proper backups before using this plugin.
 
 
 # Stay in Touch!

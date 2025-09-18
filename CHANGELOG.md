@@ -1,5 +1,40 @@
 # Releases
 
+## 0.39.1
+
+### Patch Changes
+
+- 53ffe93: internal: updated how modules are being defined
+
+## 0.39.0
+
+### Minor Changes
+
+- c4278c2: adding support for .sql and .sqlseal files
+- ce1da3f: added variable editor to the SQLSealExplorer - now if your query uses @variables they will automatically show up below the code so you can set their values.
+
+### Patch Changes
+
+- baa5856: fixing issue with failure on mobile (due to unnecessary dependency)
+
+## 0.38.0
+
+### Minor Changes
+
+- 2bfd206: adding global tables support - you can now define table that will be available in all your files
+- 7095130: added ability to hide columns from CSV files
+- 531d486: Added SQLSeal Explorer that makes it easy to work on new queries
+- 403e9f3: added interactive visualiser for SQL schema of external databases
+- 285684d: tables and charts now render better on canvas and work when you use external files too
+- 1bf5e8e: reworked JSONViewer to allow for visual JSONPath preview
+- 285684d: reworking plugin internals to organise code into modules
+- 531d486: sqlite databases can now be previewed using explorer view
+
+### Patch Changes
+
+- 285684d: csv and json views are now only registered when not colliding with other existing plugins
+- 531d486: highlighting code in the copy modal
+
 ## 0.37.1
 
 ### Patch Changes

@@ -1,20 +1,13 @@
-import { asFactory, buildContainer } from "@hypersphere/dity";
-import { InitFactory } from "./InitFactory";
+import { Registrator } from "@hypersphere/dity";
+import { globalTablesInit } from "./InitFactory";
 import { App, Plugin } from "obsidian";
-import { GlobalTablesViewRegister } from "./GlobalTablesViewRegister";
+import { globalTablesViewRendererFactory } from "./GlobalTablesViewRegister";
 import { Sync } from "../sync/sync/sync";
 
-export const globalTables = buildContainer(c => 
-    c.register({
-        init: asFactory(InitFactory),
-        globalTablesViewRegister: asFactory(GlobalTablesViewRegister)
-    })
-    .externals<{
-        plugin: Plugin,
-        app: App,
-        sync: Sync
-    }>()
-    .exports('init')
-)
-
-export type GlobalTablesModule = typeof globalTables
+export const globalTables = new Registrator()
+    .import<'app', App>()
+    .import<'plugin', Plugin>()
+    .import<'sync', Promise<Sync>>()
+    .register('globalTablesViewRegister', d => d.fn(globalTablesViewRendererFactory).inject('plugin', 'app', 'sync'))
+    .register('init', d => d.fn(globalTablesInit).inject('globalTablesViewRegister'))
+    .export('init')

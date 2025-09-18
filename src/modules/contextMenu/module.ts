@@ -1,16 +1,9 @@
-import { asFactory, buildContainer } from "@hypersphere/dity";
-import { ContextMenuInit } from "./init";
+import { Registrator } from "@hypersphere/dity";
 import { App, Plugin } from "obsidian";
+import { contextMenuInit } from "./init";
 
-export const contextMenu = buildContainer(c => 
-    c.register({
-        init: asFactory(ContextMenuInit)
-    })
-    .externals<{
-        app: App,
-        plugin: Plugin
-    }>()
-    .exports('init')
-)
-
-export type ContextMenuModule = typeof contextMenu
+export const contextMenu = new Registrator()
+    .import<'app', App>()
+    .import<'plugin', Plugin>()
+    .register('init', d => d.fn(contextMenuInit).inject('plugin', 'app'))
+    .export('init')

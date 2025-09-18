@@ -1,25 +1,18 @@
-import { asFactory, buildContainer } from "@hypersphere/dity";
-import { SyntaxHighlightInit } from "./init";
+import { Registrator } from "@hypersphere/dity";
+import { syntaxHighlightInit } from "./init";
 import { App, Plugin } from "obsidian";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
-import { CellParserFactory } from "./cellParser/factory";
+import { cellParserFactory } from "./cellParser/factory";
 import { SqlSealDatabase } from "../database/database";
-import { ViewPluginGenerator } from "./viewPluginGenerator";
+import { viewPluginGeneratorFactory } from "./viewPluginGenerator";
 
-export const syntaxHighlight = buildContainer((c) =>
-	c
-		.externals<{
-			app: App;
-			db: SqlSealDatabase;
-			rendererRegistry: RendererRegistry;
-			plugin: Plugin;
-		}>()
-		.register({
-			init: asFactory(SyntaxHighlightInit),
-			cellParser: asFactory(CellParserFactory),
-			viewPluginGenerator: asFactory(ViewPluginGenerator)
-		})
-		.exports("init", "cellParser", "viewPluginGenerator"),
-);
 
-export type SyntaxHighlightModule = typeof syntaxHighlight;
+export const syntaxHighlight = new Registrator()
+	.import<'app', App>()
+	.import<'db', Promise<SqlSealDatabase>>()
+	.import<'rendererRegistry', RendererRegistry>()
+	.import<'plugin', Plugin>()
+	.register('cellParser', d => d.fn(cellParserFactory).inject('app', 'db'))
+	.register('viewPluginGenerator', d => d.fn(viewPluginGeneratorFactory).inject('app', 'rendererRegistry'))
+	.register('init', d => d.fn(syntaxHighlightInit).inject('plugin', 'viewPluginGenerator'))
+	.export('init', 'viewPluginGenerator', 'cellParser')

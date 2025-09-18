@@ -2,10 +2,8 @@ import { Kysely } from "kysely";
 import { DatabaseSchema } from "./schema";
 import { OfficialWasmDialect } from "kysely-wasm";
 import sqlite3InitModule from "@sqlite.org/sqlite-wasm/sqlite-wasm/jswasm/sqlite3-bundler-friendly.mjs";
-import {  Database} from '@sqlite.org/sqlite-wasm'
-import { App, Vault } from "obsidian";
-import { makeInjector } from "@hypersphere/dity";
-import { DatabaseModule } from "../module";
+import { Database } from '@sqlite.org/sqlite-wasm';
+import { App } from "obsidian";
 import { sanitise } from "../../../utils/sanitiseColumn";
 
 interface DbMapEntry {
@@ -13,7 +11,6 @@ interface DbMapEntry {
 	kysely: Kysely<any>
 }
 
-@(makeInjector<DatabaseModule>()(["app"]))
 export class DatabaseProvider {
 	constructor(private app: App) {}
 	private databases: Map<string, DbMapEntry> = new Map();

@@ -1,15 +1,32 @@
-/* EDITOR */
+/* CSV EDITOR - Modern & Sleek Design */
+.csv-viewer-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--background-primary);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+    box-shadow: var(--shadow-s);
+}
+
 .sql-seal-csv-editor {
     display: flex;
     flex-direction: column;
     height: 100%;
-    gap: var(--size-4-4);
+    gap: 0;
+    background: var(--background-primary);
+    border-radius: var(--radius-m);
+    overflow: hidden;
 }
 
 .sql-seal-csv-viewer {
     flex: 1;
     display: flex;
     flex-direction: column;
+    background: var(--background-primary);
+    border-radius: 0 0 var(--radius-m) var(--radius-m);
+    overflow: hidden;
+    position: relative;
 }
 
 .sqlseal-grid-wrapper {
@@ -17,19 +34,346 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    background: var(--background-primary);
+    border-radius: 0 0 var(--radius-m) var(--radius-m);
+    overflow: hidden;
+    
+    /* Modern gradient border effect */
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            var(--color-accent) 20%, 
+            var(--color-accent) 80%, 
+            transparent 100%);
+        opacity: 0.3;
+        z-index: 1;
+    }
 }
 
 .ag-theme-quartz {
     flex: 1;
+    border-radius: 0 0 var(--radius-m) var(--radius-m);
+    overflow: hidden;
+    
+    /* Enhanced modern styling for AG Grid - Minimal borders */
+    --ag-background-color: var(--background-primary);
+    --ag-foreground-color: var(--text-normal);
+    --ag-header-background-color: var(--background-secondary);
+    --ag-header-foreground-color: var(--text-normal);
+    --ag-odd-row-background-color: var(--background-primary);
+    --ag-row-hover-color: var(--background-modifier-hover);
+    --ag-selected-row-background-color: var(--background-modifier-active-hover);
+    --ag-border-color: transparent;
+    --ag-header-cell-hover-background-color: var(--background-modifier-hover);
+    --ag-cell-horizontal-border: transparent;
+    --ag-row-border-color: transparent;
+    
+    /* Custom scrollbar styling */
+    --ag-scrollbar-size: 8px;
+    
+    .ag-header {
+        background: var(--background-secondary);
+        border-bottom: 1px solid var(--background-modifier-border);
+        font-weight: 500;
+        font-size: var(--font-ui-small);
+        
+        .ag-header-cell {
+            border-right: none;
+            padding: var(--size-4-2) var(--size-4-3);
+            transition: all 150ms ease-in-out;
+            
+            &:hover {
+                background: var(--background-modifier-hover);
+            }
+            
+            .ag-header-cell-label {
+                font-weight: 500;
+                color: var(--text-normal);
+                font-size: var(--font-ui-small);
+            }
+        }
+    }
+    
+    .ag-row {
+        border-bottom: none;
+        transition: all 150ms ease-in-out;
+        
+        &:hover {
+            background: var(--background-modifier-hover) !important;
+        }
+        
+        &.ag-row-selected {
+            background: var(--background-modifier-active-hover) !important;
+            border-left: 3px solid var(--color-accent);
+        }
+        
+        .ag-cell {
+            padding: var(--size-4-2) var(--size-4-3);
+            border-right: none;
+            font-size: var(--font-ui-small);
+            line-height: 1.4;
+            
+            &:focus {
+                outline: 2px solid var(--color-accent);
+                outline-offset: -2px;
+                border-radius: var(--radius-s);
+            }
+        }
+    }
+    
+    /* Pagination styling - Minimal design */
+    .ag-paging-panel {
+        background: transparent;
+        border: none;
+        padding: var(--size-4-3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--size-4-3);
+        
+        /* Hide when pagination is not needed */
+        &.ag-hidden {
+            display: none !important;
+        }
+        
+        /* Hide page size selector, page number input, and unwanted text */
+        .ag-paging-page-size,
+        .ag-paging-number,
+        .ag-paging-description {
+            display: none !important;
+        }
+        
+        /* Hide first/last page buttons */
+        .ag-paging-button[aria-label="First Page"],
+        .ag-paging-button[aria-label="Last Page"] {
+            display: none !important;
+        }
+        
+        /* Style only prev/next buttons */
+        .ag-paging-button {
+            background: transparent;
+            border: 1px solid var(--background-modifier-border);
+            color: var(--text-normal);
+            border-radius: var(--radius-s);
+            padding: var(--size-2-1) var(--size-2-3);
+            margin: 0 4px;
+            transition: all 150ms ease-in-out;
+            
+            &:hover:not(.ag-disabled) {
+                background: var(--background-modifier-hover);
+                border-color: var(--color-accent);
+            }
+            
+            &.ag-disabled {
+                opacity: 0.3;
+                cursor: not-allowed;
+                border-color: var(--background-modifier-border-hover);
+            }
+        }
+        
+        /* Hide pagination row summary completely - we'll use a custom display */
+        .ag-paging-row-summary-panel {
+            display: none !important;
+        }
+    }
+    
+    /* More specific hiding rules for pagination elements */
+    .ag-paging-panel {
+        /* Hide pagination when grid has few rows or pagination is disabled */
+        .ag-paging-button:first-child:last-child {
+            /* If only one button exists, likely means no pagination needed */
+            display: none;
+        }
+    }
+    
+    /* Hide pagination when not enough data to paginate */
+    .ag-theme-quartz:not(.ag-pagination) .ag-paging-panel,
+    .ag-theme-quartz .ag-paging-panel:empty {
+        display: none !important;
+    }
 }
 
+/* Menu Bar Styling - Modern Button Layout */
 .sql-seal-csv-viewer-buttons {
     display: flex;
-    gap: var(--size-4-4);
+    align-items: center;
+    gap: var(--size-2-2);
+    padding: var(--size-4-3) var(--size-4-4);
+    background: var(--background-secondary);
+    border-bottom: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-m) var(--radius-m) 0 0;
+    box-shadow: inset 0 -1px 0 var(--background-modifier-border);
+    
+    /* Flex wrap for responsive design */
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    
+    .clickable-icon {
+        background: var(--interactive-normal);
+        color: var(--text-normal);
+        border: 1px solid var(--background-modifier-border);
+        border-radius: var(--radius-s);
+        padding: var(--size-2-2) var(--size-4-3);
+        font-size: var(--font-ui-small);
+        font-weight: 500;
+        transition: all 200ms ease-in-out;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        
+        /* Modern button styling */
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 300ms ease;
+        }
+        
+        &:hover {
+            background: var(--interactive-hover);
+            border-color: var(--color-accent);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            
+            &::before {
+                left: 100%;
+            }
+        }
+        
+        &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* CTA button styling */
+        &.mod-cta {
+            background: var(--color-accent);
+            color: var(--text-on-accent);
+            border-color: var(--color-accent);
+            font-weight: 600;
+            
+            &:hover {
+                background: var(--color-accent-2);
+                border-color: var(--color-accent-2);
+                color: var(--text-on-accent);
+            }
+        }
+        
+        /* Button icons */
+        &[aria-label*="Add"] {
+            &::before {
+                background: linear-gradient(90deg, 
+                    transparent, 
+                    rgba(76, 175, 80, 0.2), 
+                    transparent);
+            }
+        }
+        
+        &[aria-label*="Generate"] {
+            &::before {
+                background: linear-gradient(90deg, 
+                    transparent, 
+                    rgba(33, 150, 243, 0.2), 
+                    transparent);
+            }
+        }
+    }
 }
 
+/* Modal Code Styling */
 .sql-seal-modal-code {
     width: 100%;
-    font-family: monospace;
-    padding: 8px;
+    font-family: var(--font-monospace);
+    font-size: var(--font-ui-small);
+    padding: var(--size-4-3);
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-s);
+    color: var(--text-normal);
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 120px;
+    
+    &:focus {
+        outline: 2px solid var(--color-accent);
+        outline-offset: -1px;
+        border-color: var(--color-accent);
+    }
+}
+
+/* Hidden columns styling */
+.sqlseal-hidden-column {
+    opacity: 0.5 !important;
+    position: relative;
+    
+    &::after {
+        content: '👁️‍🗨️';
+        position: absolute;
+        right: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 10px;
+        opacity: 0.6;
+    }
+}
+
+/* Loading states and animations */
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.ag-theme-quartz.ag-loading {
+    .ag-overlay-loading-wrapper {
+        background: var(--background-primary);
+        
+        .ag-overlay-loading-center {
+            background: linear-gradient(90deg,
+                var(--background-secondary) 25%,
+                var(--background-modifier-hover) 50%,
+                var(--background-secondary) 75%);
+            background-size: 200px 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-s);
+            color: var(--text-muted);
+        }
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .sql-seal-csv-viewer-buttons {
+        padding: var(--size-4-2);
+        gap: var(--size-2-1);
+        
+        .clickable-icon {
+            padding: var(--size-2-1) var(--size-2-3);
+            font-size: var(--font-ui-smaller);
+        }
+    }
+    
+    .ag-theme-quartz {
+        .ag-header-cell,
+        .ag-cell {
+            padding: var(--size-2-1) var(--size-2-2);
+            font-size: var(--font-ui-smaller);
+        }
+    }
 }
