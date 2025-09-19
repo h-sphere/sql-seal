@@ -122,6 +122,24 @@ const workerPlugin = {
                 loader: 'js',
             };
         });
+
+        // Handle virtual WASM URL for sqlocal
+        build.onResolve({ filter: /^virtual:sqlite-wasm-url$/ }, args => ({
+            path: args.path,
+            namespace: 'sqlite-wasm-url',
+        }));
+
+        build.onLoad({ filter: /.*/, namespace: 'sqlite-wasm-url' }, async () => {
+            const wasmPath = join(process.cwd(), 'node_modules/@subframe7536/sqlite-wasm/dist/wa-sqlite-async.wasm');
+            const wasmContents = readFileSync(wasmPath);
+            const wasmBase64 = wasmContents.toString('base64');
+            const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
+
+            return {
+                contents: `export default ${JSON.stringify(wasmDataUrl)};`,
+                loader: 'js',
+            };
+        });
     },
 };
 

@@ -35,6 +35,9 @@ importers:
       '@sqlite.org/sqlite-wasm':
         specifier: 3.50.3-build1
         version: 3.50.3-build1
+      '@subframe7536/sqlite-wasm':
+        specifier: ^0.5.6
+        version: 0.5.6
       '@types/jsonpath':
         specifier: ^0.2.4
         version: 0.2.4
