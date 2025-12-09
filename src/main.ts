@@ -27,11 +27,5 @@ export default class SqlSealPlugin extends Plugin {
 
 		const init = await this.container.get("init");
 		init();
-
-		const provider = this.container!.get('db.provider')
-		const k = await provider.get(null)
-		console.log(k)
-		// const data = await k.executeQuery('SELECT sqlite_version()' as any)
-		// console.log(data)
 	}
 }

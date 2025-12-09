@@ -1,6 +1,6 @@
 import { App, MarkdownPostProcessorContext, Plugin } from "obsidian";
 import { InlineProcessor } from "./InlineProcessor";
-import { SqlSealDatabase } from "../../../database/database";
+import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabase";
 import { Sync } from "../../../sync/sync/sync";
 import { Settings } from "../../../settings/Settings";
 
@@ -8,7 +8,7 @@ import { Settings } from "../../../settings/Settings";
 export class SqlSealInlineHandler {
     constructor(
         private readonly app: App,
-        private readonly db: SqlSealDatabase,
+        private readonly db: SqlocalDatabaseProxy,
         private readonly settings: Settings,
         private sync: Sync
     ) { }

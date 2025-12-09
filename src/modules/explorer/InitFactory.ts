@@ -1,5 +1,5 @@
 import { addIcon, App, Plugin } from "obsidian";
-import { SqlSealDatabase } from "../database/database";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 import { Sync } from "../sync/sync/sync";
@@ -17,7 +17,7 @@ import SQLSealIcon from "./sqlseal-bw.svg";
 export const explorerInit = (
 	plugin: Plugin,
 	app: App,
-	db: SqlSealDatabase,
+	db: SqlocalDatabaseProxy,
 	cellParser: ModernCellParser,
 	rendererRegistry: RendererRegistry,
 	sync: Sync,

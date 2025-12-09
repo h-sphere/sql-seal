@@ -6,7 +6,7 @@ import {
 	WorkspaceLeaf,
 } from "obsidian";
 import { CodeblockProcessor } from "../../editor/codeblockHandler/CodeblockProcessor";
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase";
 import { RendererRegistry } from "../../editor/renderer/rendererRegistry";
 import { Settings } from "../../settings/Settings";
 import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
@@ -19,7 +19,7 @@ export class ExplorerView extends ItemView {
 	constructor(
 		leaf: WorkspaceLeaf,
 		private rendererRegistry: RendererRegistry,
-		private db: Pick<SqlSealDatabase, 'select' | 'explain'>,
+		private db: Pick<SqlocalDatabaseProxy, 'select' | 'explain'>,
 		private cellParser: ModernCellParser,
 		private settings: Settings,
 		private sync: Sync,

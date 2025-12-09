@@ -2,7 +2,7 @@ import { App, TAbstractFile, TFile, Vault } from "obsidian";
 import { FilepathHasher } from "../../../utils/hasher";
 import { Omnibus } from "@hypersphere/omnibus";
 import { uniq } from "lodash";
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy";
 import { TableDefinition, TableDefinitionsRepository } from "../repository/tableDefinitions";
 import { TableAliasesRepository } from "../repository/tableAliases";
 import { ConfigurationRepository } from "../repository/configuration";
@@ -12,17 +12,23 @@ import { SyncStrategyFactory } from "../syncStrategy/SyncStrategyFactory";
 
 const SQLSEAL_DATABASE_VERSION = 2;
 
+// Global lock to prevent concurrent database recreation
+let isInitializing = false;
+let initializationPromise: Promise<void> | null = null;
+
 export class Sync {
     private tableDefinitionsRepo: TableDefinitionsRepository;
     private tableMapLog: TableAliasesRepository;
-    private bus = new Omnibus()
+    private configRepo: ConfigurationRepository;
+    private bus = new Omnibus();
+    private isLocallyInitialized = false;
 
     constructor(
-        private readonly db: SqlSealDatabase,
+        private readonly db: SqlocalDatabaseProxy,
         private readonly vault: Vault,
         private readonly app: App
     ) {
-
+        console.log('SYNC INSTANTIATED')
     }
 
     triggerGlobalTableChange(name: string) {
@@ -30,22 +36,68 @@ export class Sync {
     }
 
     async init() {
+        const instanceId = Math.random().toString(36).substring(7);
+        console.log(`Sync[${instanceId}]: Starting init, isInitializing: ${isInitializing}, isLocallyInitialized: ${this.isLocallyInitialized}`);
+
+        // If this instance is already initialized, don't do it again
+        if (this.isLocallyInitialized) {
+            console.log(`Sync[${instanceId}]: This instance already initialized, skipping`);
+            return;
+        }
+
+        // If another init is already in progress, wait for it
+        if (isInitializing && initializationPromise) {
+            console.log(`Sync[${instanceId}]: Another init in progress, waiting...`);
+            await initializationPromise;
+            console.log(`Sync[${instanceId}]: Previous init completed, continuing with local setup`);
+
+            // Just set up the local repositories, don't recreate database
+            await this.setupRepositories(instanceId);
+            return;
+        }
+
+        // Start initialization process
+        console.log(`Sync[${instanceId}]: Starting primary initialization`);
+        isInitializing = true;
+        initializationPromise = this.performInitialization(instanceId);
+
+        try {
+            await initializationPromise;
+        } finally {
+            isInitializing = false;
+            initializationPromise = null;
+        }
+    }
+
+    private async performInitialization(instanceId: string) {
+        console.log(`Sync[${instanceId}]: Performing full initialization`);
+        console.log(`Sync[${instanceId}]: this.db is:`, this.db);
+        console.log(`Sync[${instanceId}]: this.db type:`, typeof this.db);
+
         await this.db.connect()
 
         // Configuration
-        const config = new ConfigurationRepository(this.db)
+        console.log(`Sync[${instanceId}]: Creating ConfigurationRepository with db:`, this.db);
+        this.configRepo = new ConfigurationRepository(this.db)
+        console.log(`Sync[${instanceId}]: ConfigurationRepository created`);
+
         let version
         try {
-            version = await config.getConfig('version') as number
+            version = await this.configRepo.getConfig('version') as number
+            console.log('Sync: Current database version:', version);
         } catch (e) {
+            console.log('Sync: No version found, assuming version 0');
             version = 0
         }
 
         if (version < SQLSEAL_DATABASE_VERSION) {
+            console.log(`Sync: Upgrading database from version ${version} to ${SQLSEAL_DATABASE_VERSION}`);
             await this.db.recreateDatabase()
+        } else {
+            console.log('Sync: Database version is current, no recreation needed');
         }
 
-        await config.init()
+        await this.configRepo.init()
 
         this.tableDefinitionsRepo = new TableDefinitionsRepository(this.db)
         await this.tableDefinitionsRepo.init()
@@ -53,7 +105,7 @@ export class Sync {
         this.tableMapLog = new TableAliasesRepository(this.db)
         await this.tableMapLog.init()
 
-        await config.setConfig('version', SQLSEAL_DATABASE_VERSION)
+        await this.configRepo.setConfig('version', SQLSEAL_DATABASE_VERSION)
 
         const fileLogs = await this.tableDefinitionsRepo.getAll()
         const uniquePaths = uniq(fileLogs.map(l => l.source_file))
@@ -65,6 +117,28 @@ export class Sync {
         this.startSync()
 
         await this.refreshGlobalMappings()
+
+        this.isLocallyInitialized = true;
+    }
+
+    private async setupRepositories(instanceId: string) {
+        console.log(`Sync[${instanceId}]: Setting up repositories for secondary init (no table creation)`);
+
+        await this.db.connect()
+
+        // Create repository instances but don't call init() since tables are already created
+        this.configRepo = new ConfigurationRepository(this.db)
+        this.tableDefinitionsRepo = new TableDefinitionsRepository(this.db)
+        this.tableMapLog = new TableAliasesRepository(this.db)
+
+        // START SYNCING
+        this.startSync()
+
+        // Don't call refreshGlobalMappings() - it will be called by the primary initialization
+        // await this.refreshGlobalMappings()
+
+        console.log(`Sync[${instanceId}]: Secondary init completed - waiting for global mappings from primary`);
+        this.isLocallyInitialized = true;
     }
 
     async syncFileByName(fileName: string) {
@@ -127,21 +201,30 @@ export class Sync {
     }
 
     async getTablesMappingForContext(sourceFileName: string) {
+        console.log('Sync.getTablesMappingForContext: sourceFileName:', sourceFileName);
+        console.log('Sync.getTablesMappingForContext: tableMapLog exists:', !!this.tableMapLog);
+
         const tables = await this.tableMapLog.getByContext(sourceFileName) as { alias_name: string, table_name: string }[]
+        console.log('Sync.getTablesMappingForContext: tables from repository:', tables);
+
         const map = tables.reduce((acc, t) => ({
             ...acc,
             [t.alias_name as string]: t.table_name
         }), {})
 
-        // FIXME: adding globals here.
+        console.log('Sync.getTablesMappingForContext: local mappings:', map);
+        console.log('Sync.getTablesMappingForContext: global mappings:', this.globalTablesMapping);
 
-        return {
+        const result = {
             ...map,
             ...this.globalTablesMapping,
             files: 'files',
             tasks: 'tasks',
             tags: 'tags',
-        }
+        };
+
+        console.log('Sync.getTablesMappingForContext: final result:', result);
+        return result;
     }
 
     async generateTableName(fileName: string) {

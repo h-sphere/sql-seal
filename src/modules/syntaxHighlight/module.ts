@@ -3,13 +3,13 @@ import { syntaxHighlightInit } from "./init";
 import { App, Plugin } from "obsidian";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 import { cellParserFactory } from "./cellParser/factory";
-import { SqlSealDatabase } from "../database/database";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase";
 import { viewPluginGeneratorFactory } from "./viewPluginGenerator";
 
 
 export const syntaxHighlight = new Registrator()
 	.import<'app', App>()
-	.import<'db', Promise<SqlSealDatabase>>()
+	.import<'db', Promise<SqlocalDatabaseProxy>>()
 	.import<'rendererRegistry', RendererRegistry>()
 	.import<'plugin', Plugin>()
 	.register('cellParser', d => d.fn(cellParserFactory).inject('app', 'db'))

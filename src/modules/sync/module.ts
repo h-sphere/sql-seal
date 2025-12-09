@@ -1,14 +1,14 @@
 import { Registrator } from "@hypersphere/dity"
 import { App, Plugin, Vault } from "obsidian"
 import { syncBusFactory } from "./sync/syncFactory"
-import { SqlSealDatabase } from "../database/database"
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy"
 import { syncInit } from "./sync/init"
 import { fileSyncFactory } from "./fileSyncController/fileSyncFactory"
 
 export const sync = new Registrator()
     .import<'app', App>()
     .import<'plugin', Plugin>()
-    .import<'db', Promise<SqlSealDatabase>>()
+    .import<'db', Promise<SqlocalDatabaseProxy>>()
     .import<'vault', Vault>()
     .register('syncBus', d => d.fn(syncBusFactory).inject('db', 'vault', 'app'))
     .register('fileSync', d => d.fn(fileSyncFactory).inject('app', 'plugin', 'db', 'syncBus'))

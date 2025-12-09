@@ -1,9 +1,9 @@
-import { SqlSealDatabase } from "../../database/database"
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase"
 
 type Item<Columns extends string[]> = Record<Columns[number], string | number | undefined>
 
 export class DatabaseTable<const Columns extends string[]> {
-    constructor(private readonly db: SqlSealDatabase ,public readonly tableName: string, private columns: Columns) {
+    constructor(private readonly db: SqlocalDatabaseProxy ,public readonly tableName: string, private columns: Columns) {
 
     }
 

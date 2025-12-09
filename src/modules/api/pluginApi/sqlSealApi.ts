@@ -3,7 +3,7 @@ import { version } from '../../../../package.json'
 import { RendererConfig, RendererRegistry } from "../../editor/renderer/rendererRegistry";
 import { FilepathHasher } from "../../../utils/hasher";
 import { DatabaseTable } from "./table";
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase";
 import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
 import { CellFunction } from "../../syntaxHighlight/cellParser/CellFunction";
 
@@ -22,7 +22,7 @@ export class SQLSealRegisterApi {
         sqlSealPlugin: Plugin,
         private readonly cellParser: ModernCellParser,
         private readonly rendererRegistry: RendererRegistry,
-        private readonly db: SqlSealDatabase
+        private readonly db: SqlocalDatabaseProxy
     ) {
         sqlSealPlugin.register(() => {
             this.registeredApis.forEach(p => {
@@ -75,7 +75,7 @@ export class SQLSealApi {
         private readonly plugin: Plugin,
         private readonly cellParser: ModernCellParser,
         private readonly rendererRegistry: RendererRegistry,
-        private readonly db: SqlSealDatabase
+        private readonly db: SqlocalDatabaseProxy
     ) {
         plugin.register(() => {
             this.unregister()

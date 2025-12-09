@@ -2,7 +2,7 @@ import { App, Plugin, TFile } from "obsidian";
 import { AFileSyncTable } from "./abstractFileSyncTable";
 import { difference } from "lodash";
 import { sanitise } from "../../../../utils/sanitiseColumn";
-import { SqlSealDatabase } from "../../../database/database";
+import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabase";
 
 
 export const FILES_TABLE_NAME = 'files'
@@ -35,7 +35,7 @@ export class FilesFileSyncTable extends AFileSyncTable {
     }
     private columns: string[] = []
     shouldPerformBulkInsert = true;
-    constructor(db: SqlSealDatabase, app: App, private readonly plugin: Plugin) {
+    constructor(db: SqlocalDatabaseProxy, app: App, private readonly plugin: Plugin) {
         super(db, app)
     }
     async onFileModify(file: TFile): Promise<void> {
@@ -80,7 +80,7 @@ export class FilesFileSyncTable extends AFileSyncTable {
 
 
     async onInit(): Promise<void> {
-        this.db.createTableNoTypes(FILES_TABLE_NAME, ['id', 'name', 'path', 'created_at', 'modified_at', 'file_size'])
+        await this.db.createTableNoTypes(FILES_TABLE_NAME, ['id', 'name', 'path', 'created_at', 'modified_at', 'file_size'])
         this.columns = (await this.db.getColumns(FILES_TABLE_NAME)) ?? []
 
         // Indexes

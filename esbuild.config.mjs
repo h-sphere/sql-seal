@@ -91,21 +91,46 @@ const wasmPlugin = {
 const workerPlugin = {
     name: 'worker',
     setup(build) {
-        build.onResolve({ filter: /^virtual:worker-code$/ }, args => ({
+        // Handle sqlocal worker code
+        build.onResolve({ filter: /^virtual:sqlocal-worker-code$/ }, args => ({
             path: args.path,
-            namespace: 'worker-code',
+            namespace: 'sqlocal-worker-code',
         }));
 
-        build.onLoad({ filter: /.*/, namespace: 'worker-code' }, async () => {
-            // Build worker code
+        build.onLoad({ filter: /.*/, namespace: 'sqlocal-worker-code' }, async () => {
+            // Create a plugin for the worker that resolves virtual imports
+            const workerVirtualPlugin = {
+                name: 'worker-virtual',
+                setup(build) {
+                    // Handle virtual WASM URL for wa-sqlite
+                    build.onResolve({ filter: /^virtual:wa-sqlite-wasm-url$/ }, args => ({
+                        path: args.path,
+                        namespace: 'wa-sqlite-wasm-url',
+                    }));
+
+                    build.onLoad({ filter: /.*/, namespace: 'wa-sqlite-wasm-url' }, async () => {
+                        const wasmPath = join(process.cwd(), 'node_modules/wa-sqlite/dist/wa-sqlite-async.wasm');
+                        const wasmContents = readFileSync(wasmPath);
+                        const wasmBase64 = wasmContents.toString('base64');
+                        const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
+
+                        return {
+                            contents: `export default ${JSON.stringify(wasmDataUrl)};`,
+                            loader: 'js',
+                        };
+                    });
+                }
+            };
+
+            // Build sqlocal worker code
             const result = await esbuild.build({
-                entryPoints: ['src/modules/database/worker/database.ts'],
+                entryPoints: ['src/modules/database/sqlocal/sqlocalWorkerDatabase.ts'],
                 bundle: true,
                 write: false,
                 format: 'iife',
                 target: 'es2020',
-                external: ['fs', 'path'],
-                plugins: [wasmPlugin, polyfillNode({
+                external: ['fs', 'path', 'obsidian'],
+                plugins: [wasmPlugin, workerVirtualPlugin, polyfillNode({
                 })],
                 minify: process.argv[2] === 'production',
                 define: {
@@ -116,8 +141,8 @@ const workerPlugin = {
 
             return {
                 contents: `
-                    const workerCode = ${JSON.stringify(result.outputFiles[0].text)};
-                    export default workerCode;
+                    const sqlocalWorkerCode = ${JSON.stringify(result.outputFiles[0].text)};
+                    export default sqlocalWorkerCode;
                 `,
                 loader: 'js',
             };
@@ -131,6 +156,24 @@ const workerPlugin = {
 
         build.onLoad({ filter: /.*/, namespace: 'sqlite-wasm-url' }, async () => {
             const wasmPath = join(process.cwd(), 'node_modules/@subframe7536/sqlite-wasm/dist/wa-sqlite-async.wasm');
+            const wasmContents = readFileSync(wasmPath);
+            const wasmBase64 = wasmContents.toString('base64');
+            const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
+
+            return {
+                contents: `export default ${JSON.stringify(wasmDataUrl)};`,
+                loader: 'js',
+            };
+        });
+
+        // Handle virtual WASM URL for wa-sqlite
+        build.onResolve({ filter: /^virtual:wa-sqlite-wasm-url$/ }, args => ({
+            path: args.path,
+            namespace: 'wa-sqlite-wasm-url',
+        }));
+
+        build.onLoad({ filter: /.*/, namespace: 'wa-sqlite-wasm-url' }, async () => {
+            const wasmPath = join(process.cwd(), 'node_modules/wa-sqlite/dist/wa-sqlite-async.wasm');
             const wasmContents = readFileSync(wasmPath);
             const wasmBase64 = wasmContents.toString('base64');
             const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;

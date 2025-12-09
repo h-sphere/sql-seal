@@ -1,5 +1,5 @@
 import { isStringifiedArray } from "../../../utils/ui";
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase";
 import { CellFunction } from "./CellFunction";
 import { parse } from 'json5'
 
@@ -172,7 +172,8 @@ export class ModernCellParser {
     }
 
     // FIXME: this should be extracted to separate class / function but for now it's fine.
-    registerDbFunctions(db: SqlSealDatabase) {
+    registerDbFunctions(db: SqlocalDatabaseProxy) {
+        console.trace('register db functions called')
         this.functions.forEach(funct => {
             db.registerCustomFunction(funct.name, funct.sqlFunctionArgumentsCount)
         })

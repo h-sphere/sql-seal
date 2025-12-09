@@ -8,6 +8,6 @@ export type DatabaseModule = typeof db
 
 export const db = new Registrator()
 .import<'app', App>()
-.register('db', d => d.fn(databaseFactory).inject('app'))
 .register('provider', d => d.cls(DatabaseProvider).inject('app'))
+.register('db', d => d.fn(databaseFactory).inject('app', 'provider'))
 .export('db', 'provider')

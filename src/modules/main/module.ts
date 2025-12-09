@@ -19,7 +19,7 @@ const obsidian = new Registrator({ logger: console.log })
 .export('app', 'plugin', 'vault')
 
 
-export const mainModule = new Registrator()
+export const mainModule = new Registrator({logger: console.log})
 .module('obsidian', obsidian)
 .module('db', db)
 .module('editor', editor)

@@ -98,7 +98,7 @@ export class TableDefinitionsRepository extends Repository {
             updateData.arguments = JSON.stringify(fields.arguments);
         }
 
-        await this.db.db!.updateData(this.TABLE_NAME, [{
+        await this.db.updateData(this.TABLE_NAME, [{
             id,
             ...updateData
         }], 'id')

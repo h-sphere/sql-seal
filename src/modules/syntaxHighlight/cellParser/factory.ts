@@ -3,7 +3,7 @@ import { ModernCellParser } from "./ModernCellParser";
 import { LinkParser } from "./parser/link";
 import { ImageParser } from "./parser/image";
 import { CheckboxParser } from "./parser/checkbox";
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase";
 
 export const getCellParser = (app: App, create = createEl) => {
 	const cellParser = new ModernCellParser();
@@ -15,7 +15,7 @@ export const getCellParser = (app: App, create = createEl) => {
 
 export const cellParserFactory = (
 	app: App,
-	db: SqlSealDatabase,
+	db: SqlocalDatabaseProxy,
 	create: typeof createEl = createEl,
 ) => {
 	const cellParser = new ModernCellParser();

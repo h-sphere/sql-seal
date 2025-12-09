@@ -1,6 +1,6 @@
 import { Registrator } from "@hypersphere/dity"
 import { App, Plugin } from "obsidian"
-import { SqlSealDatabase } from "../database/database"
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase"
 import { Sync } from "../sync/sync/sync"
 import { RendererRegistry } from "./renderer/rendererRegistry"
 import { editorInit } from "./init"
@@ -11,7 +11,7 @@ import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser
 
 export const editor = new Registrator()
     .import<'app', App>()
-    .import<'db', Promise<SqlSealDatabase>>()
+    .import<'db', Promise<SqlocalDatabaseProxy>>()
     .import<'plugin', Plugin>()
     .import<'sync', Promise<Sync>>()
     .import<'cellParser', Promise<ModernCellParser>>()

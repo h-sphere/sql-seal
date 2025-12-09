@@ -10,7 +10,7 @@ import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
 import { Settings } from "../settings/Settings";
 import { Sync } from "../sync/sync/sync";
-import { SqlSealDatabase } from "../database/database";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase";
 
 export const SQLSEAL_FILE_VIEW = 'sqlseal-file-view';
 
@@ -31,7 +31,7 @@ export class SQLSealFileView extends TextFileView {
         private cellParser: ModernCellParser,
         private settings: Settings,
         private sync: Sync,
-        private vaultDb: Pick<SqlSealDatabase, 'select' | 'explain'>,
+        private vaultDb: Pick<SqlocalDatabaseProxy, 'select' | 'explain'>,
     ) {
         super(leaf);
     }
@@ -118,7 +118,7 @@ export class SQLSealFileView extends TextFileView {
                 frontmatter: variables || {},
             } as any;
 
-            // Create a database adapter to handle both MemoryDatabase and SqlSealDatabase
+            // Create a database adapter to handle both MemoryDatabase and SqlocalDatabaseProxy
             const dbAdapter = this.fileDb ? {
                 select: async (statement: string, frontmatter: Record<string, unknown>) => {
                     const result = this.fileDb!.select(statement);

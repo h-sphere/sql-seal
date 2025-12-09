@@ -7,7 +7,7 @@ import {
 import { Sync } from "../../sync/sync/sync";
 import { RendererRegistry, RenderReturn } from "../renderer/rendererRegistry";
 import { ParserResult, parseWithDefaults, TableDefinition } from "../parser";
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase";
 import { displayError, displayNotice } from "../../../utils/ui";
 import { transformQuery } from "../sql/sqlTransformer";
 import { registerObservers } from "../../../utils/registerObservers";
@@ -26,7 +26,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 		private source: string,
 		private ctx: MarkdownPostProcessorContext,
 		private rendererRegistry: RendererRegistry,
-		private db: Pick<SqlSealDatabase, 'select' | 'explain'>,
+		private db: Pick<SqlocalDatabaseProxy, 'select' | 'explain'>,
 		private cellParser: ModernCellParser,
 		private settings: Settings,
 		private app: App,
@@ -119,9 +119,15 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 			const registeredTablesForContext =
 				await this.sync.getTablesMappingForContext(this.sourceKey);
 
+			console.log('CodeblockProcessor: Table mappings for context:', this.sourceKey, registeredTablesForContext);
+			console.log('CodeblockProcessor: Original query:', this.query);
+
 			// Transforming Query
 			const res = this.tq(this.query, registeredTablesForContext);
 			const transformedQuery = res.sql;
+
+			console.log('CodeblockProcessor: Transformed query:', transformedQuery);
+			console.log('CodeblockProcessor: Mapped tables:', res.mappedTables);
 
 			if (this.flags.refresh) {
 				registerObservers({
