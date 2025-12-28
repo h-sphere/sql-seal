@@ -92,7 +92,7 @@ export class SQLSealFileView extends TextFileView {
         try {
             this.fileDb = await this.manager.getDatabaseConnection(this.file);
             await this.fileDb.connect();
-            this.schema = this.fileDb.getSchema();
+            this.schema = await this.fileDb.getSchema();
         } catch (error) {
             console.error("Failed to connect to database:", error);
             return;
@@ -121,7 +121,7 @@ export class SQLSealFileView extends TextFileView {
             // Create a database adapter to handle both MemoryDatabase and SqlocalDatabaseProxy
             const dbAdapter = this.fileDb ? {
                 select: async (statement: string, frontmatter: Record<string, unknown>) => {
-                    const result = this.fileDb!.select(statement);
+                    const result = await this.fileDb!.select(statement);
                     return {
                         data: result.data,
                         columns: Array.isArray(result.columns) ? result.columns : Object.keys(result.columns)

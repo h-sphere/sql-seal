@@ -148,14 +148,14 @@ const workerPlugin = {
             };
         });
 
-        // Handle virtual WASM URL for sqlocal
-        build.onResolve({ filter: /^virtual:sqlite-wasm-url$/ }, args => ({
+        // Handle virtual WASM URL for wa-sqlite
+        build.onResolve({ filter: /^virtual:wa-sqlite-wasm-url$/ }, args => ({
             path: args.path,
-            namespace: 'sqlite-wasm-url',
+            namespace: 'wa-sqlite-wasm-url',
         }));
 
-        build.onLoad({ filter: /.*/, namespace: 'sqlite-wasm-url' }, async () => {
-            const wasmPath = join(process.cwd(), 'node_modules/@subframe7536/sqlite-wasm/dist/wa-sqlite-async.wasm');
+        build.onLoad({ filter: /.*/, namespace: 'wa-sqlite-wasm-url' }, async () => {
+            const wasmPath = join(process.cwd(), 'node_modules/wa-sqlite/dist/wa-sqlite-async.wasm');
             const wasmContents = readFileSync(wasmPath);
             const wasmBase64 = wasmContents.toString('base64');
             const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
@@ -166,14 +166,14 @@ const workerPlugin = {
             };
         });
 
-        // Handle virtual WASM URL for wa-sqlite
-        build.onResolve({ filter: /^virtual:wa-sqlite-wasm-url$/ }, args => ({
+        // Handle virtual WASM URL for sql.js
+        build.onResolve({ filter: /^virtual:sqljs-wasm-url$/ }, args => ({
             path: args.path,
-            namespace: 'wa-sqlite-wasm-url',
+            namespace: 'sqljs-wasm-url',
         }));
 
-        build.onLoad({ filter: /.*/, namespace: 'wa-sqlite-wasm-url' }, async () => {
-            const wasmPath = join(process.cwd(), 'node_modules/wa-sqlite/dist/wa-sqlite-async.wasm');
+        build.onLoad({ filter: /.*/, namespace: 'sqljs-wasm-url' }, async () => {
+            const wasmPath = join(process.cwd(), 'node_modules/sql.js/dist/sql-wasm.wasm');
             const wasmContents = readFileSync(wasmPath);
             const wasmBase64 = wasmContents.toString('base64');
             const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
