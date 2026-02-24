@@ -1,60 +1,103 @@
-// This is renderer for a very basic List view.
 import { App } from "obsidian";
 import { RendererConfig, RendererContext } from "./rendererRegistry";
 import { displayError } from "../../../utils/ui";
-import Handlebars from "handlebars";
+import nunjucks from "nunjucks";
 import { ViewDefinition } from "../parser";
 import { ParseResults } from "../../syntaxHighlight/cellParser/parseResults";
+import { VaultLoader } from "./VaultLoader";
+
+function registerFilters(env: nunjucks.Environment): void {
+    // Register custom filters
+    env.addFilter("groupby", (arr: any[], key: string) => {
+        const groups: Record<string, any[]> = {};
+        for (const item of arr) {
+            const groupKey = String(item[key] ?? "");
+            groups[groupKey] ??= [];
+            groups[groupKey].push(item);
+        }
+        return Object.entries(groups).map(([k, items]) => ({
+            grouper: k,
+            list: items,
+        }));
+    });
+
+    env.addFilter("unique", (arr: any[], key?: string) => {
+        if (!key) return [...new Set(arr)];
+        const seen = new Set<string>();
+        return arr.filter((item) => {
+            const val = String(item[key] ?? "");
+            if (seen.has(val)) return false;
+            seen.add(val);
+            return true;
+        });
+    });
+}
 
 interface TemplateRendererConfig {
-    template: HandlebarsTemplateDelegate
+    template: nunjucks.Template;
 }
 
 export class TemplateRenderer implements RendererConfig {
-    constructor(private readonly app: App) {
+    private readonly env: nunjucks.Environment;
+
+    constructor(
+        private readonly app: App,
+        loader?: VaultLoader,
+    ) {
+        this.env = new nunjucks.Environment(
+            loader ?? null,
+            { autoescape: false },
+        );
+        registerFilters(this.env);
     }
 
     get rendererKey() {
-        return 'template'
+        return "template";
     }
 
     get viewDefinition(): ViewDefinition {
         return {
             name: this.rendererKey,
-            argument: 'handlebarsTemplate?',
-            singleLine: false
-        }
+            argument: "nunjucksTemplate?",
+            singleLine: false,
+        };
     }
 
     validateConfig(config: string): TemplateRendererConfig {
         if (!config) {
             return {
-                template: Handlebars.compile('No template Provided')
-            }
+                template: nunjucks.compile("No template provided", this.env),
+            };
         }
         return {
-            template: Handlebars.compile(config)
-        }
+            template: nunjucks.compile(config, this.env),
+        };
     }
 
-    render(config: TemplateRendererConfig, el: HTMLElement, { cellParser }: RendererContext) {
+    render(
+        config: TemplateRendererConfig,
+        el: HTMLElement,
+        { cellParser }: RendererContext,
+    ) {
         return {
             render: ({ columns, data, frontmatter }: any) => {
-                el.empty()
-                
-                const parser = new ParseResults(cellParser!, (el) => new Handlebars.SafeString(el.outerHTML))
+                el.empty();
 
-                // Seems to be the only way to render handlebars into DOM. Don't like it but what can we do.
-                el.innerHTML = config.template({
+                const parser = new ParseResults(
+                    cellParser!,
+                    (el) => new nunjucks.runtime.SafeString(el.outerHTML),
+                );
+
+                el.innerHTML = config.template.render({
                     data: parser.parse(data, columns),
                     columns,
-                    properties: frontmatter
-                })
-                parser.initialise(el)
+                    properties: frontmatter,
+                });
+                parser.initialise(el);
             },
             error: (error: string) => {
-                displayError(el, error)
-            }
-        }
+                displayError(el, error);
+            },
+        };
     }
 }

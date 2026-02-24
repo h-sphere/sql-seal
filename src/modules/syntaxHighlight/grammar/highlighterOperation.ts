@@ -1,6 +1,6 @@
 import * as ohm from 'ohm-js';
 import { cstVisitor, Literal, parse } from 'sql-parser-cst';
-import highlightHandlebars from './highlighter/handlebarsHighlighter';
+import highlightNunjucks from './highlighter/nunjucksHighlighter';
 import { highlightJavaScript } from './highlighter/jsHighlighter';
 
 const nodes = new Map([
@@ -91,10 +91,10 @@ export const highlighterOperation = (grammar: ohm.Grammar) => {
                 end: node.source.endIdx
             }]
         },
-        handlebarsTemplate(_node) {
+        nunjucksTemplate(_node) {
             try {
                 const template = this.source.contents
-                const sections = highlightHandlebars(template)
+                const sections = highlightNunjucks(template)
                 const offset = this.source.startIdx
                 return sections.map(s => ({
                     ...s,
