@@ -7,6 +7,7 @@ import { GridRenderer } from "./renderer/GridRenderer";
 import { ListRenderer } from "./renderer/ListRenderer";
 import { TemplateRenderer } from "./renderer/TemplateRenderer";
 import { MarkdownRenderer } from "./renderer/MarkdownRenderer";
+import { VaultLoader } from "./renderer/VaultLoader";
 import { Settings } from "../settings/Settings";
 import { SqlSealInlineHandler } from "./codeblockHandler/inline/InlineCodeHandler";
 import { SqlSealCodeblockHandler } from "./codeblockHandler/SqlSealCodeblockHandler";
@@ -56,6 +57,8 @@ export const editorInit = (
 		);
 	};
 
+	const vaultLoader = new VaultLoader(app, plugin);
+
 	const registerViews = () => {
 		rendererRegistry.register(
 			"sql-seal-internal-table",
@@ -72,7 +75,7 @@ export const editorInit = (
 		rendererRegistry.register("sql-seal-internal-list", new ListRenderer(app));
 		rendererRegistry.register(
 			"sql-seal-internal-template",
-			new TemplateRenderer(app),
+			new TemplateRenderer(app, vaultLoader),
 		);
 	};
 
@@ -80,6 +83,8 @@ export const editorInit = (
 		registerViews();
 
 		app.workspace.onLayoutReady(async () => {
+			await vaultLoader.loadAll();
+			vaultLoader.registerWatchers();
 			registerInlineCodeblocks();
 			registerBlockCodeblock();
 		});
