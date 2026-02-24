@@ -2,7 +2,10 @@
 module.exports = {
   testEnvironment: "node",
   transform: {
-    "^.+.tsx?$": ["ts-jest",{}],
-    "^.+.ts?$": ["ts-jest",{}],
+    "^.+.tsx?$": ["ts-jest", { tsconfig: { esModuleInterop: true } }],
+    "^.+.ts?$": ["ts-jest", { tsconfig: { esModuleInterop: true } }],
+  },
+  moduleNameMapper: {
+    "^obsidian$": "<rootDir>/src/__mocks__/obsidian.ts",
   },
 };

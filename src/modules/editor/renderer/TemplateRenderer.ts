@@ -4,40 +4,52 @@ import { displayError } from "../../../utils/ui";
 import nunjucks from "nunjucks";
 import { ViewDefinition } from "../parser";
 import { ParseResults } from "../../syntaxHighlight/cellParser/parseResults";
+import { VaultLoader } from "./VaultLoader";
 
-const env = new nunjucks.Environment(null, { autoescape: false });
-
-// Register custom filters
-env.addFilter("groupby", (arr: any[], key: string) => {
-    const groups: Record<string, any[]> = {};
-    for (const item of arr) {
-        const groupKey = String(item[key] ?? "");
-        groups[groupKey] ??= [];
-        groups[groupKey].push(item);
-    }
-    return Object.entries(groups).map(([k, items]) => ({
-        grouper: k,
-        list: items,
-    }));
-});
-
-env.addFilter("unique", (arr: any[], key?: string) => {
-    if (!key) return [...new Set(arr)];
-    const seen = new Set<string>();
-    return arr.filter((item) => {
-        const val = String(item[key] ?? "");
-        if (seen.has(val)) return false;
-        seen.add(val);
-        return true;
+function registerFilters(env: nunjucks.Environment): void {
+    // Register custom filters
+    env.addFilter("groupby", (arr: any[], key: string) => {
+        const groups: Record<string, any[]> = {};
+        for (const item of arr) {
+            const groupKey = String(item[key] ?? "");
+            groups[groupKey] ??= [];
+            groups[groupKey].push(item);
+        }
+        return Object.entries(groups).map(([k, items]) => ({
+            grouper: k,
+            list: items,
+        }));
     });
-});
+
+    env.addFilter("unique", (arr: any[], key?: string) => {
+        if (!key) return [...new Set(arr)];
+        const seen = new Set<string>();
+        return arr.filter((item) => {
+            const val = String(item[key] ?? "");
+            if (seen.has(val)) return false;
+            seen.add(val);
+            return true;
+        });
+    });
+}
 
 interface TemplateRendererConfig {
     template: nunjucks.Template;
 }
 
 export class TemplateRenderer implements RendererConfig {
-    constructor(private readonly app: App) {}
+    private readonly env: nunjucks.Environment;
+
+    constructor(
+        private readonly app: App,
+        loader?: VaultLoader,
+    ) {
+        this.env = new nunjucks.Environment(
+            loader ?? null,
+            { autoescape: false },
+        );
+        registerFilters(this.env);
+    }
 
     get rendererKey() {
         return "template";
@@ -54,11 +66,11 @@ export class TemplateRenderer implements RendererConfig {
     validateConfig(config: string): TemplateRendererConfig {
         if (!config) {
             return {
-                template: nunjucks.compile("No template provided", env),
+                template: nunjucks.compile("No template provided", this.env),
             };
         }
         return {
-            template: nunjucks.compile(config, env),
+            template: nunjucks.compile(config, this.env),
         };
     }
 
