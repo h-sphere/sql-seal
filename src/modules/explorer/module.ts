@@ -2,7 +2,7 @@ import { Registrator } from "@hypersphere/dity";
 import { explorerInit } from "./InitFactory";
 import { App, Plugin } from "obsidian";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
-import { SqlSealDatabase } from "../database/database";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 import { Settings } from "../settings/Settings";
 import { Sync } from "../sync/sync/sync";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
@@ -13,7 +13,7 @@ import { DatabaseManager } from "./database/databaseManager";
 export const explorer = new Registrator()
     .import<'app', App>()
     .import<'cellParser', Promise<ModernCellParser>>()
-    .import<'db', Promise<SqlSealDatabase>>()
+    .import<'db', Promise<SqlocalDatabaseProxy>>()
     .import<'settings', Promise<Settings>>()
     .import<'sync', Promise<Sync>>()
     .import<'rendererRegistry', RendererRegistry>()

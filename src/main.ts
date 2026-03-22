@@ -14,7 +14,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 provideGlobalGridOptions({ theme: "legacy" });
 
 export default class SqlSealPlugin extends Plugin {
-	container: ReturnType<(typeof mainModule)["build"]>;
+	container?: ReturnType<(typeof mainModule)["build"]>;
 
 	async onload() {
 		// CONTAINER
@@ -24,7 +24,7 @@ export default class SqlSealPlugin extends Plugin {
 			.resolve('obsidian.vault', d => d.value(this.app.vault))
 			.build()
 
-		const init = await this.container.get("init")
-		init()
+		const init = await this.container.get("init");
+		init();
 	}
 }

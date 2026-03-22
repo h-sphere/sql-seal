@@ -1,7 +1,7 @@
 import { App, MarkdownPostProcessorContext } from "obsidian"
 import { RendererRegistry } from "../renderer/rendererRegistry"
 import { CodeblockProcessor } from "./CodeblockProcessor"
-import { SqlSealDatabase } from "../../database/database"
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy"
 import { Sync } from "../../sync/sync/sync"
 import { Settings } from "../../settings/Settings"
 import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser"
@@ -9,7 +9,7 @@ import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellPar
 export class SqlSealCodeblockHandler {
     constructor(
         private readonly app: App,
-        private readonly db: SqlSealDatabase,
+        private readonly db: SqlocalDatabaseProxy,
         private readonly cellParser: ModernCellParser,
         private sync: Sync,
         private rendererRegistry: RendererRegistry,

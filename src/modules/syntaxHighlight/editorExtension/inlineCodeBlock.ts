@@ -9,7 +9,7 @@ import {
 import { RangeSetBuilder } from "@codemirror/state";
 import { syntaxTree } from "@codemirror/language";
 import { App } from "obsidian";
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy";
 import { Settings } from "../../settings/Settings";
 import { Sync } from "../../sync/sync/sync";
 import { SqlSealInlineHandler } from "../../editor/codeblockHandler/inline/InlineCodeHandler";
@@ -17,7 +17,7 @@ import { InlineProcessor } from "../../editor/codeblockHandler/inline/InlineProc
 
 export function createSqlSealEditorExtension(
 	app: App,
-	db: SqlSealDatabase,
+	db: SqlocalDatabaseProxy,
 	settings: Settings,
 	sync: Sync,
 ) {

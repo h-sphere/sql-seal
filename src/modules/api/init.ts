@@ -4,7 +4,7 @@ import {
 	SQLSealRegisterApi,
 } from "./pluginApi/sqlSealApi";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
-import { SqlSealDatabase } from "../database/database";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
 
 const SQLSEAL_API_KEY = "___sqlSeal";
@@ -14,7 +14,7 @@ export const apiInit = (
 	plugin: Plugin,
 	cellParser: ModernCellParser,
 	rendererRegistry: RendererRegistry,
-	db: SqlSealDatabase,
+	db: SqlocalDatabaseProxy,
 ) => {
 	return () => {
 		const api = new SQLSealRegisterApi(

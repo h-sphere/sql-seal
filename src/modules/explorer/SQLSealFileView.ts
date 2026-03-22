@@ -1,6 +1,6 @@
 import { FileView, IconName, MarkdownPostProcessorContext, Menu, TextFileView, TFile, WorkspaceLeaf } from "obsidian";
 import { GridApi } from "ag-grid-community";
-import { MemoryDatabase } from "./database/memoryDatabase";
+import { WaSqliteMemoryDatabase } from "./database/waSqliteMemoryDatabase";
 import { DatabaseManager } from "./database/databaseManager";
 import { TableInfo } from "./schemaVisualiser/TableVisualiser";
 import { Editor } from "./Editor";
@@ -10,7 +10,7 @@ import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
 import { Settings } from "../settings/Settings";
 import { Sync } from "../sync/sync/sync";
-import { SqlSealDatabase } from "../database/database";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 
 export const SQLSEAL_FILE_VIEW = 'sqlseal-file-view';
 
@@ -18,7 +18,7 @@ const DEFAULT_SQLITE_QUERY = "SELECT name\nFROM sqlite_master\nWHERE type='table
 const DEFAULT_SQL_QUERY = "SELECT *\nFROM files\nLIMIT 10";
 
 export class SQLSealFileView extends TextFileView {
-    private fileDb: MemoryDatabase | null = null;
+    private fileDb: WaSqliteMemoryDatabase | null = null;
     private schema: TableInfo[] = [];
     private editor: Editor | null = null;
     private fileContent: string = "";
@@ -31,7 +31,7 @@ export class SQLSealFileView extends TextFileView {
         private cellParser: ModernCellParser,
         private settings: Settings,
         private sync: Sync,
-        private vaultDb: Pick<SqlSealDatabase, 'select' | 'explain'>,
+        private vaultDb: Pick<SqlocalDatabaseProxy, 'select' | 'explain'>,
     ) {
         super(leaf);
     }
@@ -92,7 +92,7 @@ export class SQLSealFileView extends TextFileView {
         try {
             this.fileDb = await this.manager.getDatabaseConnection(this.file);
             await this.fileDb.connect();
-            this.schema = this.fileDb.getSchema();
+            this.schema = await this.fileDb.getSchema();
         } catch (error) {
             console.error("Failed to connect to database:", error);
             return;
@@ -118,13 +118,14 @@ export class SQLSealFileView extends TextFileView {
                 frontmatter: variables || {},
             } as any;
 
-            // Create a database adapter to handle both MemoryDatabase and SqlSealDatabase
+            // Create a database adapter to handle both MemoryDatabase and SqlocalDatabaseProxy
             const dbAdapter = this.fileDb ? {
                 select: async (statement: string, frontmatter: Record<string, unknown>) => {
-                    const result = this.fileDb!.select(statement);
+                    const result = await this.fileDb!.select(statement);
                     return {
                         data: result.data,
-                        columns: Array.isArray(result.columns) ? result.columns : Object.keys(result.columns)
+                        columns: Array.isArray(result.columns) ? result.columns : Object.keys(result.columns),
+                        executionTime: 0
                     };
                 },
                 explain: async () => ""

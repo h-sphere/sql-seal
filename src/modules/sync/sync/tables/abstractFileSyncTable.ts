@@ -1,9 +1,9 @@
 import { App, TFile } from "obsidian";
-import { SqlSealDatabase } from "../../../database/database";
+import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabaseProxy";
 
 export abstract class AFileSyncTable {
     constructor(
-        protected readonly db: SqlSealDatabase,
+        protected readonly db: SqlocalDatabaseProxy,
         protected readonly app: App
     ) {
     }

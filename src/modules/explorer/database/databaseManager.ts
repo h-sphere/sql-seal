@@ -1,34 +1,20 @@
 import { TFile } from "obsidian";
-import { MemoryDatabase } from "./memoryDatabase";
-// @ts-ignore
-import wasmBinary from '../../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm'
-// @ts-ignore
-import initSqlJs from '@jlongster/sql.js';
+import { WaSqliteMemoryDatabase } from "./waSqliteMemoryDatabase";
 
+/**
+ * DatabaseManager - manages connections to external .db files
+ * Using wa-sqlite with MemoryAsyncVFS for in-memory database loading
+ */
 export class DatabaseManager {
 	constructor() {}
 
-    private sql: initSqlJs.SqlJsStatic | null = null
-
-	private async getConnection() {
-        if (this.sql) {
-            return this.sql
-        }
-		const SQL = await initSqlJs({
-			wasmBinary: wasmBinary,
-		});
-        this.sql = SQL
-        return SQL
-	}
-
 	async getDatabaseConnection(file: TFile) {
-		// FIXME: connecting to database
-        const connection = await this.getConnection()
-
-		const db =  new MemoryDatabase(connection, file);
-        await db.connect()
-        return db
+		const db = new WaSqliteMemoryDatabase(file);
+		await db.connect();
+		return db;
 	}
 
-	getGlobalDatabaseConnection() {}
+	getGlobalDatabaseConnection() {
+		throw new Error('Global database connection not implemented. Use the main database provider instead.');
+	}
 }

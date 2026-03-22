@@ -1,7 +1,7 @@
 import { App, Plugin } from "obsidian";
 import { SealFileSync } from "./FileSync";
 import { Sync } from "../sync/sync";
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy";
 import { FilesFileSyncTable } from "../sync/tables/filesTable";
 import { TagsFileSyncTable } from "../sync/tables/tagsTable";
 import { TasksFileSyncTable } from "../sync/tables/tasksTable";
@@ -10,10 +10,12 @@ import { LinksFileSyncTable } from "../sync/tables/linksTable";
 export const fileSyncFactory = async (
 	app: App,
 	plugin: Plugin,
-	db: SqlSealDatabase,
+	dbPromise: Promise<SqlocalDatabaseProxy>,
 	sync: Sync,
 ) => {
 	return async () => {
+		const db = await dbPromise;
+
 		const fileSync = new SealFileSync(app, plugin, (name) =>
 			sync.triggerGlobalTableChange(name),
 		);

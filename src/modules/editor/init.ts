@@ -1,5 +1,5 @@
 import { App, Plugin } from "obsidian";
-import { SqlSealDatabase } from "../database/database";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 import { Sync } from "../sync/sync/sync";
 import { RendererRegistry } from "./renderer/rendererRegistry";
 import { TableRenderer } from "./renderer/TableRenderer";
@@ -14,7 +14,7 @@ import { createSqlSealEditorExtension } from "../syntaxHighlight/editorExtension
 
 export const editorInit = (
 	app: App,
-	db: SqlSealDatabase,
+	db: SqlocalDatabaseProxy,
 	plugin: Plugin,
 	sync: Sync,
 	inlineHandler: SqlSealInlineHandler,

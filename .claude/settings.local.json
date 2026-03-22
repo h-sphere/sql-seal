@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "WebSearch",
+      "Bash(node --version:*)",
+      "Bash(npm test)"
+    ]
+  }
+}

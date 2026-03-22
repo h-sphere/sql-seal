@@ -1,5 +1,6 @@
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy";
 
 export abstract class Repository {
-    constructor(protected readonly db: SqlSealDatabase) { }
+    constructor(protected readonly db: SqlocalDatabaseProxy) {
+    }
 }

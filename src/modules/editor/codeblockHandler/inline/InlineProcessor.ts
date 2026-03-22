@@ -1,7 +1,7 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownRenderChild } from "obsidian";
 import { transformQuery } from "../../sql/sqlTransformer";
-import { SqlSealDatabase } from "../../../database/database";
+import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabaseProxy";
 import { Sync } from "../../../sync/sync/sync";
 import { registerObservers } from "../../../../utils/registerObservers";
 import { displayError } from "../../../../utils/ui";
@@ -14,7 +14,7 @@ export class InlineProcessor extends MarkdownRenderChild {
         private el: HTMLElement,
         private query: string,
         private sourcePath: string,
-        private db: SqlSealDatabase,
+        private db: SqlocalDatabaseProxy,
         private settings: Settings,
         private app: App,
         private sync: Sync

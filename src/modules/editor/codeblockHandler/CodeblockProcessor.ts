@@ -7,7 +7,7 @@ import {
 import { Sync } from "../../sync/sync/sync";
 import { RendererRegistry, RenderReturn } from "../renderer/rendererRegistry";
 import { ParserResult, parseWithDefaults, TableDefinition } from "../parser";
-import { SqlSealDatabase } from "../../database/database";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy";
 import { displayError, displayNotice } from "../../../utils/ui";
 import { transformQuery } from "../sql/sqlTransformer";
 import { registerObservers } from "../../../utils/registerObservers";
@@ -26,7 +26,7 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 		private source: string,
 		private ctx: MarkdownPostProcessorContext,
 		private rendererRegistry: RendererRegistry,
-		private db: Pick<SqlSealDatabase, 'select' | 'explain'>,
+		private db: Pick<SqlocalDatabaseProxy, 'select' | 'explain'>,
 		private cellParser: ModernCellParser,
 		private settings: Settings,
 		private app: App,
