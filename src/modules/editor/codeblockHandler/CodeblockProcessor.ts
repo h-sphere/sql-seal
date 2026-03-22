@@ -120,7 +120,9 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 				await this.sync.getTablesMappingForContext(this.sourceKey);
 
 			// Transforming Query
-			const res = this.tq(this.query, registeredTablesForContext);
+			const res = this.tq(this.query, registeredTablesForContext, {
+				disableTagAutoDetection: this.settings.get('disableTagAutoDetection')
+			});
 			const transformedQuery = res.sql;
 
 			if (this.flags.refresh) {
