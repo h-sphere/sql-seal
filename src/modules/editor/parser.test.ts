@@ -336,6 +336,58 @@ describe('parseWithDefaults', () => {
         })
     })
 
+    it('should not treat "select" as SQL keyword when it appears as part of a config property name', () => {
+        // Regression test for main-0e3: `selectedMode` in a GRID/CHART config object
+        // was incorrectly parsed as the start of a SQL SELECT query, causing a parse error.
+        expect(parseWithDefaults(`
+            TABLE data = file(test_data.csv)
+GRID {
+  selectedMode: true,
+  selectAll: false
+}
+SELECT * FROM data`, DEFAULT_VIEWS, DEFAULTS)).toEqual({
+            flags: { explain: false, refresh: true },
+            query: 'SELECT * FROM data',
+            renderer: {
+                type: 'GRID',
+                options: `{
+  selectedMode: true,
+  selectAll: false
+}`,
+            },
+            tables: [{ tableAlias: 'data', arguments: ['test_data.csv'], type: 'file' }]
+        })
+    })
+
+    it('should not treat "with" as SQL keyword when it appears as part of a config property name', () => {
+        // Same word-boundary fix covers "with" prefix: `withAnimation`, `without`, etc.
+        expect(parseWithDefaults(`
+            TABLE data = file(test_data.csv)
+GRID {
+  withAnimation: true
+}
+SELECT * FROM data`, DEFAULT_VIEWS, DEFAULTS)).toEqual({
+            flags: { explain: false, refresh: true },
+            query: 'SELECT * FROM data',
+            renderer: {
+                type: 'GRID',
+                options: `{
+  withAnimation: true
+}`,
+            },
+            tables: [{ tableAlias: 'data', arguments: ['test_data.csv'], type: 'file' }]
+        })
+    })
+
+    it('should still parse SELECT as keyword when used as a standalone SQL clause', () => {
+        expect(parseWithDefaults(`SELECT * FROM files`, DEFAULT_VIEWS, DEFAULTS)).toEqual({
+            flags: { explain: false, refresh: true },
+            query: 'SELECT * FROM files',
+            renderer: { type: 'GRID', name: 'GRID', options: '' },
+            tables: []
+        })
+    })
+
     it('should properly handle chart', () => {
         expect(parseWithDefaults(`
             TABLE data = file(test_data.csv)
