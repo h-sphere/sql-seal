@@ -1,4 +1,4 @@
-import { uniq } from 'lodash';
+import _ from 'lodash';
 import { parse, show, cstVisitor } from 'sql-parser-cst';
 
 /**
@@ -33,6 +33,6 @@ export const transformQuery = (query: string, tableNames: Record<string, string>
 
   return {
     sql: show(cst),
-    mappedTables: uniq(watchTables)
+    mappedTables: _.uniq(watchTables)
   }
 }

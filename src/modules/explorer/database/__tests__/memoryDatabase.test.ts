@@ -1,6 +1,10 @@
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { WaSqliteMemoryDatabase } from '../waSqliteMemoryDatabase';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock TFile from Obsidian
 class MockTFile {
@@ -134,7 +138,8 @@ describe('WaSqliteMemoryDatabase with wa-sqlite', () => {
             const results = await memoryDb.queryAsync('SELECT * FROM users WHERE id = 999');
 
             expect(results.data).toEqual([]);
-            expect(results.columns).toEqual([]);
+            // Columns should still be returned even when there are no rows
+            expect(results.columns).toEqual(['id', 'name', 'age']);
         });
     });
 
@@ -283,6 +288,9 @@ describe('WaSqliteMemoryDatabase with wa-sqlite', () => {
             expect((result as any).columns).toBeUndefined();
 
             // This would cause "cannot convert undefined" errors
+
+            // Clean up: await the promise to finalize the statement
+            await result;
         });
     });
 

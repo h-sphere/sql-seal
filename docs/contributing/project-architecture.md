@@ -2,8 +2,8 @@
 SQLSeal is an Obsidian Plugin written in TypeScript. We use the following tech stack:
 - [PNPM](https://pnpm.io/)
 - [TypeScript](https://www.typescriptlang.org/)
-- [SQL.JS](https://github.com/sql-js/sql.js): [SQLite](https://www.sqlite.org/) compiled into WebAssembly
-    - [AbsurdSQL](https://github.com/jlongster/absurd-sql) to persist SQLite page blocks into IndexedDB and not keep the database in the memory
+- [wa-sqlite](https://github.com/rhashimoto/wa-sqlite): [SQLite](https://www.sqlite.org/) compiled into WebAssembly
+    - IDBBatchAtomicVFS to persist SQLite page blocks into IndexedDB and not keep the database in memory
 - [AGGrid](https://www.ag-grid.com/) - grid solution, default table renderer
 - Node-SQL-Parser - to parse SQL and modify table names before sending it to SQLite
 - Comlink - for Webworker communication abstraction
@@ -11,7 +11,7 @@ SQLSeal is an Obsidian Plugin written in TypeScript. We use the following tech s
 ## Architecture overview
 ![Architecture Diagram](./diagram.png)
 
-On the high level SQLSeal uses SQLite and communicates with it using WebWorker. The main process calls that Web Worker (using Comlink as a wrapper to abstract away complexity of postMessage and wrap it into class methods returning promises instead). The database is setup in a way that individual blocks are being persisted into the IndexedDB. Thanks to that even if the database grows, the memory footprint should stay relatively low.
+On the high level SQLSeal uses SQLite (via wa-sqlite) and communicates with it using WebWorker. The main process calls that Web Worker (using Comlink as a wrapper to abstract away complexity of postMessage and wrap it into class methods returning promises instead). The database is setup in a way that individual blocks are being persisted into IndexedDB using IDBBatchAtomicVFS. Thanks to that even if the database grows, the memory footprint should stay relatively low.
 
 
 ## Extensible Architecture

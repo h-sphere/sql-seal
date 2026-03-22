@@ -1,4 +1,4 @@
-const unidecode = require('unidecode')
+import unidecode from 'unidecode';
 
 /**
  * Sanitizes a string to be used as a valid SQLite column name.

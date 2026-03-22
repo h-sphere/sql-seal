@@ -1,3 +1,4 @@
+import { jest, describe, it, expect } from '@jest/globals';
 import { Omnibus } from "@hypersphere/omnibus"
 import { registerObservers } from "./registerObservers"
 
