@@ -3,6 +3,7 @@ import { ISyncStrategy } from "./abstractSyncStrategy";
 import { CsvFileSyncStrategy } from "./CsvFileSyncStrategy";
 import { MarkdownTableSyncStrategy } from "./MarkdownTableSyncStrategy";
 import { JsonFileSyncStrategy } from "./JSONFileSyncStrategy";
+import { JsonlFileSyncStrategy } from "./JsonlFileSyncStrategy";
 import { ParserTableDefinition } from "./types";
 import { TableDefinitionExternal } from "../repository/tableDefinitions";
 import { getFileExtension } from "../../../utils/extractExtension";
@@ -17,6 +18,9 @@ const resolveFileStrategy = (filename: string) => {
         case 'json':
         case 'json5':
             return JsonFileSyncStrategy
+        case 'jsonl':
+        case 'ndjson':
+            return JsonlFileSyncStrategy
         default:
             throw new Error(`No file processor for extension ${extension}`)
     }
