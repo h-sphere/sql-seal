@@ -19,7 +19,9 @@ import { SQLSealLangDefinition } from '../../editor/parser';
 
 interface CodeBlockMatch {
   startIndex: number,
-  content: string
+  content: string,
+  /** Characters stripped from the start of each content line (e.g. "> " in callouts) */
+  linePrefix?: string
 }
 
 const markDecorations = {
@@ -83,19 +85,32 @@ export class SQLSealViewPlugin implements PluginValue {
       }]
     }
 
-    // Parsing
-    const codeBlockRegex = /```(sqlseal)\n([\s\S]*?)```/g;
+    // Parsing — match code blocks with optional callout prefix (e.g. "> ") on fence lines.
+    // The prefix is captured so positions can be mapped back to the raw document.
+    const codeBlockRegex = /^([ \t]*(?:> )*)```(sqlseal)\n([\s\S]*?)^[ \t]*(?:> )*```/gm;
     let match;
     let results: CodeBlockMatch[] = []
     while ((match = codeBlockRegex.exec(text)) !== null) {
+      const fencePrefix = match[1] || '';
+      const langTag = match[2];
+      const rawContent = match[3];
       const blockStart = match.index;
-      const langTagEnd = blockStart + match[1].length + 3;
-      const sqlContent = match[2];
-      const contentStart = langTagEnd + 1;
-      results.push({
-        content: sqlContent,
-        startIndex: contentStart
-      })
+      const langTagEnd = blockStart + fencePrefix.length + 3 + langTag.length; // prefix + ``` + langTag
+      const contentStart = langTagEnd + 1; // +1 for the newline after the opening fence
+
+      if (!fencePrefix) {
+        results.push({ content: rawContent, startIndex: contentStart })
+      } else {
+        // Strip the callout prefix from each content line so the grammar can parse it cleanly.
+        const strippedLines = rawContent.split('\n').map(line =>
+          line.startsWith(fencePrefix) ? line.slice(fencePrefix.length) : line
+        )
+        results.push({
+          content: strippedLines.join('\n'),
+          startIndex: contentStart,
+          linePrefix: fencePrefix
+        })
+      }
     }
     return results
   }
@@ -123,9 +138,22 @@ export class SQLSealViewPlugin implements PluginValue {
   }
 
   privateDecorateCodeblock(codeblockMatch: CodeBlockMatch): Array<Range<Decoration>> {
-      const { content, startIndex } = codeblockMatch
+      const { content, startIndex, linePrefix } = codeblockMatch
       const decorations = this.parseWithGrammar(content);
-        return (decorations || []).flatMap(dec => {
+
+      /**
+       * Map a position in the (possibly stripped) content back to the raw document.
+       * For callout blocks, each line has a prefix (e.g. "> ") that was removed before
+       * parsing. We restore that offset here: for a position on line N, add (N+1) * prefixLen.
+       */
+      const toDocPos = (posInContent: number): number => {
+        if (!linePrefix) return startIndex + posInContent
+        const prefixLen = linePrefix.length
+        const lineCount = (content.slice(0, posInContent).match(/\n/g) || []).length
+        return startIndex + posInContent + (lineCount + 1) * prefixLen
+      }
+
+      return (decorations || []).flatMap(dec => {
           switch (dec.type) {
             case 'filename':
               return this.decorateFilename(dec, codeblockMatch)
@@ -133,8 +161,8 @@ export class SQLSealViewPlugin implements PluginValue {
               const decoration = markDecorations[dec.type as keyof typeof markDecorations];
             if (decoration) {
               return decoration.range(
-                startIndex + dec.start,
-                startIndex + dec.end
+                toDocPos(dec.start),
+                toDocPos(dec.end)
               )
             } else {
               return []
