@@ -10,8 +10,9 @@ module.exports = {
     '/__mocks__/'
   ],
   moduleNameMapper: {
-    '^virtual:sqljs-wasm-url$': '<rootDir>/src/modules/explorer/database/__tests__/__mocks__/sqljs-wasm-url.ts',
     '^virtual:wa-sqlite-wasm-url$': '<rootDir>/src/modules/explorer/database/__tests__/__mocks__/wa-sqlite-wasm-url.ts',
-    '^virtual:sqlite-wasm-url$': '<rootDir>/src/modules/explorer/database/__tests__/__mocks__/sqlite-wasm-url.ts',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(wa-sqlite)/)'
+  ],
 };

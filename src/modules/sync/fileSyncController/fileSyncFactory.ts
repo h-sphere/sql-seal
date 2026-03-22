@@ -14,9 +14,7 @@ export const fileSyncFactory = async (
 	sync: Sync,
 ) => {
 	return async () => {
-		console.log('######### SEAL FILE SYNC INIT IN FACTORY: DATABASE AND SYNC SHOULD BE ALREADY CREATED BY NOW')
 		const db = await dbPromise;
-		console.log('fileSyncFactory: Database resolved:', !!db);
 
 		const fileSync = new SealFileSync(app, plugin, (name) =>
 			sync.triggerGlobalTableChange(name),

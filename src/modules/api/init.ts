@@ -4,7 +4,7 @@ import {
 	SQLSealRegisterApi,
 } from "./pluginApi/sqlSealApi";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
-import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
 
 const SQLSEAL_API_KEY = "___sqlSeal";

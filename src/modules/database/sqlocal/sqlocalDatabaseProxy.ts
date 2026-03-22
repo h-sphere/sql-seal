@@ -18,7 +18,6 @@ export class SqlocalDatabaseProxy {
     private worker?: Worker;
 
     constructor(private readonly app: App, private readonly dbName: string) {
-        console.log('SqlocalDatabaseProxy: Constructor called with dbName:', dbName);
     }
 
     async connect() {
@@ -32,8 +31,6 @@ export class SqlocalDatabaseProxy {
 
         this.connectingPromise = new Promise(async (resolve, reject) => {
             try {
-                console.log('SqlocalDatabaseProxy: Creating worker');
-
                 // Import the worker code built by esbuild
                 // @ts-ignore
                 const workerCodeModule = await import('virtual:sqlocal-worker-code');
@@ -50,15 +47,12 @@ export class SqlocalDatabaseProxy {
                 // Wrap worker with Comlink
                 const DatabaseWrap = Comlink.wrap<typeof SqlocalWorkerDatabase>(this.worker);
 
-                console.log('SqlocalDatabaseProxy: Instantiating worker database');
                 const instance = await new DatabaseWrap(this.dbName);
 
-                console.log('SqlocalDatabaseProxy: Connecting worker database');
                 await instance.connect();
 
                 this.db = instance;
                 this.isConnected = true;
-                console.log('SqlocalDatabaseProxy: Worker database connected');
                 resolve();
             } catch (e) {
                 console.error('SqlocalDatabaseProxy: Failed to initialize worker database:', e);
@@ -69,11 +63,11 @@ export class SqlocalDatabaseProxy {
         return this.connectingPromise;
     }
 
-    async disconect() {
+    async disconnect() {
         if (!this.isConnected) {
             return;
         }
-        await this.db?.disconect();
+        await this.db?.disconnect();
         if (this.worker) {
             this.worker.terminate();
             this.worker = undefined;
@@ -135,7 +129,7 @@ export class SqlocalDatabaseProxy {
     }
 
     async explain(statement: string, frontmatter: Record<string, unknown>) {
-        return this.db?.explain(statement, frontmatter);
+        return this.db?.explain(statement, frontmatter) ?? "";
     }
 
     async hasTable(tableName: string) {

@@ -2,7 +2,7 @@ import { App, Plugin, TFile } from "obsidian";
 import { AFileSyncTable } from "./abstractFileSyncTable";
 import { difference } from "lodash";
 import { sanitise } from "../../../../utils/sanitiseColumn";
-import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabaseProxy";
 
 
 export const FILES_TABLE_NAME = 'files'

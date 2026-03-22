@@ -1,7 +1,7 @@
 import { App, MarkdownPostProcessorContext } from "obsidian"
 import { RendererRegistry } from "../renderer/rendererRegistry"
 import { CodeblockProcessor } from "./CodeblockProcessor"
-import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase"
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy"
 import { Sync } from "../../sync/sync/sync"
 import { Settings } from "../../settings/Settings"
 import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser"

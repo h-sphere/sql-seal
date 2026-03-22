@@ -1,7 +1,7 @@
 import { Registrator } from "@hypersphere/dity";
 import { apiInit } from "./init";
 import { Plugin } from "obsidian";
-import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
 

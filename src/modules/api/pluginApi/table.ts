@@ -1,4 +1,4 @@
-import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase"
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy"
 
 type Item<Columns extends string[]> = Record<Columns[number], string | number | undefined>
 

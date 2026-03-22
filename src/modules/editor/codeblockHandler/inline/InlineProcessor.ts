@@ -1,7 +1,7 @@
 import { OmnibusRegistrator } from "@hypersphere/omnibus";
 import { App, MarkdownRenderChild } from "obsidian";
 import { transformQuery } from "../../sql/sqlTransformer";
-import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabaseProxy";
 import { Sync } from "../../../sync/sync/sync";
 import { registerObservers } from "../../../../utils/registerObservers";
 import { displayError } from "../../../../utils/ui";

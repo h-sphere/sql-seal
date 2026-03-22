@@ -1,5 +1,5 @@
 import { isStringifiedArray } from "../../../utils/ui";
-import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy";
 import { CellFunction } from "./CellFunction";
 import { parse } from 'json5'
 

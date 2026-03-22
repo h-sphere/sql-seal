@@ -23,7 +23,6 @@ export class SqlocalWorkerDatabase {
     private isRecreating = false;
 
     constructor(private readonly dbName: string) {
-        console.log('SqlocalWorkerDatabase: Constructor called with dbName:', dbName);
     }
 
     /**
@@ -62,13 +61,9 @@ export class SqlocalWorkerDatabase {
         }
 
         try {
-            console.log('SqlocalWorkerDatabase: Initializing wa-sqlite with bundled WASM');
-            console.log('SqlocalWorkerDatabase: WASM URL:', wasmUrl);
-
             // Initialize the module with bundled WASM
             const asyncModule = await SQLiteAsyncESMFactory({
                 locateFile: (file: string) => {
-                    console.log('SqlocalWorkerDatabase: SQLite requesting file:', file);
                     if (file.endsWith('.wasm')) {
                         return wasmUrl;
                     }
@@ -78,9 +73,6 @@ export class SqlocalWorkerDatabase {
 
             // Use Factory to get the actual sqlite3 API
             this.sqlite3 = SQLite.Factory(asyncModule);
-            console.log('SqlocalWorkerDatabase: wa-sqlite initialized successfully');
-            console.log('SqlocalWorkerDatabase: sqlite3 type:', typeof this.sqlite3);
-            console.log('SqlocalWorkerDatabase: vfs_register exists:', typeof this.sqlite3.vfs_register);
             return this.sqlite3;
         } catch (error) {
             console.error('SqlocalWorkerDatabase: Failed to initialize wa-sqlite:', error);
@@ -94,7 +86,6 @@ export class SqlocalWorkerDatabase {
         }
 
         try {
-            console.log('SqlocalWorkerDatabase: Registering IDBBatchAtomicVFS for', dbName);
             // Register VFS with relaxed durability for performance
             // @ts-ignore - Constructor does accept these parameters despite TypeScript definition
             const vfs = new IDBBatchAtomicVFS(dbName, {
@@ -102,7 +93,6 @@ export class SqlocalWorkerDatabase {
             });
             this.sqlite3.vfs_register(vfs);
             this.vfsRegistered = true;
-            console.log('SqlocalWorkerDatabase: IDBBatchAtomicVFS registered successfully');
         } catch (error) {
             console.error('SqlocalWorkerDatabase: Failed to register VFS:', error);
             throw error;
@@ -115,23 +105,17 @@ export class SqlocalWorkerDatabase {
         }
 
         try {
-            console.log('SqlocalWorkerDatabase: Connecting to database');
-
             // Initialize SQLite
             await this.initializeSQLite();
 
             // Register VFS
             this.registerVFS(this.dbName);
 
-            console.log('SqlocalWorkerDatabase: Opening database connection for', this.dbName);
-
             // Open database connection with concurrent read support
             this.connection = await this.sqlite3.open_v2(
                 this.dbName,
                 SQLite.SQLITE_OPEN_CREATE | SQLite.SQLITE_OPEN_READWRITE
             );
-
-            console.log('SqlocalWorkerDatabase: Database connection opened successfully');
 
             // Configure for optimal speed (data can be recreated in this project)
             // Using MEMORY journal mode for maximum performance
@@ -144,14 +128,13 @@ export class SqlocalWorkerDatabase {
             `);
 
             this.isConnected = true;
-            console.log('SqlocalWorkerDatabase: Connected successfully');
         } catch (error) {
             console.error('SqlocalWorkerDatabase: Failed to connect:', error);
             throw error;
         }
     }
 
-    async disconect() {
+    async disconnect() {
         if (!this.isConnected || !this.connection) {
             return;
         }
@@ -163,8 +146,6 @@ export class SqlocalWorkerDatabase {
     }
 
     registerCustomFunction(name: string, argsCount = 1) {
-        console.log(`SqlocalWorkerDatabase: Registering custom function '${name}' with ${argsCount} args`);
-
         if (!this.connection) {
             console.warn('SqlocalWorkerDatabase: Database not connected, cannot register custom function');
             return Promise.resolve();
@@ -174,7 +155,6 @@ export class SqlocalWorkerDatabase {
         // The callback signature is (context: number, values: Uint32Array)
         // where values is an array of pointers to sqlite3_value
         try {
-            console.log(`SqlocalWorkerDatabase: Attempting to register function overloads for '${name}'`);
 
             if (argsCount >= 1) {
                 this.sqlite3.create_function(
@@ -227,8 +207,6 @@ export class SqlocalWorkerDatabase {
             if (argsCount >= 4) {
                 throw new Error('Too many arguments, only up to 3 arguments are supported at the moment.');
             }
-
-            console.log(`SqlocalWorkerDatabase: Successfully registered custom function '${name}'`);
         } catch (error) {
             console.error(`SqlocalWorkerDatabase: Error registering function '${name}':`, error);
         }
@@ -237,17 +215,13 @@ export class SqlocalWorkerDatabase {
     }
 
     async recreateDatabase() {
-        console.log('SqlocalWorkerDatabase: Starting recreateDatabase');
-
         if (!this.connection) throw new Error('Database not connected');
         if (this.isRecreating) {
-            console.log('already recreating');
             return;
         }
 
         try {
             this.isRecreating = true;
-            console.log('SqlocalWorkerDatabase: Getting table names');
 
             // Get all table names using wa-sqlite API
             const tables: any[] = [];
@@ -269,23 +243,16 @@ export class SqlocalWorkerDatabase {
                 this.sqlite3.str_finish(str);
             }
 
-            console.log('SqlocalWorkerDatabase: Found tables:', tables.map(t => t.name));
-
             // Drop all tables
             for (const table of tables) {
-                console.log(`SqlocalWorkerDatabase: Dropping table '${table.name}'`);
                 await this.dropTableInternal(table.name);
             }
 
             // Run VACUUM to reclaim space and optimize database (matching old sql.js implementation)
-            console.log('SqlocalWorkerDatabase: Running VACUUM to optimize database');
             await this.sqlite3.exec(this.connection, 'VACUUM');
 
             // Run integrity check to verify database health
-            console.log('SqlocalWorkerDatabase: Running integrity check');
             await this.sqlite3.exec(this.connection, 'PRAGMA integrity_check');
-
-            console.log('SqlocalWorkerDatabase: Successfully recreated database');
         } catch (error) {
             console.error('SqlocalWorkerDatabase: Error during recreateDatabase:', error);
             throw error;
@@ -296,7 +263,6 @@ export class SqlocalWorkerDatabase {
 
     private async dropTableInternal(name: string) {
         const sql = `DROP TABLE IF EXISTS "${name}"`;
-        console.log(`SqlocalWorkerDatabase: Executing SQL: ${sql}`);
 
         const str = this.sqlite3.str_new(this.connection, sql);
         try {
@@ -308,8 +274,6 @@ export class SqlocalWorkerDatabase {
         } finally {
             this.sqlite3.str_finish(str);
         }
-
-        console.log(`SqlocalWorkerDatabase: Successfully dropped table '${name}'`);
     }
 
     async updateData(name: string, data: Array<Record<string, unknown>>, key: string = 'id') {
@@ -390,12 +354,9 @@ export class SqlocalWorkerDatabase {
     }
 
     async insertData(name: string, inData: Array<Record<string, unknown>>) {
-        console.log(`SqlocalWorkerDatabase: Inserting ${inData.length} rows into table '${name}'`);
-
         if (!this.connection) throw new Error('Database not connected');
 
         if (inData.length === 0) {
-            console.log('SqlocalWorkerDatabase: No data to insert, returning');
             return;
         }
 
@@ -405,7 +366,6 @@ export class SqlocalWorkerDatabase {
         const columnNames = columns.map(col => `"${col}"`).join(', ');
 
         const sql = `INSERT INTO "${name}" (${columnNames}) VALUES (${placeholders})`;
-        console.log(`SqlocalWorkerDatabase: Insert SQL: ${sql}`);
 
         // PERFORMANCE OPTIMIZATION: Prepare statement once, reuse for all rows
         const str = this.sqlite3.str_new(this.connection, sql);
@@ -432,12 +392,9 @@ export class SqlocalWorkerDatabase {
             await this.sqlite3.finalize(prepared.stmt);
             this.sqlite3.str_finish(str);
         }
-        console.log(`SqlocalWorkerDatabase: Successfully inserted ${inData.length} rows into '${name}'`);
     }
 
     async dropTable(name: string) {
-        console.log(`SqlocalWorkerDatabase: Dropping table '${name}'`);
-
         if (!this.connection) throw new Error('Database not connected');
 
         try {
@@ -449,18 +406,14 @@ export class SqlocalWorkerDatabase {
     }
 
     async createTableNoTypes(name: string, columns: string[], noDrop?: boolean) {
-        console.log(`SqlocalWorkerDatabase: Creating table '${name}' with columns:`, columns);
-
         if (!this.connection) throw new Error('Database not connected');
 
         if (!noDrop) {
-            console.log(`SqlocalWorkerDatabase: Dropping table '${name}' first`);
             await this.dropTableInternal(name);
         }
 
         const columnDefs = columns.map(col => `"${col}" TEXT`).join(', ');
         const sql = `CREATE TABLE IF NOT EXISTS "${name}" (${columnDefs})`;
-        console.log(`SqlocalWorkerDatabase: Executing SQL: ${sql}`);
 
         const str = this.sqlite3.str_new(this.connection, sql);
         try {
@@ -472,17 +425,12 @@ export class SqlocalWorkerDatabase {
         } finally {
             this.sqlite3.str_finish(str);
         }
-
-        console.log(`SqlocalWorkerDatabase: Successfully created table '${name}'`);
     }
 
     async createTable(name: string, columns: ColumnDefinition[], noDrop?: boolean) {
-        console.log(`SqlocalWorkerDatabase: Creating typed table '${name}' with columns:`, columns);
-
         if (!this.connection) throw new Error('Database not connected');
 
         if (!noDrop) {
-            console.log(`SqlocalWorkerDatabase: Dropping table '${name}' first`);
             await this.dropTableInternal(name);
         }
 
@@ -492,7 +440,6 @@ export class SqlocalWorkerDatabase {
             return `"${col.name}" ${type}`;
         }).join(', ');
         const sql = `CREATE TABLE IF NOT EXISTS "${name}" (${columnDefs})`;
-        console.log(`SqlocalWorkerDatabase: Executing SQL: ${sql}`);
 
         const str = this.sqlite3.str_new(this.connection, sql);
         try {
@@ -504,8 +451,6 @@ export class SqlocalWorkerDatabase {
         } finally {
             this.sqlite3.str_finish(str);
         }
-
-        console.log(`SqlocalWorkerDatabase: Successfully created typed table '${name}'`);
     }
 
     async createIndex(indexName: string, tableName: string, columns: string[]) {
@@ -577,8 +522,6 @@ export class SqlocalWorkerDatabase {
     }
 
     async select(statement: string, frontmatter: Record<string, unknown>) {
-        console.log('SqlocalWorkerDatabase: Executing select with statement:', statement.substring(0, 100) + (statement.length > 100 ? '...' : ''));
-
         if (!this.connection) throw new Error('Database not connected');
         if (this.isRecreating) {
             console.warn('SqlocalWorkerDatabase: Database is being recreated, cannot execute select');
@@ -722,8 +665,25 @@ export class SqlocalWorkerDatabase {
             this.sqlite3.str_finish(str);
         }
 
-        // Return array of objects matching old sql.js implementation
-        return results;
+        // Format results as indented string (matching SqlocalDatabase implementation)
+        let strResult = '';
+        const map = new Map<number, number>();
+        const INDENT_INCREASE = 4;
+        map.set(0, -INDENT_INCREASE);
+
+        for (const result of results || []) {
+            const parent = parseInt((result.parent as unknown as string) ?? '0', 10);
+            const indent = (map.get(parent) || 0) + INDENT_INCREASE;
+
+            for (let i = 0; i < indent; i++) {
+                strResult += ' ';
+            }
+
+            strResult += result.detail + "\n";
+            map.set(result.id as number, indent);
+        }
+
+        return strResult;
     }
 
     async hasTable(tableName: string) {

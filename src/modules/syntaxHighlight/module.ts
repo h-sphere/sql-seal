@@ -3,7 +3,7 @@ import { syntaxHighlightInit } from "./init";
 import { App, Plugin } from "obsidian";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 import { cellParserFactory } from "./cellParser/factory";
-import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 import { viewPluginGeneratorFactory } from "./viewPluginGenerator";
 
 

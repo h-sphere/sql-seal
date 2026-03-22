@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { MemoryDatabase } from '../memoryDatabase';
+import { WaSqliteMemoryDatabase } from '../waSqliteMemoryDatabase';
 
 // Mock TFile from Obsidian
 class MockTFile {
@@ -17,8 +17,8 @@ class MockTFile {
     }
 }
 
-describe('MemoryDatabase with sql.js', () => {
-    let memoryDb: MemoryDatabase;
+describe('WaSqliteMemoryDatabase with wa-sqlite', () => {
+    let memoryDb: WaSqliteMemoryDatabase;
     let testDbBuffer: ArrayBuffer;
     let mockFile: any;
 
@@ -29,9 +29,9 @@ describe('MemoryDatabase with sql.js', () => {
     });
 
     beforeEach(() => {
-        // Create new mock file and MemoryDatabase instance for each test
+        // Create new mock file and WaSqliteMemoryDatabase instance for each test
         mockFile = new MockTFile('test.db', testDbBuffer);
-        memoryDb = new MemoryDatabase(mockFile);
+        memoryDb = new WaSqliteMemoryDatabase(mockFile);
     });
 
     afterEach(async () => {
@@ -202,12 +202,12 @@ describe('MemoryDatabase with sql.js', () => {
             expect(results.data).toHaveLength(2);
         });
 
-        test('query() method (synchronous wrapper) should work', async () => {
-            const results = memoryDb.query('SELECT * FROM users ORDER BY id');
-
-            expect(results.data).toHaveLength(2);
-            expect(results.data[0]).toHaveProperty('id');
-            expect(results.data[0]).toHaveProperty('name');
+        test.skip('query() method (synchronous) not supported in wa-sqlite', async () => {
+            // wa-sqlite is async-only, synchronous query() is not supported
+            // This test is skipped for the new wa-sqlite implementation
+            expect(() => {
+                memoryDb.query('SELECT * FROM users ORDER BY id');
+            }).toThrow('Synchronous query() not supported');
         });
 
         test('getAllTables() should return list of table names', async () => {
@@ -290,23 +290,23 @@ describe('MemoryDatabase with sql.js', () => {
         test('should throw error when querying before connect()', () => {
             expect(() => {
                 memoryDb.query('SELECT * FROM users');
-            }).toThrow('Database not connected');
+            }).toThrow('Synchronous query() not supported');
         });
 
         test('should handle invalid SQL gracefully', async () => {
             await memoryDb.connect();
 
-            expect(() => {
-                memoryDb.query('INVALID SQL STATEMENT');
-            }).toThrow();
+            await expect(async () => {
+                await memoryDb.queryAsync('INVALID SQL STATEMENT');
+            }).rejects.toThrow();
         });
 
         test('should handle queries on non-existent tables', async () => {
             await memoryDb.connect();
 
-            expect(() => {
-                memoryDb.query('SELECT * FROM nonexistent_table');
-            }).toThrow();
+            await expect(async () => {
+                await memoryDb.queryAsync('SELECT * FROM nonexistent_table');
+            }).rejects.toThrow();
         });
 
         test('should handle invalid table names in getColumns()', async () => {
@@ -320,14 +320,14 @@ describe('MemoryDatabase with sql.js', () => {
     describe('Disconnect behavior', () => {
         test('should close database connection', async () => {
             await memoryDb.connect();
-            const resultBefore = memoryDb.query('SELECT 1 as test');
+            const resultBefore = await memoryDb.queryAsync('SELECT 1 as test');
             expect(resultBefore.data).toEqual([{ test: 1 }]);
 
             await memoryDb.disconnect();
 
-            expect(() => {
-                memoryDb.query('SELECT 1 as test');
-            }).toThrow('Database not connected');
+            await expect(async () => {
+                await memoryDb.queryAsync('SELECT 1 as test');
+            }).rejects.toThrow('Database not connected');
         });
 
         test('should be safe to disconnect multiple times', async () => {
@@ -335,9 +335,9 @@ describe('MemoryDatabase with sql.js', () => {
             await memoryDb.disconnect();
             await memoryDb.disconnect(); // Should not throw
 
-            expect(() => {
-                memoryDb.query('SELECT 1');
-            }).toThrow('Database not connected');
+            await expect(async () => {
+                await memoryDb.queryAsync('SELECT 1');
+            }).rejects.toThrow('Database not connected');
         });
     });
 

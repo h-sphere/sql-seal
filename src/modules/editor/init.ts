@@ -1,5 +1,5 @@
 import { App, Plugin } from "obsidian";
-import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 import { Sync } from "../sync/sync/sync";
 import { RendererRegistry } from "./renderer/rendererRegistry";
 import { TableRenderer } from "./renderer/TableRenderer";

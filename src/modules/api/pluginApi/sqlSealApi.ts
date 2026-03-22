@@ -3,7 +3,7 @@ import { version } from '../../../../package.json'
 import { RendererConfig, RendererRegistry } from "../../editor/renderer/rendererRegistry";
 import { FilepathHasher } from "../../../utils/hasher";
 import { DatabaseTable } from "./table";
-import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy";
 import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
 import { CellFunction } from "../../syntaxHighlight/cellParser/CellFunction";
 

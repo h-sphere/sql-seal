@@ -6,7 +6,6 @@ import {
 	provideGlobalGridOptions,
 } from "ag-grid-community";
 import { mainModule } from "./modules/main/module";
-import { sql } from "kysely";
 
 // Register all community features
 ModuleRegistry.registerModules([AllCommunityModule]);

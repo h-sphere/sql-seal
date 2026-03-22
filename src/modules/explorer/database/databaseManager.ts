@@ -1,20 +1,16 @@
 import { TFile } from "obsidian";
-import { MemoryDatabase } from "./memoryDatabase";
+import { WaSqliteMemoryDatabase } from "./waSqliteMemoryDatabase";
 
 /**
  * DatabaseManager - manages connections to external .db files
- * Re-implemented using wa-sqlite instead of sql.js
+ * Using wa-sqlite with MemoryAsyncVFS for in-memory database loading
  */
 export class DatabaseManager {
 	constructor() {}
 
 	async getDatabaseConnection(file: TFile) {
-		console.log('DatabaseManager: Creating connection to external .db file:', file.name);
-
-		const db = new MemoryDatabase(file);
+		const db = new WaSqliteMemoryDatabase(file);
 		await db.connect();
-
-		console.log('DatabaseManager: Successfully connected to external .db file');
 		return db;
 	}
 

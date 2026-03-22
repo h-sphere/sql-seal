@@ -3,7 +3,7 @@ import { CodeblockProcessor } from "../editor/codeblockHandler/CodeblockProcesso
 import { EditorView, keymap } from "@codemirror/view";
 import { ViewPluginGeneratorType } from "../syntaxHighlight/viewPluginGenerator";
 import { EditorMenuBar } from "./EditorMenuBar";
-import { MemoryDatabase } from "./database/memoryDatabase";
+import { WaSqliteMemoryDatabase } from "./database/waSqliteMemoryDatabase";
 import { SchemaVisualiser } from "./schemaVisualiser/SchemaVisualiser";
 import { activateView } from "./activateView";
 import { App } from "obsidian";
@@ -32,7 +32,7 @@ export class Editor {
 		private viewPluginGenerator: ViewPluginGeneratorType,
 		private app: App,
 		private query: string = DEFAULT_QUERY,
-		private db: MemoryDatabase | null = null,
+		private db: WaSqliteMemoryDatabase | null = null,
 		private isTextFile: boolean = false,
 		private rendererRegistry?: RendererRegistry
 	) {

@@ -1,25 +1,28 @@
 import { TFile } from "obsidian";
 import { TableInfo } from "../schemaVisualiser/TableVisualiser";
-import initSqlJs, { Database } from 'sql.js';
+import SQLiteAsyncESMFactory from 'wa-sqlite/dist/wa-sqlite-async.mjs';
+import * as SQLite from 'wa-sqlite';
+import { MemoryAsyncVFS } from 'wa-sqlite/src/examples/MemoryAsyncVFS.js';
 // @ts-ignore - Virtual module from esbuild
-import sqlJsWasmUrl from 'virtual:sqljs-wasm-url';
+import wasmUrl from 'virtual:wa-sqlite-wasm-url';
 
 type ParamsObject = Record<string, any>;
 
 /**
- * MemoryDatabase - reads external .db files using sql.js
+ * WaSqliteMemoryDatabase - reads external .db files using wa-sqlite
  * This is used by the SQL Explorer to open and query external SQLite database files
  *
- * Uses sql.js for simple, direct Uint8Array → database loading with bundled WASM
+ * Uses wa-sqlite with MemoryAsyncVFS for simple, direct Uint8Array → database loading
  */
-export class MemoryDatabase {
-    private db: Database | null = null;
+export class WaSqliteMemoryDatabase {
+    private connection: number | null = null;
+    private sqlite3: any = null;
+    private vfs: MemoryAsyncVFS | null = null;
+    private readonly dbName = 'external.db';
 
     constructor(private file: TFile) {}
 
     async connect() {
-        console.log('MemoryDatabase: Loading external .db file using sql.js');
-
         // Read the .db file binary data
         const binary = await this.file.vault.readBinary(this.file);
         const data = new Uint8Array(binary);
@@ -30,52 +33,91 @@ export class MemoryDatabase {
             throw new Error('Invalid SQLite database file format');
         }
 
-        console.log('MemoryDatabase: Initializing sql.js with bundled WASM');
-
-        // Initialize sql.js (loads bundled WASM for offline use)
-        const SQL = await initSqlJs({
-            locateFile: () => sqlJsWasmUrl
+        // Initialize wa-sqlite
+        const asyncModule = await SQLiteAsyncESMFactory({
+            locateFile: (file: string) => {
+                if (file.endsWith('.wasm')) {
+                    return wasmUrl;
+                }
+                return file;
+            }
         });
 
-        console.log('MemoryDatabase: Loading database from Uint8Array');
+        this.sqlite3 = SQLite.Factory(asyncModule);
 
-        // Direct Uint8Array → database (one line!)
-        this.db = new SQL.Database(data);
+        // Create and register MemoryAsyncVFS
+        this.vfs = new MemoryAsyncVFS();
+        this.sqlite3.vfs_register(this.vfs, true); // true = make it the default VFS
 
-        console.log('MemoryDatabase: External .db file loaded successfully');
+        // Pre-populate the VFS with the database file data
+        // The MemoryVFS stores files in a Map keyed by filename
+        this.vfs.mapNameToFile.set(this.dbName, {
+            name: this.dbName,
+            flags: 0,
+            size: data.byteLength,
+            data: data.buffer // Use the ArrayBuffer from the Uint8Array
+        });
+
+        // Open the database connection
+        this.connection = await this.sqlite3.open_v2(
+            this.dbName,
+            SQLite.SQLITE_OPEN_READONLY // Open as read-only since we're just querying
+        );
     }
 
-    private runQuery<T = ParamsObject>(sql: string, params: any[] = []): { data: T[], columns: string[] } {
-        if (!this.db) {
+    private async runQuery<T = ParamsObject>(sql: string, params: any[] = []): Promise<{ data: T[], columns: string[] }> {
+        if (!this.connection || !this.sqlite3) {
             throw new Error('Database not connected');
         }
 
         try {
-            const results = this.db.exec(sql, params);
+            const data: T[] = [];
+            let columns: string[] = [];
 
-            if (results.length === 0) {
-                return { data: [], columns: [] };
+            // Create string in WASM memory
+            const str = this.sqlite3.str_new(this.connection, sql);
+            try {
+                const prepared = await this.sqlite3.prepare_v2(this.connection, this.sqlite3.str_value(str));
+                if (prepared && prepared.stmt) {
+                    // Bind parameters if any
+                    if (params.length > 0) {
+                        await this.sqlite3.bind_collection(prepared.stmt, params);
+                    }
+
+                    // Get column names
+                    const columnCount = await this.sqlite3.column_count(prepared.stmt);
+                    for (let i = 0; i < columnCount; i++) {
+                        columns.push(await this.sqlite3.column_name(prepared.stmt, i));
+                    }
+
+                    // Fetch all rows
+                    while (await this.sqlite3.step(prepared.stmt) === SQLite.SQLITE_ROW) {
+                        const row: any = {};
+                        for (let i = 0; i < columnCount; i++) {
+                            row[columns[i]] = await this.sqlite3.column(prepared.stmt, i);
+                        }
+                        data.push(row as T);
+                    }
+
+                    await this.sqlite3.finalize(prepared.stmt);
+                }
+            } finally {
+                this.sqlite3.str_finish(str);
             }
-
-            const { columns, values } = results[0];
-            const data = values.map((row: any[]) => {
-                const obj: any = {};
-                columns.forEach((col: string, i: number) => {
-                    obj[col] = row[i];
-                });
-                return obj as T;
-            });
 
             return { data, columns };
         } catch (error) {
-            console.error('MemoryDatabase: Query execution failed', { sql, params, error });
+            console.error('WaSqliteMemoryDatabase: Query execution failed', { sql, params, error });
             throw error;
         }
     }
 
     query<T = ParamsObject>(query: string, params: Record<string, any> | null = null): { data: T[], columns: string[] } {
+        // Convert params object to array for wa-sqlite
         const paramArray = params && typeof params === 'object' && !Array.isArray(params) ? Object.values(params) : [];
-        return this.runQuery<T>(query, paramArray);
+        // This is a sync method in the original API, but we need async for wa-sqlite
+        // We'll need to make this async-compatible
+        throw new Error('Synchronous query() not supported in wa-sqlite implementation. Use queryAsync() instead.');
     }
 
     async queryAsync<T = ParamsObject>(query: string, params: Record<string, any> | null = null): Promise<{ data: T[], columns: string[] }> {
@@ -192,9 +234,13 @@ export class MemoryDatabase {
     }
 
     async disconnect() {
-        if (this.db) {
-            this.db.close();
-            this.db = null;
+        if (this.connection && this.sqlite3) {
+            await this.sqlite3.close(this.connection);
+            this.connection = null;
         }
+
+        // VFS cleanup is automatic when connection closes
+        this.vfs = null;
+        this.sqlite3 = null;
     }
 }

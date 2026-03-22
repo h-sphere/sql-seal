@@ -2,7 +2,7 @@ import { Registrator } from "@hypersphere/dity";
 import { explorerInit } from "./InitFactory";
 import { App, Plugin } from "obsidian";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
-import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 import { Settings } from "../settings/Settings";
 import { Sync } from "../sync/sync/sync";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";

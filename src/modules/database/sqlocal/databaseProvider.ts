@@ -26,15 +26,11 @@ export class DatabaseProvider {
 		const dbName = filename ? `${this.prefix}_${filename}` : `${this.prefix}_db`;
 
 		try {
-			console.log('DatabaseProvider: Creating worker-based database proxy for', dbName);
-
 			// Create the proxy which will handle worker creation and communication
 			const sqlocalDb = new SqlocalDatabaseProxy(this.app, dbName);
 
 			// Connect to initialize the worker
 			await sqlocalDb.connect();
-
-			console.log('DatabaseProvider: Worker database proxy created successfully');
 
 			// Cache the instance
 			this.databases.set(key, sqlocalDb);
@@ -49,10 +45,8 @@ export class DatabaseProvider {
 	}
 
 	async close() {
-		console.log('DatabaseProvider: Closing all database connections');
-		const promises = Array.from(this.databases.values()).map(db => db.disconect());
+		const promises = Array.from(this.databases.values()).map(db => db.disconnect());
 		await Promise.all(promises);
 		this.databases.clear();
-		console.log('DatabaseProvider: All connections closed');
 	}
 }

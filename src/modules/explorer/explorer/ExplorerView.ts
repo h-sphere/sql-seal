@@ -6,7 +6,7 @@ import {
 	WorkspaceLeaf,
 } from "obsidian";
 import { CodeblockProcessor } from "../../editor/codeblockHandler/CodeblockProcessor";
-import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy";
 import { RendererRegistry } from "../../editor/renderer/rendererRegistry";
 import { Settings } from "../../settings/Settings";
 import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";

@@ -1,5 +1,5 @@
 import { addIcon, App, Plugin } from "obsidian";
-import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../database/sqlocal/sqlocalDatabaseProxy";
 import { ModernCellParser } from "../syntaxHighlight/cellParser/ModernCellParser";
 import { RendererRegistry } from "../editor/renderer/rendererRegistry";
 import { Sync } from "../sync/sync/sync";

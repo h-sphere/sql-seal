@@ -1,5 +1,5 @@
 import mermaid from 'mermaid'
-import { MemoryDatabase } from '../database/memoryDatabase'
+import { WaSqliteMemoryDatabase } from '../database/waSqliteMemoryDatabase'
 
 export interface DetailedColumnInfo {
     name: string
@@ -29,7 +29,7 @@ export interface DetailedTableInfo {
 export class SchemaVisualiser {
     private initialized = false
     
-    constructor(private database: MemoryDatabase) {
+    constructor(private database: WaSqliteMemoryDatabase) {
         this.initializeMermaid()
     }
 
@@ -67,14 +67,7 @@ export class SchemaVisualiser {
         try {
             const schema = await this.buildSchema()
             const mermaidCode = this.generateMermaidERD(schema)
-            
-            // Debug: Log the generated Mermaid code
-            console.log('Generated Mermaid ERD Code:', mermaidCode)
-            console.log('Schema tables detected:', schema.map(t => ({
-                original: t.name,
-                escaped: this.escapeMermaidIdentifier(t.name)
-            })))
-            
+
             const diagramContainer = container.createDiv({ 
                 cls: 'sqlseal-mermaid-container',
                 attr: { 
@@ -107,14 +100,10 @@ export class SchemaVisualiser {
             this.addInteractivity(diagramContainer, schema)
             
             // Remove relationship summary - user requested removal
-            
+
         } catch (error) {
             console.error('Error rendering Mermaid schema:', error)
-            console.error('Error details:', {
-                message: error instanceof Error ? error.message : 'Unknown error',
-                stack: error instanceof Error ? error.stack : undefined
-            })
-            
+
             // Fallback to simple schema display
             this.showFallbackSchema(container, await this.buildSchema())
         }

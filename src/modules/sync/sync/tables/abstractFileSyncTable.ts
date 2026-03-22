@@ -1,5 +1,5 @@
 import { App, TFile } from "obsidian";
-import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../../../database/sqlocal/sqlocalDatabaseProxy";
 
 export abstract class AFileSyncTable {
     constructor(

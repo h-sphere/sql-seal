@@ -165,24 +165,6 @@ const workerPlugin = {
                 loader: 'js',
             };
         });
-
-        // Handle virtual WASM URL for sql.js
-        build.onResolve({ filter: /^virtual:sqljs-wasm-url$/ }, args => ({
-            path: args.path,
-            namespace: 'sqljs-wasm-url',
-        }));
-
-        build.onLoad({ filter: /.*/, namespace: 'sqljs-wasm-url' }, async () => {
-            const wasmPath = join(process.cwd(), 'node_modules/sql.js/dist/sql-wasm.wasm');
-            const wasmContents = readFileSync(wasmPath);
-            const wasmBase64 = wasmContents.toString('base64');
-            const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
-
-            return {
-                contents: `export default ${JSON.stringify(wasmDataUrl)};`,
-                loader: 'js',
-            };
-        });
     },
 };
 

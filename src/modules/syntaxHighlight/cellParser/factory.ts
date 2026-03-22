@@ -3,7 +3,7 @@ import { ModernCellParser } from "./ModernCellParser";
 import { LinkParser } from "./parser/link";
 import { ImageParser } from "./parser/image";
 import { CheckboxParser } from "./parser/checkbox";
-import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabase";
+import { SqlocalDatabaseProxy } from "../../database/sqlocal/sqlocalDatabaseProxy";
 
 export const getCellParser = (app: App, create = createEl) => {
 	const cellParser = new ModernCellParser();
