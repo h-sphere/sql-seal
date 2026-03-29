@@ -2,57 +2,15 @@
  * Tests for the callout syntax-highlighting fix (main-ow0).
  *
  * SQLSealViewPlugin is not imported here because it pulls in Obsidian/CodeMirror
- * globals that don't exist in Node. Instead, we extract and test the three pieces
- * of pure logic that were changed:
+ * globals that don't exist in Node. Instead, we test the pure logic functions
+ * that were extracted for testability:
  *
- * 1. The regex that finds sqlseal blocks (including inside callouts)
- * 2. The prefix-stripping that cleans "> " from each content line
- * 3. The toDocPos() formula that maps stripped positions back to raw doc positions
+ * 1. extractCodeBlocks() - The regex that finds sqlseal blocks (including inside callouts)
+ *    and the prefix-stripping that cleans "> " from each content line
+ * 2. toDocPos() - The formula that maps stripped positions back to raw doc positions
  */
 
-// --------------------------------------------------------------------------
-// 1. Replica of getCodeBlocks() logic — same regex and stripping as source
-// --------------------------------------------------------------------------
-
-interface CodeBlockMatch {
-    startIndex: number
-    content: string
-    linePrefix?: string
-}
-
-function extractCodeBlocks(text: string): CodeBlockMatch[] {
-    const codeBlockRegex = /^([ \t]*(?:> )*)```(sqlseal)\n([\s\S]*?)^[ \t]*(?:> )*```/gm
-    let match
-    const results: CodeBlockMatch[] = []
-    while ((match = codeBlockRegex.exec(text)) !== null) {
-        const fencePrefix = match[1] || ''
-        const langTag = match[2]
-        const rawContent = match[3]
-        const blockStart = match.index
-        const langTagEnd = blockStart + fencePrefix.length + 3 + langTag.length
-        const contentStart = langTagEnd + 1
-
-        if (!fencePrefix) {
-            results.push({ content: rawContent, startIndex: contentStart })
-        } else {
-            const strippedLines = rawContent.split('\n').map(line =>
-                line.startsWith(fencePrefix) ? line.slice(fencePrefix.length) : line
-            )
-            results.push({ content: strippedLines.join('\n'), startIndex: contentStart, linePrefix: fencePrefix })
-        }
-    }
-    return results
-}
-
-// --------------------------------------------------------------------------
-// 2. Replica of toDocPos() — same formula as privateDecorateCodeblock()
-// --------------------------------------------------------------------------
-
-function toDocPos(content: string, linePrefix: string, startIndex: number, posInContent: number): number {
-    const prefixLen = linePrefix.length
-    const lineCount = (content.slice(0, posInContent).match(/\n/g) || []).length
-    return startIndex + posInContent + (lineCount + 1) * prefixLen
-}
+import { extractCodeBlocks, toDocPos } from './codeBlockExtraction';
 
 // --------------------------------------------------------------------------
 // Tests
