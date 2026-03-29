@@ -450,4 +450,61 @@ SELECT id, value FROM data`, DEFAULT_VIEWS, DEFAULTS)).toEqual({
     }]
 })
     })
+
+    it('should not treat "select" as SQL keyword when it appears as a quoted config property key', () => {
+        // Test case for fix: quoted string "select" as a property key should not break the parser
+        expect(parseWithDefaults(`
+GRID {
+  "select": 4
+}
+SELECT * FROM files`, DEFAULT_VIEWS, DEFAULTS)).toEqual({
+            flags: { explain: false, refresh: true },
+            query: 'SELECT * FROM files',
+            renderer: {
+                type: 'GRID',
+                options: `{
+  "select": 4
+}`,
+            },
+            tables: []
+        })
+    })
+
+    it('should not treat "select" as SQL keyword when it appears as an unquoted config property key', () => {
+        // Bonus test: unquoted property key with colon immediately following
+        expect(parseWithDefaults(`
+GRID {
+  select: 4
+}
+SELECT * FROM files`, DEFAULT_VIEWS, DEFAULTS)).toEqual({
+            flags: { explain: false, refresh: true },
+            query: 'SELECT * FROM files',
+            renderer: {
+                type: 'GRID',
+                options: `{
+  select: 4
+}`,
+            },
+            tables: []
+        })
+    })
+
+    it('should handle "select" as property key with space before colon', () => {
+        // Edge case: space between quoted key and colon
+        expect(parseWithDefaults(`
+GRID {
+  "select" : 4
+}
+SELECT * FROM files`, DEFAULT_VIEWS, DEFAULTS)).toEqual({
+            flags: { explain: false, refresh: true },
+            query: 'SELECT * FROM files',
+            renderer: {
+                type: 'GRID',
+                options: `{
+  "select" : 4
+}`,
+            },
+            tables: []
+        })
+    })
 })
