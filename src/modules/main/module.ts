@@ -12,7 +12,7 @@ import { apiModule } from '../api/module'
 import { globalTables } from '../globalTables/module'
 import { explorer } from '../explorer/module'
 
-const obsidian = new Registrator({ logger: console.log })
+const obsidian = new Registrator(process.env.NODE_ENV === 'development' ? { logger: console.log } : undefined)
 .import<'app', App>()
 .import<'plugin', Plugin>()
 .import<'vault', Vault>()
