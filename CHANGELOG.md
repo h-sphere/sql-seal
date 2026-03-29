@@ -1,5 +1,17 @@
 # Releases
 
+## 0.40.0
+
+### Minor Changes
+
+- bf085fe: underlying engine updated to wa-sqlite
+- c856713: Adding tasks statuses support
+
+### Patch Changes
+
+- 03dfcd7: fixing issue with select keywords outside SQL queries
+- d9cb4d5: fixed syntax highlighting in callouts
+
 ## 0.39.1
 
 ### Patch Changes

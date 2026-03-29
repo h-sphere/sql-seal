@@ -1,0 +1,58 @@
+{
+  "changesets": [
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "patch"
+        }
+      ],
+      "summary": "fixing issue with select keywords outside SQL queries",
+      "id": "bright-weeks-chew"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "patch"
+        }
+      ],
+      "summary": "fixed syntax highlighting in callouts",
+      "id": "gentle-ducks-peel"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "minor"
+        }
+      ],
+      "summary": "underlying engine updated to wa-sqlite",
+      "id": "old-wombats-slide"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "minor"
+        }
+      ],
+      "summary": "Adding tasks statuses support",
+      "id": "orange-showers-argue"
+    }
+  ],
+  "releases": [
+    {
+      "name": "sqlseal",
+      "type": "minor",
+      "oldVersion": "0.39.1",
+      "changesets": [
+        "bright-weeks-chew",
+        "gentle-ducks-peel",
+        "old-wombats-slide",
+        "orange-showers-argue"
+      ],
+      "newVersion": "0.40.0"
+    }
+  ]
+}
