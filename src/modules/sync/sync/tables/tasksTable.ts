@@ -47,6 +47,7 @@ export class TasksFileSyncTable extends AFileSyncTable {
                     checked: status,
                     path: file.path,
                     task: taskContent,
+                    status: listItem.task,
                     position: {
                         line: listItem.position.start.line,
                         lineContent: lineContent
@@ -63,6 +64,7 @@ export class TasksFileSyncTable extends AFileSyncTable {
                 path: file.path,
                 task: taskContent,
                 completed: status ? 1 : 0,
+                status: listItem.task,
                 position: listItem.position.start.line,
                 checkbox: `SQLSEALCUSTOM(${JSON.stringify(checkboxData)})`,
 				heading: heading ? heading.heading : undefined,
@@ -72,7 +74,7 @@ export class TasksFileSyncTable extends AFileSyncTable {
     }
 
     async onInit(): Promise<void> {
-        await this.db.createTableNoTypes('tasks', ['checkbox', 'task', 'completed', 'filePath', 'path', 'position', 'heading', 'heading_level'])
+        await this.db.createTableNoTypes('tasks', ['checkbox', 'task', 'completed', 'status', 'filePath', 'path', 'position', 'heading', 'heading_level'])
 
          // Indexes
          const toIndex = ['filePath']
