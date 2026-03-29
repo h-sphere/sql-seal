@@ -3,6 +3,7 @@ import { SQLSealSettingsTab } from "./SQLSealSettingsTab";
 import { Settings } from "./Settings";
 import { SettingsCSVControls } from "./settingsTabSection/SettingsCSVControls";
 import { SettingsJsonControls } from "./settingsTabSection/SettingsJsonControls";
+import { SettingsJsonlControls } from "./settingsTabSection/SettingsJsonlControls";
 import { SettingsSQLControls } from "./settingsTabSection/SettingsSQLControls";
 import { ViewPluginGeneratorType } from "../syntaxHighlight/viewPluginGenerator";
 
@@ -26,9 +27,15 @@ export const settingsInit = (
 			plugin,
 			viewPluginGenerator,
 		);
+		const jsonlControl = new SettingsJsonlControls(
+			settings,
+			app,
+			plugin,
+			viewPluginGenerator,
+		);
 		const sqlControl = new SettingsSQLControls(settings, app, plugin);
 
-		const controls = [csvControl, jsonControl, sqlControl];
+		const controls = [csvControl, jsonControl, jsonlControl, sqlControl];
 
 		settingsTab.registerControls(...controls);
 
