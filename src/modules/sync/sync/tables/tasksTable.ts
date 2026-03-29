@@ -47,6 +47,7 @@ export class TasksFileSyncTable extends AFileSyncTable {
                     checked: status,
                     path: file.path,
                     task: taskContent,
+                    status: listItem.task,
                     position: {
                         line: listItem.position.start.line,
                         lineContent: lineContent

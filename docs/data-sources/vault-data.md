@@ -44,6 +44,7 @@ Tasks table consists of the following columns:
 | --------------- |--------------------------------------------------------------------------------------------------------------------------| ------------- |
 | `task`          | Content of the task (text)                                                                                               |               |
 | `completed`     | 0 if not completed, 1 if completed                                                                                       |               |
+| `status`        | The raw checkbox character (` ` for unchecked, `x` for completed, `/` for in-progress, `-` for cancelled, etc.)         | 0.40.0        |
 | `path`          | Full path of the file the tag belongs to                                                                                 | 0.24.1        |
 | `filePath`      | (deprecated) same like `path`. Name changed for compatibility with other tables. Will get removed in the future versions |               |
 | `checkbox`      | Interactive checkbox for the task that can be clicked to toggle completion state                                         | 0.29.0        |
@@ -88,3 +89,9 @@ WHERE target = @path
 AND json_extract(position, '$.frontmatterKey') = 'type'
 ```
 
+## Task Status Field
+
+The `status` column in the `tasks` table contains the raw checkbox character from your markdown tasks. This enables querying tasks by their specific states beyond just completed/uncompleted. This is functionality used commonly in plugins like Tasks and Obsidian natively supports them too. Many themes also render these fields correctly by default. You can read more about it in [the Tasks documentation](https://publish.obsidian.md/tasks/Getting+Started/Statuses#Credit%20Sytone%20and%20the%20'Tasks%20SQL%20Powered'%20plugin).
+
+### Example
+![Tasks Statuses](tasks-statuses.png)

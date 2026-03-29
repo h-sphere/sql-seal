@@ -11,7 +11,8 @@ interface CheckboxProps {
         line: number,
         lineContent: string
     },
-    task: string
+    task: string,
+    status?: string
 }
 
 const isCheckboxProp = (arg: any): arg is CheckboxProps => {
@@ -45,7 +46,8 @@ export class CheckboxParser implements CellFunction<Args> {
         const el = createEl('input', {
             type: 'checkbox',
             attr: {
-                checked: !!(values && values.checked) ? true : null
+                checked: !!(values && values.checked) ? true : null,
+                'data-task': values.status || ' '
             }
         })
 
@@ -73,11 +75,26 @@ export class CheckboxParser implements CellFunction<Args> {
                         // Get the line containing the task
                         const lineIndex = values.position?.line
                         if (lineIndex >= 0 && lineIndex < lines.length) {
+                            // Get current status
+                            const currentStatus = values.status || (values.checked ? 'x' : ' ')
+
+                            // Escape special regex characters
+                            const escapedStatus = currentStatus.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
                             // Update the task status
                             if (el.checked) {
-                                lines[lineIndex] = lines[lineIndex].replace('- [ ]', '- [x]')
+                                // Mark as completed
+                                lines[lineIndex] = lines[lineIndex].replace(
+                                    new RegExp(`- \\[${escapedStatus}\\]`),
+                                    '- [x]'
+                                )
                             } else {
-                                lines[lineIndex] = lines[lineIndex].replace('- [x]', '- [ ]')
+                                // Restore original status
+                                const originalStatus = currentStatus === 'x' ? ' ' : currentStatus
+                                lines[lineIndex] = lines[lineIndex].replace(
+                                    '- [x]',
+                                    `- [${originalStatus}]`
+                                )
                             }
 
                             // Write back to the file
@@ -98,10 +115,15 @@ export class CheckboxParser implements CellFunction<Args> {
             }
             return '[ ]'
         } else {
+            // Use status if available
+            if (values.status) {
+                return `[${values.status}]`
+            }
+            // Fall back to checked boolean
             if (values.checked) {
                 return '[x]'
             } else {
-                return '[ ] '
+                return '[ ]'
             }
         }
     }
