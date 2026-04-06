@@ -38,7 +38,9 @@ export class InlineProcessor extends MarkdownRenderChild {
     async render() {
         try {
             const registeredTablesForContext = await this.sync.getTablesMappingForContext(this.sourcePath);
-            const transformedQuery = transformQuery(this.query, registeredTablesForContext);
+            const transformedQuery = transformQuery(this.query, registeredTablesForContext, {
+                disableTagAutoDetection: this.settings.get('disableTagAutoDetection')
+            });
 
             // FIXME: settings here instead of plugin
             if (this.settings.get('enableDynamicUpdates')) {

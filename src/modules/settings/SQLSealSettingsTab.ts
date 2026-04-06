@@ -11,6 +11,7 @@ export interface SQLSealSettings {
     enableSQLViewer: boolean;
     enableDynamicUpdates: boolean;
     enableSyntaxHighlighting: boolean;
+    disableTagAutoDetection: boolean;
     defaultView: 'grid' | 'markdown' | 'html';
     gridItemsPerPage: number
 }
@@ -23,6 +24,7 @@ export const DEFAULT_SETTINGS: SQLSealSettings = {
     enableSQLViewer: true,
     enableDynamicUpdates: true,
     enableSyntaxHighlighting: true,
+    disableTagAutoDetection: false,
     defaultView: 'grid',
     gridItemsPerPage: 20
 };
@@ -76,6 +78,15 @@ export class SQLSealSettingsTab extends PluginSettingTab {
                     // await this.plugin.saveData(this.settings);
                     this.display();
                     // this.callChanges()
+                }));
+        new Setting(containerEl)
+            .setName('Disable Tag Auto-Detection')
+            .setDesc('By default SQLSeal automatically rewrites `tag = \'#a\' AND tag = \'#b\'` into an efficient INTERSECT query. Enable this to turn off that behaviour and write raw SQL yourself.')
+            .addToggle(toggle => toggle
+                .setValue(this.settings.get('disableTagAutoDetection'))
+                .onChange(async (value) => {
+                    this.settings.set('disableTagAutoDetection', !!value)
+                    this.display();
                 }));
 
 

@@ -28,3 +28,19 @@ The tags table is specifically designed to capture all tags found within the vau
 ## In Summary
 
 When using SQLSeal, keep in mind that tags from frontmatter and tags in the tags table serve different purposes and are structured differently. Frontmatter tags are essentially metadata fields of the file and appear as-is in the files table, while the tags table provides a detailed, row-based view of all tags in your vault.
+
+## Filtering by Multiple Tags
+
+A common pitfall when querying the `tags` table is writing:
+
+```sql
+WHERE tag = '#project' AND tag = '#active'
+```
+
+This always returns zero results because no single row can have two different `tag` values at once. SQLSeal automatically detects and corrects this pattern. You can also use the explicit `TAGS()` macro:
+
+```sqlseal
+SELECT * FROM files WHERE TAGS('#project', '#active')
+```
+
+See [Filter by Multiple Tags](../query-vault-content.md#filter-by-multiple-tags-and-logic) for full details.
