@@ -7,6 +7,7 @@ export interface SQLSealSettings {
     enableViewer: boolean;
     enableEditing: boolean;
     enableJSONViewer: boolean;
+    enableJSONLViewer: boolean;
     enableSQLViewer: boolean;
     enableDynamicUpdates: boolean;
     enableSyntaxHighlighting: boolean;
@@ -18,6 +19,7 @@ export const DEFAULT_SETTINGS: SQLSealSettings = {
     enableViewer: true,
     enableEditing: true,
     enableJSONViewer: true,
+    enableJSONLViewer: true,
     enableSQLViewer: true,
     enableDynamicUpdates: true,
     enableSyntaxHighlighting: true,
