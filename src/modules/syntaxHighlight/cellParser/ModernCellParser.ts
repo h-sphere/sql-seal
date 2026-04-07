@@ -173,7 +173,6 @@ export class ModernCellParser {
 
     // FIXME: this should be extracted to separate class / function but for now it's fine.
     registerDbFunctions(db: SqlocalDatabaseProxy) {
-        console.trace('register db functions called')
         this.functions.forEach(funct => {
             db.registerCustomFunction(funct.name, funct.sqlFunctionArgumentsCount)
         })
