@@ -10,6 +10,55 @@ import { sanitise } from "../../../utils/sanitiseColumn";
 import wasmUrl from 'virtual:wa-sqlite-wasm-url';
 
 /**
+ * Retry an async operation with exponential backoff
+ * @param operation - The async operation to retry
+ * @param maxRetries - Maximum number of retry attempts (default: 3)
+ * @param baseDelay - Base delay in milliseconds for exponential backoff (default: 50)
+ * @param errorMatcher - Optional function to determine if error should trigger retry
+ * @returns The result of the successful operation
+ * @throws The last error if all retries fail
+ */
+async function retryWithBackoff<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 50,
+    errorMatcher?: (error: Error) => boolean
+): Promise<T> {
+    let lastError: Error;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            return await operation();
+        } catch (error) {
+            lastError = error as Error;
+
+            // If errorMatcher provided, only retry matching errors
+            if (errorMatcher && !errorMatcher(error as Error)) {
+                throw error;
+            }
+
+            // Don't retry on last attempt
+            if (attempt === maxRetries) {
+                break;
+            }
+
+            // Calculate delay with exponential backoff
+            const delay = baseDelay * Math.pow(2, attempt - 1);
+            if (process.env.NODE_ENV === 'development') {
+                console.warn(
+                    `SqlocalWorkerDatabase: Retry attempt ${attempt}/${maxRetries} ` +
+                    `after error: ${lastError.message}. Waiting ${delay}ms...`
+                );
+            }
+
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+
+    throw lastError!;
+}
+
+/**
  * Worker-side database implementation that runs wa-sqlite operations
  * in a Web Worker to avoid blocking the main thread.
  *
@@ -147,7 +196,9 @@ export class SqlocalWorkerDatabase {
 
     registerCustomFunction(name: string, argsCount = 1) {
         if (!this.connection) {
-            console.warn('SqlocalWorkerDatabase: Database not connected, cannot register custom function');
+            if (process.env.NODE_ENV === 'development') {
+                console.warn('SqlocalWorkerDatabase: Database not connected, cannot register custom function');
+            }
             return Promise.resolve();
         }
 
@@ -524,94 +575,107 @@ export class SqlocalWorkerDatabase {
     async select(statement: string, frontmatter: Record<string, unknown>) {
         if (!this.connection) throw new Error('Database not connected');
         if (this.isRecreating) {
-            console.warn('SqlocalWorkerDatabase: Database is being recreated, cannot execute select');
+            if (process.env.NODE_ENV === 'development') {
+                console.warn('SqlocalWorkerDatabase: Database is being recreated, cannot execute select');
+            }
             return { data: [], columns: [], executionTime: 0 };
         }
 
-        try {
-            // Replace frontmatter placeholders in the query
-            let processedStatement = statement;
-            const params: any[] = [];
+        // Wrap the select operation with retry logic
+        return retryWithBackoff(
+            async () => {
+                try {
+                    // Replace frontmatter placeholders in the query
+                    let processedStatement = statement;
+                    const params: any[] = [];
 
-            // Support both {{key}} and @key parameter formats for compatibility
-            for (const [key, value] of Object.entries(frontmatter)) {
-                // Handle {{key}} format (used in user queries)
-                const doubleBracePlaceholder = `{{${key}}}`;
-                const doubleBraceRegex = new RegExp(doubleBracePlaceholder.replace(/[{}]/g, '\\$&'), 'g');
-                const doubleBraceMatches = (processedStatement.match(doubleBraceRegex) || []).length;
-                if (doubleBraceMatches > 0) {
-                    processedStatement = processedStatement.replace(doubleBraceRegex, '?');
-                    for (let i = 0; i < doubleBraceMatches; i++) {
-                        params.push(value);
-                    }
-                }
-
-                // Handle @key format (used in repository queries)
-                const atPlaceholder = `@${key}`;
-                const atRegex = new RegExp(`@${key}\\b`, 'g');
-                const atMatches = (processedStatement.match(atRegex) || []).length;
-                if (atMatches > 0) {
-                    processedStatement = processedStatement.replace(atRegex, '?');
-                    for (let i = 0; i < atMatches; i++) {
-                        params.push(value);
-                    }
-                }
-            }
-
-            const startTime = performance.now();
-            const data: any[] = [];
-            let columns: string[] = [];
-
-            // Create string in WASM memory
-            const str = this.sqlite3.str_new(this.connection, processedStatement);
-            let prepared = null;
-            try {
-                prepared = await this.sqlite3.prepare_v2(this.connection, this.sqlite3.str_value(str));
-
-                if (prepared && prepared.stmt) {
-                    await this.sqlite3.bind_collection(prepared.stmt, params);
-
-                    // Get column names
-                    const columnCount = await this.sqlite3.column_count(prepared.stmt);
-
-                    for (let i = 0; i < columnCount; i++) {
-                        columns.push(await this.sqlite3.column_name(prepared.stmt, i));
-                    }
-
-                    // Fetch all rows
-                    let stepResult;
-                    while ((stepResult = await this.sqlite3.step(prepared.stmt)) === SQLite.SQLITE_ROW) {
-                        const row: any = {};
-                        for (let i = 0; i < columnCount; i++) {
-                            const columnName = columns[i];
-                            row[columnName] = await this.sqlite3.column(prepared.stmt, i);
+                    // Support both {{key}} and @key parameter formats for compatibility
+                    for (const [key, value] of Object.entries(frontmatter)) {
+                        // Handle {{key}} format (used in user queries)
+                        const doubleBracePlaceholder = `{{${key}}}`;
+                        const doubleBraceRegex = new RegExp(doubleBracePlaceholder.replace(/[{}]/g, '\\$&'), 'g');
+                        const doubleBraceMatches = (processedStatement.match(doubleBraceRegex) || []).length;
+                        if (doubleBraceMatches > 0) {
+                            processedStatement = processedStatement.replace(doubleBraceRegex, '?');
+                            for (let i = 0; i < doubleBraceMatches; i++) {
+                                params.push(value);
+                            }
                         }
-                        data.push(row);
-                    }
-                }
-            } finally {
-                // Finalize statement before finishing string
-                if (prepared && prepared.stmt) {
-                    try {
-                        await this.sqlite3.finalize(prepared.stmt);
-                    } catch (finalizeError) {
-                        console.error('SqlocalWorkerDatabase: Error finalizing statement:', finalizeError);
-                    }
-                }
-                this.sqlite3.str_finish(str);
-            }
 
-            const executionTime = performance.now() - startTime;
-            return {
-                data,
-                columns,
-                executionTime
-            };
-        } catch (error) {
-            console.error('SqlocalWorkerDatabase: Error executing select:', error);
-            console.error('SqlocalWorkerDatabase: Failed statement:', statement);
-            throw error;
-        }
+                        // Handle @key format (used in repository queries)
+                        const atPlaceholder = `@${key}`;
+                        const atRegex = new RegExp(`@${key}\\b`, 'g');
+                        const atMatches = (processedStatement.match(atRegex) || []).length;
+                        if (atMatches > 0) {
+                            processedStatement = processedStatement.replace(atRegex, '?');
+                            for (let i = 0; i < atMatches; i++) {
+                                params.push(value);
+                            }
+                        }
+                    }
+
+                    const startTime = performance.now();
+                    const data: any[] = [];
+                    let columns: string[] = [];
+
+                    // Create string in WASM memory
+                    const str = this.sqlite3.str_new(this.connection, processedStatement);
+                    let prepared = null;
+                    try {
+                        prepared = await this.sqlite3.prepare_v2(this.connection, this.sqlite3.str_value(str));
+
+                        if (prepared && prepared.stmt) {
+                            await this.sqlite3.bind_collection(prepared.stmt, params);
+
+                            // Get column names
+                            const columnCount = await this.sqlite3.column_count(prepared.stmt);
+
+                            for (let i = 0; i < columnCount; i++) {
+                                columns.push(await this.sqlite3.column_name(prepared.stmt, i));
+                            }
+
+                            // Fetch all rows
+                            let stepResult;
+                            while ((stepResult = await this.sqlite3.step(prepared.stmt)) === SQLite.SQLITE_ROW) {
+                                const row: any = {};
+                                for (let i = 0; i < columnCount; i++) {
+                                    const columnName = columns[i];
+                                    row[columnName] = await this.sqlite3.column(prepared.stmt, i);
+                                }
+                                data.push(row);
+                            }
+                        }
+                    } finally {
+                        // Finalize statement before finishing string
+                        if (prepared && prepared.stmt) {
+                            try {
+                                await this.sqlite3.finalize(prepared.stmt);
+                            } catch (finalizeError) {
+                                console.error('SqlocalWorkerDatabase: Error finalizing statement:', finalizeError);
+                            }
+                        }
+                        this.sqlite3.str_finish(str);
+                    }
+
+                    const executionTime = performance.now() - startTime;
+                    return {
+                        data,
+                        columns,
+                        executionTime
+                    };
+                } catch (error) {
+                    console.error('SqlocalWorkerDatabase: Error executing select:', error);
+                    console.error('SqlocalWorkerDatabase: Failed statement:', statement);
+                    throw error;
+                }
+            },
+            3, // maxRetries
+            50, // baseDelay (50ms, 100ms, 200ms pattern)
+            (error: Error) => {
+                // Only retry on "no such table" errors
+                return error.message.toLowerCase().includes('no such table');
+            }
+        );
     }
 
     async explain(statement: string, frontmatter: Record<string, unknown>) {

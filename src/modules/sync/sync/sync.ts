@@ -68,6 +68,7 @@ export class Sync {
 
         // Configuration
         this.configRepo = new ConfigurationRepository(this.db)
+        await this.configRepo.init()
 
         let version
         try {
@@ -78,9 +79,8 @@ export class Sync {
 
         if (version < SQLSEAL_DATABASE_VERSION) {
             await this.db.recreateDatabase()
+            await this.configRepo.init()
         }
-
-        await this.configRepo.init()
 
         this.tableDefinitionsRepo = new TableDefinitionsRepository(this.db)
         await this.tableDefinitionsRepo.init()

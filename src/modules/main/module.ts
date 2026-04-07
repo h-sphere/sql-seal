@@ -19,7 +19,7 @@ const obsidian = new Registrator(process.env.NODE_ENV === 'development' ? { logg
 .export('app', 'plugin', 'vault')
 
 
-export const mainModule = new Registrator({logger: console.log})
+export const mainModule = new Registrator(process.env.NODE_ENV === 'development' ? {logger: console.log} : undefined)
 .module('obsidian', obsidian)
 .module('db', db)
 .module('editor', editor)
