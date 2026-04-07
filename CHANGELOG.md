@@ -1,5 +1,21 @@
 # Releases
 
+## 0.40.0
+
+### Minor Changes
+
+- fc24a4f: JSONL and NDJSON support
+- c038366: adding support for TAGS macro
+- bf085fe: underlying engine updated to wa-sqlite
+- c856713: Adding tasks statuses support
+
+### Patch Changes
+
+- 03dfcd7: fixing issue with select keywords outside SQL queries
+- b852977: disabling logs in the console on production builds
+- d9cb4d5: fixed syntax highlighting in callouts
+- 33e19df: fixing issue with config table not found on first run
+
 ## 0.39.1
 
 ### Patch Changes
