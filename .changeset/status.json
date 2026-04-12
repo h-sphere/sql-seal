@@ -1,0 +1,102 @@
+{
+  "changesets": [
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "patch"
+        }
+      ],
+      "summary": "fixing issue with select keywords outside SQL queries",
+      "id": "bright-weeks-chew"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "patch"
+        }
+      ],
+      "summary": "disabling logs in the console on production builds",
+      "id": "dark-signs-show"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "minor"
+        }
+      ],
+      "summary": "JSONL and NDJSON support",
+      "id": "evil-loops-feel"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "patch"
+        }
+      ],
+      "summary": "fixed syntax highlighting in callouts",
+      "id": "gentle-ducks-peel"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "minor"
+        }
+      ],
+      "summary": "adding support for TAGS macro",
+      "id": "giant-times-roll"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "minor"
+        }
+      ],
+      "summary": "underlying engine updated to wa-sqlite",
+      "id": "old-wombats-slide"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "minor"
+        }
+      ],
+      "summary": "Adding tasks statuses support",
+      "id": "orange-showers-argue"
+    },
+    {
+      "releases": [
+        {
+          "name": "sqlseal",
+          "type": "patch"
+        }
+      ],
+      "summary": "fixing issue with config table not found on first run",
+      "id": "poor-foxes-fall"
+    }
+  ],
+  "releases": [
+    {
+      "name": "sqlseal",
+      "type": "minor",
+      "oldVersion": "0.39.1",
+      "changesets": [
+        "bright-weeks-chew",
+        "dark-signs-show",
+        "evil-loops-feel",
+        "gentle-ducks-peel",
+        "giant-times-roll",
+        "old-wombats-slide",
+        "orange-showers-argue",
+        "poor-foxes-fall"
+      ],
+      "newVersion": "0.40.0"
+    }
+  ]
+}
