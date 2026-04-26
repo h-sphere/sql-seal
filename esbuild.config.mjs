@@ -112,10 +112,13 @@ const workerPlugin = {
                         const wasmPath = join(process.cwd(), 'node_modules/wa-sqlite/dist/wa-sqlite-async.wasm');
                         const wasmContents = readFileSync(wasmPath);
                         const wasmBase64 = wasmContents.toString('base64');
-                        const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
 
                         return {
-                            contents: `export default ${JSON.stringify(wasmDataUrl)};`,
+                            contents: `
+                                const wasmBase64 = "${wasmBase64}";
+                                const wasmBinary = Uint8Array.from(atob(wasmBase64), c => c.charCodeAt(0));
+                                export default wasmBinary;
+                            `,
                             loader: 'js',
                         };
                     });
@@ -158,10 +161,13 @@ const workerPlugin = {
             const wasmPath = join(process.cwd(), 'node_modules/wa-sqlite/dist/wa-sqlite-async.wasm');
             const wasmContents = readFileSync(wasmPath);
             const wasmBase64 = wasmContents.toString('base64');
-            const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
 
             return {
-                contents: `export default ${JSON.stringify(wasmDataUrl)};`,
+                contents: `
+                    const wasmBase64 = "${wasmBase64}";
+                    const wasmBinary = Uint8Array.from(atob(wasmBase64), c => c.charCodeAt(0));
+                    export default wasmBinary;
+                `,
                 loader: 'js',
             };
         });

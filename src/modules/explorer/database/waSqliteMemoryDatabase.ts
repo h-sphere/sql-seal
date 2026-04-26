@@ -4,7 +4,7 @@ import SQLiteAsyncESMFactory from 'wa-sqlite/dist/wa-sqlite-async.mjs';
 import * as SQLite from 'wa-sqlite';
 import { MemoryAsyncVFS } from 'wa-sqlite/src/examples/MemoryAsyncVFS.js';
 // @ts-ignore - Virtual module from esbuild
-import wasmUrl from 'virtual:wa-sqlite-wasm-url';
+import wasmBinary from 'virtual:wa-sqlite-wasm-url';
 
 type ParamsObject = Record<string, any>;
 
@@ -33,15 +33,7 @@ export class WaSqliteMemoryDatabase {
             throw new Error('Invalid SQLite database file format');
         }
 
-        // Initialize wa-sqlite
-        const asyncModule = await SQLiteAsyncESMFactory({
-            locateFile: (file: string) => {
-                if (file.endsWith('.wasm')) {
-                    return wasmUrl;
-                }
-                return file;
-            }
-        });
+        const asyncModule = await SQLiteAsyncESMFactory({ wasmBinary, locateFile: (file: string) => file });
 
         this.sqlite3 = SQLite.Factory(asyncModule);
 
