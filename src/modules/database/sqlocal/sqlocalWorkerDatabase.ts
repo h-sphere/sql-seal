@@ -7,7 +7,7 @@ import { sanitise } from "../../../utils/sanitiseColumn";
 
 // Get the WASM URL from the virtual module
 // @ts-ignore
-import wasmUrl from 'virtual:wa-sqlite-wasm-url';
+import wasmBinary from 'virtual:wa-sqlite-wasm-url';
 
 /**
  * Retry an async operation with exponential backoff
@@ -110,15 +110,7 @@ export class SqlocalWorkerDatabase {
         }
 
         try {
-            // Initialize the module with bundled WASM
-            const asyncModule = await SQLiteAsyncESMFactory({
-                locateFile: (file: string) => {
-                    if (file.endsWith('.wasm')) {
-                        return wasmUrl;
-                    }
-                    return file;
-                }
-            });
+            const asyncModule = await SQLiteAsyncESMFactory({ wasmBinary, locateFile: (file: string) => file });
 
             // Use Factory to get the actual sqlite3 API
             this.sqlite3 = SQLite.Factory(asyncModule);
