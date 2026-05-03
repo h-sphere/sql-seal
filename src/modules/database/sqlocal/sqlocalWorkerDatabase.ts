@@ -5,10 +5,6 @@ import { IDBBatchAtomicVFS } from 'wa-sqlite/src/examples/IDBBatchAtomicVFS.js';
 import { ColumnDefinition } from "../../../utils/types";
 import { sanitise } from "../../../utils/sanitiseColumn";
 
-// Get the WASM URL from the virtual module
-// @ts-ignore
-import wasmBinary from 'virtual:wa-sqlite-wasm-url';
-
 /**
  * Retry an async operation with exponential backoff
  * @param operation - The async operation to retry
@@ -70,6 +66,7 @@ export class SqlocalWorkerDatabase {
     private isConnected = false;
     private vfsRegistered = false;
     private isRecreating = false;
+    private wasmBinary?: Uint8Array;
 
     constructor(private readonly dbName: string) {
     }
@@ -109,8 +106,12 @@ export class SqlocalWorkerDatabase {
             return this.sqlite3;
         }
 
+        if (!this.wasmBinary) {
+            throw new Error('SqlocalWorkerDatabase: wasmBinary not provided. Call connect() with the WASM binary.');
+        }
+
         try {
-            const asyncModule = await SQLiteAsyncESMFactory({ wasmBinary, locateFile: (file: string) => file });
+            const asyncModule = await SQLiteAsyncESMFactory({ wasmBinary: this.wasmBinary, locateFile: (file: string) => file });
 
             // Use Factory to get the actual sqlite3 API
             this.sqlite3 = SQLite.Factory(asyncModule);
@@ -140,10 +141,12 @@ export class SqlocalWorkerDatabase {
         }
     }
 
-    async connect() {
+    async connect(wasmBinary: Uint8Array) {
         if (this.isConnected) {
             return Promise.resolve();
         }
+
+        this.wasmBinary = wasmBinary;
 
         try {
             // Initialize SQLite

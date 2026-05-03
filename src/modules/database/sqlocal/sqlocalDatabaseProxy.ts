@@ -3,6 +3,8 @@ import * as Comlink from 'comlink';
 import { SqlocalWorkerDatabase } from "./sqlocalWorkerDatabase";
 import { ColumnDefinition } from "../../../utils/types";
 import { sanitise } from "../../../utils/sanitiseColumn";
+// @ts-ignore
+import wasmBinary from 'virtual:wa-sqlite-wasm-url';
 
 /**
  * Main-thread proxy for SqlocalWorkerDatabase.
@@ -49,7 +51,7 @@ export class SqlocalDatabaseProxy {
 
                 const instance = await new DatabaseWrap(this.dbName);
 
-                await instance.connect();
+                await instance.connect(wasmBinary);
 
                 this.db = instance;
                 this.isConnected = true;
