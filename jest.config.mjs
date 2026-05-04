@@ -4,6 +4,7 @@ export default {
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'],
   moduleNameMapper: {
+    '^obsidian$': '<rootDir>/__mocks__/obsidian.ts',
     '^virtual:wa-sqlite-wasm-url$': '<rootDir>/src/modules/explorer/database/__tests__/__mocks__/wa-sqlite-wasm-url.ts',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },

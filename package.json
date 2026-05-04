@@ -41,6 +41,7 @@
     "esbuild-plugin-replace": "^1.4.0",
     "esbuild-sass-plugin": "^3.3.1",
     "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.3.0",
     "obsidian": "^1.8.7",
     "prettier": "3.6.2",
     "ts-jest": "^29.4.1",
