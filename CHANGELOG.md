@@ -1,5 +1,11 @@
 # Releases
 
+## 0.40.1
+
+### Patch Changes
+
+- 42a6541: fixing issue with new wa-sqlite on mobile
+
 ## 0.40.0
 
 ### Minor Changes
