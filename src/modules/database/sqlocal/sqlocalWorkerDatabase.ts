@@ -86,8 +86,8 @@ export class SqlocalWorkerDatabase {
                 return { ...ret, [key]: value ? 1 : 0 };
             }
 
-            // Convert falsy values to null
-            if (!value) {
+            // Convert falsy values to null, but preserve numeric 0
+            if (!value && value !== 0) {
                 return { ...ret, [key]: null };
             }
 
