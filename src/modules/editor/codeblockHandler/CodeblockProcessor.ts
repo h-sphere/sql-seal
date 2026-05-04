@@ -13,6 +13,7 @@ import { transformQuery } from "../sql/sqlTransformer";
 import { registerObservers } from "../../../utils/registerObservers";
 import { Settings } from "../../settings/Settings";
 import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
+import { findCollapsedCallout } from "./calloutVisibility";
 
 export class CodeblockProcessor extends MarkdownRenderChild {
 	registrator: OmnibusRegistrator;
@@ -73,38 +74,55 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 				}
 			}
 
-			this.flags = results.flags;
-			let rendererEl = this.el;
-
-			if (this.flags.explain) {
-				this.extrasEl = this.el.createDiv({ cls: "sqlseal-extras-container" });
-				if (this.flags.explain) {
-					this.explainEl = this.extrasEl.createEl("pre", {
-						cls: "sqlseal-extras-explain-container",
-					});
-				}
-				rendererEl = this.el.createDiv({ cls: "sqlseal-renderer-container" });
+			const callout = findCollapsedCallout(this.el);
+			if (callout) {
+				const observer = new MutationObserver(() => {
+					if (!callout.classList.contains('is-collapsed')) {
+						observer.disconnect();
+						this.doLoad(results).catch(e => displayError(this.el, e.toString()));
+					}
+				});
+				observer.observe(callout, { attributes: true, attributeFilter: ['class'] });
+				this.register(() => observer.disconnect());
+				return;
 			}
 
-            // IF WE'RE ON CANVAS, LETS ADD BACKGRUND
-            if (this.isOnCanvas) {
-                rendererEl.classList.add('sqlseal-renderer-on-canvas')
-            }
-
-			this.renderer = this.rendererRegistry.prepareRender(
-				results.renderer.type.toLowerCase(),
-				results.renderer.options,
-			)(rendererEl, {
-				cellParser: this.cellParser,
-				sourcePath: this.sourceKey,
-			});
-
-			// FIXME: probably should save the one before transform and perform transform every time we execute it.
-			this.query = results.query;
-			await this.render();
+			await this.doLoad(results);
 		} catch (e) {
 			displayError(this.el, e.toString());
 		}
+	}
+
+	private async doLoad(results: ParserResult) {
+		this.flags = results.flags;
+		let rendererEl = this.el;
+
+		if (this.flags.explain) {
+			this.extrasEl = this.el.createDiv({ cls: "sqlseal-extras-container" });
+			if (this.flags.explain) {
+				this.explainEl = this.extrasEl.createEl("pre", {
+					cls: "sqlseal-extras-explain-container",
+				});
+			}
+			rendererEl = this.el.createDiv({ cls: "sqlseal-renderer-container" });
+		}
+
+        // IF WE'RE ON CANVAS, LETS ADD BACKGRUND
+        if (this.isOnCanvas) {
+            rendererEl.classList.add('sqlseal-renderer-on-canvas')
+        }
+
+		this.renderer = this.rendererRegistry.prepareRender(
+			results.renderer.type.toLowerCase(),
+			results.renderer.options,
+		)(rendererEl, {
+			cellParser: this.cellParser,
+			sourcePath: this.sourceKey,
+		});
+
+		// FIXME: probably should save the one before transform and perform transform every time we execute it.
+		this.query = results.query;
+		await this.render();
 	}
 
 	onunload() {
