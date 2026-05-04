@@ -98,31 +98,8 @@ const workerPlugin = {
         }));
 
         build.onLoad({ filter: /.*/, namespace: 'sqlocal-worker-code' }, async () => {
-            // Create a plugin for the worker that resolves virtual imports
-            const workerVirtualPlugin = {
-                name: 'worker-virtual',
-                setup(build) {
-                    // Handle virtual WASM URL for wa-sqlite
-                    build.onResolve({ filter: /^virtual:wa-sqlite-wasm-url$/ }, args => ({
-                        path: args.path,
-                        namespace: 'wa-sqlite-wasm-url',
-                    }));
-
-                    build.onLoad({ filter: /.*/, namespace: 'wa-sqlite-wasm-url' }, async () => {
-                        const wasmPath = join(process.cwd(), 'node_modules/wa-sqlite/dist/wa-sqlite-async.wasm');
-                        const wasmContents = readFileSync(wasmPath);
-                        const wasmBase64 = wasmContents.toString('base64');
-                        const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
-
-                        return {
-                            contents: `export default ${JSON.stringify(wasmDataUrl)};`,
-                            loader: 'js',
-                        };
-                    });
-                }
-            };
-
             // Build sqlocal worker code
+            // WASM binary is NOT embedded in the worker — it's passed from the main thread via Comlink
             const result = await esbuild.build({
                 entryPoints: ['src/modules/database/sqlocal/sqlocalWorkerDatabase.ts'],
                 bundle: true,
@@ -130,7 +107,7 @@ const workerPlugin = {
                 format: 'iife',
                 target: 'es2020',
                 external: ['fs', 'path', 'obsidian'],
-                plugins: [wasmPlugin, workerVirtualPlugin, polyfillNode({
+                plugins: [wasmPlugin, polyfillNode({
                 })],
                 minify: process.argv[2] === 'production',
                 define: {
@@ -158,10 +135,13 @@ const workerPlugin = {
             const wasmPath = join(process.cwd(), 'node_modules/wa-sqlite/dist/wa-sqlite-async.wasm');
             const wasmContents = readFileSync(wasmPath);
             const wasmBase64 = wasmContents.toString('base64');
-            const wasmDataUrl = `data:application/wasm;base64,${wasmBase64}`;
 
             return {
-                contents: `export default ${JSON.stringify(wasmDataUrl)};`,
+                contents: `
+                    const wasmBase64 = "${wasmBase64}";
+                    const wasmBinary = Uint8Array.from(atob(wasmBase64), c => c.charCodeAt(0));
+                    export default wasmBinary;
+                `,
                 loader: 'js',
             };
         });

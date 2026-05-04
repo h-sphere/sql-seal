@@ -1,10 +1,10 @@
 // Mock for virtual:wa-sqlite-wasm-url used in tests
-// Returns a file:// URL that works with the fetch polyfill in jest.setup.mjs
+// Returns the WASM binary as Uint8Array (same as production build)
 
 import { join } from 'path';
-import { pathToFileURL } from 'url';
+import { readFileSync } from 'fs';
 
 const wasmPath = join(process.cwd(), 'node_modules/wa-sqlite/dist/wa-sqlite-async.wasm');
-const wasmUrl = pathToFileURL(wasmPath).href;
+const wasmBinary = new Uint8Array(readFileSync(wasmPath));
 
-export default wasmUrl;
+export default wasmBinary;
