@@ -14,6 +14,14 @@ import { registerObservers } from "../../../utils/registerObservers";
 import { Settings } from "../../settings/Settings";
 import { ModernCellParser } from "../../syntaxHighlight/cellParser/ModernCellParser";
 
+// Persist NO REFRESH results across processor recreations (e.g., reading mode re-renders).
+// Key: sourcePath + query. Cleared when the plugin unloads.
+const noRefreshCache = new Map<string, { data: unknown[], columns: string[] }>()
+
+export function clearNoRefreshCache() {
+	noRefreshCache.clear()
+}
+
 export class CodeblockProcessor extends MarkdownRenderChild {
 	registrator: OmnibusRegistrator;
 	renderer: RenderReturn;
@@ -154,6 +162,21 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 				...this.ctx.frontmatter,
 			};
 
+			// NO REFRESH: serve from cache when Obsidian recreates the processor
+			// (e.g., reading-mode preview re-renders on file save).
+			if (!this.flags.refresh) {
+				const cacheKey = `${this.sourceKey}:::${this.query}`
+				const cached = noRefreshCache.get(cacheKey)
+				if (cached) {
+					this.renderer.render({
+						data: cached.data,
+						columns: cached.columns,
+						flags: this.flags,
+						frontmatter: variables,
+					});
+					return
+				}
+			}
 
 			if (this.flags.explain) {
 				// Rendering explain
@@ -161,11 +184,17 @@ export class CodeblockProcessor extends MarkdownRenderChild {
 				this.explainEl.textContent = result;
 			}
 
-			
+
 			const { data, columns } = (await this.db.select(
 				transformedQuery,
 				variables,
 			))!; // FIXME: check this
+
+			// Cache result for NO REFRESH blocks so processor recreations don't re-query.
+			if (!this.flags.refresh) {
+				noRefreshCache.set(`${this.sourceKey}:::${this.query}`, { data, columns })
+			}
+
 			this.renderer.render({
 				data,
 				columns,
