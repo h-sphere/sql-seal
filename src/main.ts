@@ -6,6 +6,7 @@ import {
 	provideGlobalGridOptions,
 } from "ag-grid-community";
 import { mainModule } from "./modules/main/module";
+import { clearNoRefreshCache } from "./modules/editor/codeblockHandler/CodeblockProcessor";
 
 // Register all community features
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -26,5 +27,9 @@ export default class SqlSealPlugin extends Plugin {
 
 		const init = await this.container.get("init");
 		init();
+	}
+
+	onunload() {
+		clearNoRefreshCache();
 	}
 }
