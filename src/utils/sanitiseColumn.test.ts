@@ -8,9 +8,9 @@ describe('sanitise', () => {
     })
 
     it('should sanitise reserved keywords', () => {
-        expect(sanitise('BEGIN')).toEqual('begin_')
-        expect(sanitise('AS')).toEqual('as_')
-        expect(sanitise('BEGIN AS')).toEqual('begin_as')
+        expect(sanitise('BEGIN')).toEqual('BEGIN_')
+        expect(sanitise('AS')).toEqual('AS_')
+        expect(sanitise('BEGIN AS')).toEqual('BEGIN_AS')
     })
 
     it('should properly normalise non-latin characters', () => {
@@ -18,7 +18,7 @@ describe('sanitise', () => {
         expect(sanitise('część')).toEqual('czesc')
         expect(sanitise('geändert')).toEqual('geandert')
         expect(sanitise('หมวดหมู่')).toEqual('hmwdhmuu')
-        expect(sanitise('类别')).toEqual('lei_bie')
+        expect(sanitise('类别')).toEqual('Lei_Bie')
         expect(sanitise('категория')).toEqual('kategoriia')
         expect(sanitise('カテゴリ')).toEqual('kategori')
         expect(sanitise('ノートタイプ')).toEqual('nototaipu')
