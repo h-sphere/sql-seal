@@ -10,7 +10,7 @@ import { ParserTableDefinition } from "../syncStrategy/types";
 import { SyncStrategyFactory } from "../syncStrategy/SyncStrategyFactory";
 
 
-const SQLSEAL_DATABASE_VERSION = 2;
+const SQLSEAL_DATABASE_VERSION = 3;
 
 // Global lock to prevent concurrent database recreation
 let isInitializing = false;
